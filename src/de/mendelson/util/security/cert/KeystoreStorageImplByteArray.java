@@ -1,16 +1,16 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/cert/KeystoreStorageImplByteArray.java,v 1.1 2015/01/06 11:07:58 heller Exp $
 package de.mendelson.util.security.cert;
 
-import de.mendelson.util.security.BCCryptoHelper;
-import de.mendelson.util.security.KeyStoreUtil;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
 import java.util.Map;
+
+import de.mendelson.util.security.BCCryptoHelper;
+import de.mendelson.util.security.KeyStoreUtil;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

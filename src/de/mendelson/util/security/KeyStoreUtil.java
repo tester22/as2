@@ -14,11 +14,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.security.Key;
-import java.security.cert.Certificate;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.Provider;
 import java.security.cert.CertPath;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -32,7 +32,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
+
 import javax.security.auth.x500.X500Principal;
+
 import org.bouncycastle.openssl.PEMParser;
 
 /*

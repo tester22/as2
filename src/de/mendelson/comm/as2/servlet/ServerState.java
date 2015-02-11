@@ -14,19 +14,21 @@ package de.mendelson.comm.as2.servlet;
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import de.mendelson.comm.as2.AS2ServerVersion;
 import de.mendelson.comm.as2.clientserver.message.ServerInfoRequest;
 import de.mendelson.comm.as2.clientserver.message.ServerInfoResponse;
 import de.mendelson.comm.as2.preferences.PreferencesAS2;
 import de.mendelson.util.clientserver.AnonymousTextClient;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.DateFormat;
-import java.util.Map;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 public class ServerState extends HttpServlet {
 

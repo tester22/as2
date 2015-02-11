@@ -1,17 +1,13 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/Partner.java,v 1.1 2015/01/06 11:07:43 heller Exp $
 package de.mendelson.comm.as2.partner;
 
-import de.mendelson.util.security.cert.CertificateManager;
-import de.mendelson.comm.as2.message.AS2Message;
-import de.mendelson.comm.as2.message.store.MessageStoreHandler;
-import de.mendelson.comm.as2.send.HttpConnectionParameter;
-import de.mendelson.util.security.cert.KeystoreCertificate;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -22,6 +18,12 @@ import org.w3c.dom.NodeList;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
+
+import de.mendelson.comm.as2.message.AS2Message;
+import de.mendelson.comm.as2.message.store.MessageStoreHandler;
+import de.mendelson.comm.as2.send.HttpConnectionParameter;
+import de.mendelson.util.security.cert.CertificateManager;
+import de.mendelson.util.security.cert.KeystoreCertificate;
 
 /**
  * Stores all information about a business partner

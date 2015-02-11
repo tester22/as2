@@ -1,15 +1,17 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/server/ClientServerSessionHandlerLocalhost.java,v 1.1 2015/01/06 11:07:49 heller Exp $
 package de.mendelson.comm.as2.server;
 
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.clientserver.ClientServerSessionHandler;
-import de.mendelson.util.clientserver.messages.ServerLogMessage;
 import java.net.InetSocketAddress;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.apache.mina.core.session.IoSession;
+
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.clientserver.ClientServerSessionHandler;
+import de.mendelson.util.clientserver.messages.ServerLogMessage;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

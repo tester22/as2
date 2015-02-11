@@ -1,7 +1,7 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/SortableTreeNode.java,v 1.1 2015/01/06 11:07:37 heller Exp $
 package de.mendelson.comm.as2.client;
 
-import javax.swing.tree.*;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

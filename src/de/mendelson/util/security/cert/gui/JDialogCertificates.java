@@ -1,21 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/cert/gui/JDialogCertificates.java,v 1.1 2015/01/06 11:07:58 heller Exp $
 package de.mendelson.util.security.cert.gui;
 
-import de.mendelson.util.security.cert.CertificateManager;
-import de.mendelson.util.security.cert.KeystoreCertificate;
-import de.mendelson.util.security.cert.gui.keygeneration.JDialogGenerateKey;
-import de.mendelson.util.ImageUtil;
-import de.mendelson.util.MecFileChooser;
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.clientserver.AllowModificationCallback;
-import de.mendelson.util.clientserver.GUIClient;
-import de.mendelson.util.security.KeyStoreUtil;
-import de.mendelson.util.security.cert.CertificateInUseChecker;
-import de.mendelson.util.security.cert.KeystoreStorage;
-import de.mendelson.util.security.csr.CSRUtil;
-import de.mendelson.util.security.keygeneration.KeyGenerationResult;
-import de.mendelson.util.security.keygeneration.KeyGenerationValues;
-import de.mendelson.util.security.keygeneration.KeyGenerator;
 import java.awt.Desktop;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -30,6 +15,7 @@ import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -37,6 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -47,6 +34,22 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import de.mendelson.util.ImageUtil;
+import de.mendelson.util.MecFileChooser;
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.clientserver.AllowModificationCallback;
+import de.mendelson.util.clientserver.GUIClient;
+import de.mendelson.util.security.KeyStoreUtil;
+import de.mendelson.util.security.cert.CertificateInUseChecker;
+import de.mendelson.util.security.cert.CertificateManager;
+import de.mendelson.util.security.cert.KeystoreCertificate;
+import de.mendelson.util.security.cert.KeystoreStorage;
+import de.mendelson.util.security.cert.gui.keygeneration.JDialogGenerateKey;
+import de.mendelson.util.security.csr.CSRUtil;
+import de.mendelson.util.security.keygeneration.KeyGenerationResult;
+import de.mendelson.util.security.keygeneration.KeyGenerationValues;
+import de.mendelson.util.security.keygeneration.KeyGenerator;
 
 
 /*

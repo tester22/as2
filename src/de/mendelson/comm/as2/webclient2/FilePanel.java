@@ -1,7 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/webclient2/FilePanel.java,v 1.1 2015/01/06 11:07:50 heller Exp $
 package de.mendelson.comm.as2.webclient2;
 
-import com.vaadin.ui.TextArea;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -10,6 +9,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import com.vaadin.ui.TextArea;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

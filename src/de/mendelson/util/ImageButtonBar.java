@@ -1,21 +1,19 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/ImageButtonBar.java,v 1.1 2015/01/06 11:07:51 heller Exp $
 package de.mendelson.util;
 
-import com.l2fprod.common.swing.JButtonBar;
-import com.l2fprod.common.swing.plaf.blue.BlueishButtonBarUI;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *
@@ -24,6 +22,9 @@ import javax.swing.JPanel;
  * Other product and brand names are trademarks of their respective owners.
  */
 import javax.swing.JToggleButton;
+
+import com.l2fprod.common.swing.JButtonBar;
+import com.l2fprod.common.swing.plaf.blue.BlueishButtonBarUI;
 
 /**
  * Panel that contains image buttons and could be used to group panels. 

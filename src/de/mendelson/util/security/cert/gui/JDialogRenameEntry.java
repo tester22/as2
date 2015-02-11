@@ -1,14 +1,16 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/cert/gui/JDialogRenameEntry.java,v 1.1 2015/01/06 11:07:58 heller Exp $
 package de.mendelson.util.security.cert.gui;
 
-import de.mendelson.util.security.cert.CertificateManager;
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.security.BCCryptoHelper;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.security.BCCryptoHelper;
+import de.mendelson.util.security.cert.CertificateManager;
 
 
 /*

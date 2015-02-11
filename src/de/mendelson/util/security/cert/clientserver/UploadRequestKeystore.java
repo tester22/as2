@@ -1,7 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/cert/clientserver/UploadRequestKeystore.java,v 1.1 2015/01/06 11:07:58 heller Exp $
 package de.mendelson.util.security.cert.clientserver;
 
-import de.mendelson.util.clientserver.clients.datatransfer.UploadRequestFile;
 import java.io.Serializable;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
@@ -10,6 +9,8 @@ import java.io.Serializable;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
+
+import de.mendelson.util.clientserver.clients.datatransfer.UploadRequestFile;
 
 /**
  * Msg for the client server protocol

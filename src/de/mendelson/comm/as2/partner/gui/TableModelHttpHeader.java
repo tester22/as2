@@ -1,10 +1,16 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/gui/TableModelHttpHeader.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.partner.gui;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
+import javax.swing.table.AbstractTableModel;
+
 import de.mendelson.comm.as2.partner.Partner;
 import de.mendelson.comm.as2.partner.PartnerHttpHeader;
-import javax.swing.table.*;
-import java.util.*;
 import de.mendelson.util.MecResourceBundle;
 
 /*

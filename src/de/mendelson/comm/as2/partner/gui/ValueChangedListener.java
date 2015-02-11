@@ -1,7 +1,8 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/gui/ValueChangedListener.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.partner.gui;
 
-import java.util.*;
+import java.util.EventListener;
+import java.util.EventObject;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

@@ -26,6 +26,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import javax.imageio.ImageIO;
 import javax.swing.JWindow;
 import javax.swing.SwingConstants;

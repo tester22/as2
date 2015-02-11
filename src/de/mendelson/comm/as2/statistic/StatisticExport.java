@@ -1,11 +1,12 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/statistic/StatisticExport.java,v 1.1 2015/01/06 11:07:50 heller Exp $
 package de.mendelson.comm.as2.statistic;
 
-import de.mendelson.comm.as2.partner.Partner;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import de.mendelson.comm.as2.partner.Partner;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

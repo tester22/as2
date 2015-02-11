@@ -1,19 +1,21 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/AS2.java,v 1.1 2015/01/06 11:07:29 heller Exp $
 package de.mendelson.comm.as2;
 
-import de.mendelson.comm.as2.client.AS2Gui;
-import de.mendelson.comm.as2.server.AS2Agent;
-import de.mendelson.comm.as2.preferences.PreferencesAS2;
-import de.mendelson.comm.as2.server.AS2Server;
-import de.mendelson.comm.as2.server.UpgradeRequiredException;
-import de.mendelson.util.Splash;
-import de.mendelson.util.security.BCCryptoHelper;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.AffineTransform;
 import java.util.Locale;
 import java.util.logging.Logger;
+
 import javax.swing.JOptionPane;
+
+import de.mendelson.comm.as2.client.AS2Gui;
+import de.mendelson.comm.as2.preferences.PreferencesAS2;
+import de.mendelson.comm.as2.server.AS2Agent;
+import de.mendelson.comm.as2.server.AS2Server;
+import de.mendelson.comm.as2.server.UpgradeRequiredException;
+import de.mendelson.util.Splash;
+import de.mendelson.util.security.BCCryptoHelper;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

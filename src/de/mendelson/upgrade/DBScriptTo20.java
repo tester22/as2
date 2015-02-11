@@ -1,8 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/upgrade/DBScriptTo20.java,v 1.1 2015/01/06 11:07:51 heller Exp $
 package de.mendelson.upgrade;
 
-import de.mendelson.comm.as2.database.DBDriverManager;
-import de.mendelson.util.ConsoleProgressBar;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -16,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+
 import org.hsqldb.Server;
 import org.hsqldb.persist.HsqlProperties;
 /*
@@ -25,6 +24,9 @@ import org.hsqldb.persist.HsqlProperties;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
+
+import de.mendelson.comm.as2.database.DBDriverManager;
+import de.mendelson.util.ConsoleProgressBar;
 
 /**
  * Update as2, must be applied for versions < 2012

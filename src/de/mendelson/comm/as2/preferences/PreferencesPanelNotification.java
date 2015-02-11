@@ -1,9 +1,13 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/preferences/PreferencesPanelNotification.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.preferences;
 
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
+import javax.swing.JOptionPane;
+
 import de.mendelson.comm.as2.client.AS2StatusBar;
 import de.mendelson.comm.as2.clientserver.message.PerformNotificationTestRequest;
-import de.mendelson.comm.as2.notification.NotificationAccessDB;
 import de.mendelson.comm.as2.notification.NotificationData;
 import de.mendelson.comm.as2.notification.clientserver.NotificationGetRequest;
 import de.mendelson.comm.as2.notification.clientserver.NotificationGetResponse;
@@ -12,10 +16,6 @@ import de.mendelson.util.MecResourceBundle;
 import de.mendelson.util.clientserver.BaseClient;
 import de.mendelson.util.clientserver.clients.preferences.PreferencesClient;
 import de.mendelson.util.clientserver.messages.ClientServerResponse;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.concurrent.Executors;
-import javax.swing.JOptionPane;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

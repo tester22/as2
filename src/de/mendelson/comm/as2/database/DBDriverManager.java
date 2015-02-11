@@ -1,15 +1,12 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/database/DBDriverManager.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.database;
 
-import de.mendelson.comm.as2.AS2ServerVersion;
-import de.mendelson.comm.as2.preferences.PreferencesAS2;
-import de.mendelson.comm.as2.server.AS2Server;
-import de.mendelson.util.database.DebuggableConnection;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Logger;
+
 import org.apache.commons.dbcp.BasicDataSource;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
@@ -18,6 +15,11 @@ import org.apache.commons.dbcp.BasicDataSource;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
+
+import de.mendelson.comm.as2.AS2ServerVersion;
+import de.mendelson.comm.as2.preferences.PreferencesAS2;
+import de.mendelson.comm.as2.server.AS2Server;
+import de.mendelson.util.database.DebuggableConnection;
 
 /**
  * Class needed to access the database

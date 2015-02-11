@@ -1,15 +1,13 @@
 //$Header: /as2/sqlscript/runtime/Update29to30.java 2     11.11.11 12:14 Heller $
 package sqlscript.runtime;
 
-import de.mendelson.comm.as2.database.IUpdater;
-import de.mendelson.comm.as2.preferences.PreferencesAS2;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.cert.Certificate;
 import java.security.KeyStore;
 import java.security.MessageDigest;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -18,6 +16,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Enumeration;
+
+import de.mendelson.comm.as2.database.IUpdater;
+import de.mendelson.comm.as2.preferences.PreferencesAS2;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

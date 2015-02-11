@@ -1,6 +1,15 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/cem/CEMInitiator.java,v 1.1 2015/01/06 11:07:31 heller Exp $
 package de.mendelson.comm.as2.cem;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.logging.Logger;
+
 import de.mendelson.comm.as2.cem.messages.EDIINTCertificateExchangeRequest;
 import de.mendelson.comm.as2.cem.messages.EndEntity;
 import de.mendelson.comm.as2.cem.messages.TradingPartnerInfo;
@@ -22,14 +31,6 @@ import de.mendelson.util.AS2Tools;
 import de.mendelson.util.security.KeyStoreUtil;
 import de.mendelson.util.security.cert.CertificateManager;
 import de.mendelson.util.security.cert.KeystoreCertificate;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.logging.Logger;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

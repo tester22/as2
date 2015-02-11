@@ -1,11 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/timing/FileDeleteController.java,v 1.1 2015/01/06 11:07:50 heller Exp $
 package de.mendelson.comm.as2.timing;
 
-import de.mendelson.comm.as2.preferences.PreferencesAS2;
-import de.mendelson.comm.as2.server.AS2Server;
-import de.mendelson.util.AS2Tools;
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.clientserver.ClientServer;
 import java.io.File;
 import java.sql.Connection;
 import java.util.MissingResourceException;
@@ -13,6 +8,12 @@ import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+
+import de.mendelson.comm.as2.preferences.PreferencesAS2;
+import de.mendelson.comm.as2.server.AS2Server;
+import de.mendelson.util.AS2Tools;
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.clientserver.ClientServer;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

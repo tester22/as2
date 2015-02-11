@@ -1,9 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/upgrade/DB18ToScript.java,v 1.1 2015/01/06 11:07:51 heller Exp $
 package de.mendelson.upgrade;
 
-import de.mendelson.comm.as2.AS2ServerVersion;
-import de.mendelson.comm.as2.database.DBDriverManager;
-import de.mendelson.util.ConsoleProgressBar;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,15 +8,13 @@ import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Properties;
+
 import org.hsqldb.Server;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
@@ -28,6 +23,10 @@ import org.hsqldb.Server;
  * Please read and agree to all terms before using this software. Other product
  * and brand names are trademarks of their respective owners.
  */
+
+import de.mendelson.comm.as2.AS2ServerVersion;
+import de.mendelson.comm.as2.database.DBDriverManager;
+import de.mendelson.util.ConsoleProgressBar;
 
 /**
  * Update as2, must be applied for versions < 2012

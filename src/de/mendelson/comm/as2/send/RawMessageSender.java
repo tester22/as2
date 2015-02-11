@@ -1,6 +1,11 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/send/RawMessageSender.java,v 1.1 2015/01/06 11:07:46 heller Exp $
 package de.mendelson.comm.as2.send;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Properties;
+import java.util.logging.Logger;
+
 import de.mendelson.comm.as2.AS2ServerVersion;
 import de.mendelson.comm.as2.clientserver.message.IncomingMessageRequest;
 import de.mendelson.comm.as2.clientserver.message.IncomingMessageResponse;
@@ -8,10 +13,6 @@ import de.mendelson.comm.as2.preferences.PreferencesAS2;
 import de.mendelson.comm.as2.server.AS2Server;
 import de.mendelson.util.clientserver.AnonymousTextClient;
 import de.mendelson.util.security.BCCryptoHelper;
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.Properties;
-import java.util.logging.Logger;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

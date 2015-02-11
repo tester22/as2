@@ -1,21 +1,22 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/importexport/JDialogImportConfiguration.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.importexport;
 
-import de.mendelson.comm.as2.partner.Partner;
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.clientserver.BaseClient;
-import de.mendelson.util.clientserver.clients.datatransfer.TransferClient;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.TableColumn;
+
+import de.mendelson.comm.as2.partner.Partner;
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.clientserver.BaseClient;
+import de.mendelson.util.clientserver.clients.datatransfer.TransferClient;
 
 
 /*

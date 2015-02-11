@@ -1,7 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/ByteStorageImplFile.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
-import de.mendelson.util.AS2Tools;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -12,6 +11,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import de.mendelson.util.AS2Tools;
 
 /**
  * Container that stores byte arrays in a temp file

@@ -1,10 +1,11 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/AS2MessageInfo.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
-import de.mendelson.comm.as2.AS2ServerVersion;
-import de.mendelson.util.security.BCCryptoHelper;
 import java.util.Date;
 import java.util.Properties;
+
+import de.mendelson.comm.as2.AS2ServerVersion;
+import de.mendelson.util.security.BCCryptoHelper;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

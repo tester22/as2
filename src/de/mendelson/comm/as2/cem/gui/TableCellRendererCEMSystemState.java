@@ -1,12 +1,15 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/cem/gui/TableCellRendererCEMSystemState.java,v 1.1 2015/01/06 11:07:35 heller Exp $
 package de.mendelson.comm.as2.cem.gui;
 
-import de.mendelson.comm.as2.cem.CEMEntry;
-import javax.swing.*;
-import javax.swing.table.*;
-import java.awt.Component;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Rectangle;
+
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
+
+import de.mendelson.comm.as2.cem.CEMEntry;
 
 /** 
  * Renders the system activity column

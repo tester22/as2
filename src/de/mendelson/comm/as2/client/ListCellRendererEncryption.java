@@ -1,17 +1,19 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/ListCellRendererEncryption.java,v 1.1 2015/01/06 11:07:37 heller Exp $
 package de.mendelson.comm.as2.client;
 
-import de.mendelson.comm.as2.message.ResourceBundleAS2Message;
-import de.mendelson.util.MecResourceBundle;
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
+
+import de.mendelson.comm.as2.message.ResourceBundleAS2Message;
+import de.mendelson.util.MecResourceBundle;
 
 /**
  * Renderer to render the encryption entries in comboboxes

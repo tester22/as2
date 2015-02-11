@@ -1,13 +1,9 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/preferences/PreferencesPanelSecurity.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.preferences;
 
-import de.mendelson.util.MecFileChooser;
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.clientserver.BaseClient;
-import de.mendelson.util.clientserver.clients.filesystemview.RemoteFileBrowser;
-import de.mendelson.util.clientserver.clients.preferences.PreferencesClient;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 /*
@@ -17,6 +13,11 @@ import javax.swing.SwingUtilities;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
+
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.clientserver.BaseClient;
+import de.mendelson.util.clientserver.clients.filesystemview.RemoteFileBrowser;
+import de.mendelson.util.clientserver.clients.preferences.PreferencesClient;
 
 /**
  * Panel to define the directory preferences

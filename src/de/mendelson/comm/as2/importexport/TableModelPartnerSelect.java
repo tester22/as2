@@ -1,15 +1,17 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/importexport/TableModelPartnerSelect.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.importexport;
 
-import de.mendelson.comm.as2.partner.Partner;
-import de.mendelson.comm.as2.partner.gui.ListCellRendererPartner;
-import de.mendelson.util.MecResourceBundle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+
 import javax.swing.ImageIcon;
 import javax.swing.table.AbstractTableModel;
+
+import de.mendelson.comm.as2.partner.Partner;
+import de.mendelson.comm.as2.partner.gui.ListCellRendererPartner;
+import de.mendelson.util.MecResourceBundle;
 
 
 /*

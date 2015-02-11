@@ -1,6 +1,8 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/AS2ShutdownThread.java,v 1.1 2015/01/06 11:07:30 heller Exp $
 package de.mendelson.comm.as2;
 
+import org.eclipse.jetty.server.Server;
+
 import de.mendelson.comm.as2.database.DBServer;
 import de.mendelson.comm.as2.sendorder.SendOrderReceiver;
 /*
@@ -11,10 +13,6 @@ import de.mendelson.comm.as2.sendorder.SendOrderReceiver;
  * Other product and brand names are trademarks of their respective owners.
  */
 import de.mendelson.comm.as2.server.AS2Server;
-
-import java.io.File;
-
-import org.eclipse.jetty.server.Server;
 
 /**
  * Thread that is executed if the VM will shut down (that means the server

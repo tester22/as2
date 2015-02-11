@@ -1,16 +1,18 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/log/DBLoggingHandler.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.log;
 
-import de.mendelson.comm.as2.database.DBDriverManager;
-import de.mendelson.comm.as2.message.AS2MDNInfo;
-import de.mendelson.comm.as2.message.AS2MessageInfo;
-import de.mendelson.comm.as2.server.AS2Server;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.util.logging.ErrorManager;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+
+import de.mendelson.comm.as2.database.DBDriverManager;
+import de.mendelson.comm.as2.message.AS2MDNInfo;
+import de.mendelson.comm.as2.message.AS2MessageInfo;
+import de.mendelson.comm.as2.server.AS2Server;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

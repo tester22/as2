@@ -3,12 +3,11 @@ package de.mendelson.comm.as2.client;
 
 import java.awt.Cursor;
 import java.awt.Desktop;
-import java.io.File;
 import java.net.URI;
 import java.net.URL;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.swing.JPanel;
-
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *
@@ -18,6 +17,7 @@ import javax.swing.JPanel;
  */
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;

@@ -1,21 +1,23 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/cert/gui/JDialogInfoOnExternalCertificate.java,v 1.1 2015/01/06 11:07:58 heller Exp $
 package de.mendelson.util.security.cert.gui;
 
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.security.KeyStoreUtil;
-import de.mendelson.util.security.cert.KeystoreCertificate;
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.Provider;
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.security.KeyStoreUtil;
+import de.mendelson.util.security.cert.KeystoreCertificate;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

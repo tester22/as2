@@ -1,12 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/ClientServer.java,v 1.1 2015/01/06 11:07:53 heller Exp $
 package de.mendelson.util.clientserver;
 
-import de.mendelson.util.clientserver.codec.ClientServerCodecFactory;
-import de.mendelson.util.clientserver.messages.ClientServerMessage;
-import de.mendelson.util.security.BCCryptoHelper;
-import de.mendelson.util.security.keygeneration.KeyGenerationResult;
-import de.mendelson.util.security.keygeneration.KeyGenerationValues;
-import de.mendelson.util.security.keygeneration.KeyGenerator;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.KeyStore;
@@ -14,12 +8,13 @@ import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.executor.ExecutorFilter;
 import org.apache.mina.filter.executor.UnorderedThreadPoolExecutor;
@@ -27,6 +22,13 @@ import org.apache.mina.filter.ssl.SslFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
+
+import de.mendelson.util.clientserver.codec.ClientServerCodecFactory;
+import de.mendelson.util.clientserver.messages.ClientServerMessage;
+import de.mendelson.util.security.BCCryptoHelper;
+import de.mendelson.util.security.keygeneration.KeyGenerationResult;
+import de.mendelson.util.security.keygeneration.KeyGenerationValues;
+import de.mendelson.util.security.keygeneration.KeyGenerator;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

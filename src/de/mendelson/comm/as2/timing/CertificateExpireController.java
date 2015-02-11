@@ -1,11 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/timing/CertificateExpireController.java,v 1.1 2015/01/06 11:07:50 heller Exp $
 package de.mendelson.comm.as2.timing;
 
-import de.mendelson.util.security.cert.CertificateManager;
-import de.mendelson.util.security.cert.KeystoreCertificate;
-import de.mendelson.comm.as2.notification.Notification;
-import de.mendelson.comm.as2.server.AS2Server;
-import de.mendelson.util.MecResourceBundle;
 import java.sql.Connection;
 import java.util.Calendar;
 import java.util.Date;
@@ -15,6 +10,12 @@ import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+
+import de.mendelson.comm.as2.notification.Notification;
+import de.mendelson.comm.as2.server.AS2Server;
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.security.cert.CertificateManager;
+import de.mendelson.util.security.cert.KeystoreCertificate;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

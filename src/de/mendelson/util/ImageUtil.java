@@ -1,9 +1,9 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/ImageUtil.java,v 1.1 2015/01/06 11:07:51 heller Exp $
 package de.mendelson.util;
 
-import javax.swing.*;
-import java.awt.image.*;
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Composite;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *
@@ -11,6 +11,16 @@ import java.awt.*;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.ImageFilter;
+
+import javax.swing.GrayFilter;
+import javax.swing.ImageIcon;
 
 /**Class that contains routines for the image processing
  *@author S.Heller

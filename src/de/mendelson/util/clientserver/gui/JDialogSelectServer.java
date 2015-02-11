@@ -3,6 +3,7 @@ package de.mendelson.util.clientserver.gui;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
+
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 /*

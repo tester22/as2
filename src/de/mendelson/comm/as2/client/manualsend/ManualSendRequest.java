@@ -1,8 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/manualsend/ManualSendRequest.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.client.manualsend;
 
-import de.mendelson.comm.as2.partner.Partner;
-import de.mendelson.util.clientserver.clients.datatransfer.UploadRequestFile;
 import java.io.Serializable;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
@@ -11,6 +9,9 @@ import java.io.Serializable;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
+
+import de.mendelson.comm.as2.partner.Partner;
+import de.mendelson.util.clientserver.clients.datatransfer.UploadRequestFile;
 
 /**
  * Msg for the client server protocol

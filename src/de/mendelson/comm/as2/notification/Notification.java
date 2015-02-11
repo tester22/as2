@@ -1,21 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/notification/Notification.java,v 1.1 2015/01/06 11:07:42 heller Exp $
 package de.mendelson.comm.as2.notification;
 
-import de.mendelson.comm.as2.AS2ServerVersion;
-import de.mendelson.comm.as2.log.LogAccessDB;
-import de.mendelson.comm.as2.log.LogEntry;
-import de.mendelson.comm.as2.message.AS2MessageInfo;
-import de.mendelson.comm.as2.message.MessageAccessDB;
-import de.mendelson.comm.as2.partner.Partner;
-import de.mendelson.comm.as2.partner.PartnerAccessDB;
-import de.mendelson.comm.as2.partner.PartnerCertificateInformation;
-import de.mendelson.comm.as2.server.AS2Server;
-import de.mendelson.comm.as2.statistic.QuotaAccessDB;
-import de.mendelson.comm.as2.statistic.StatisticOverviewEntry;
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.database.DebuggablePreparedStatement;
-import de.mendelson.util.security.cert.CertificateManager;
-import de.mendelson.util.security.cert.KeystoreCertificate;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
@@ -34,6 +19,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.mail.Address;
 import javax.mail.Authenticator;
 import javax.mail.Message;
@@ -43,6 +29,22 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+
+import de.mendelson.comm.as2.AS2ServerVersion;
+import de.mendelson.comm.as2.log.LogAccessDB;
+import de.mendelson.comm.as2.log.LogEntry;
+import de.mendelson.comm.as2.message.AS2MessageInfo;
+import de.mendelson.comm.as2.message.MessageAccessDB;
+import de.mendelson.comm.as2.partner.Partner;
+import de.mendelson.comm.as2.partner.PartnerAccessDB;
+import de.mendelson.comm.as2.partner.PartnerCertificateInformation;
+import de.mendelson.comm.as2.server.AS2Server;
+import de.mendelson.comm.as2.statistic.QuotaAccessDB;
+import de.mendelson.comm.as2.statistic.StatisticOverviewEntry;
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.database.DebuggablePreparedStatement;
+import de.mendelson.util.security.cert.CertificateManager;
+import de.mendelson.util.security.cert.KeystoreCertificate;
 
 
 /*

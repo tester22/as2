@@ -1,17 +1,18 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/loggui/JPanelFileDisplay.java,v 1.1 2015/01/06 11:07:41 heller Exp $
 package de.mendelson.comm.as2.message.loggui;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
+import javax.swing.JPanel;
+
 import de.mendelson.util.MecResourceBundle;
 import de.mendelson.util.clientserver.BaseClient;
 import de.mendelson.util.clientserver.clients.datatransfer.DownloadRequestFileLimited;
 import de.mendelson.util.clientserver.clients.datatransfer.DownloadResponseFileLimited;
 import de.mendelson.util.clientserver.clients.datatransfer.TransferClient;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import javax.swing.*;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

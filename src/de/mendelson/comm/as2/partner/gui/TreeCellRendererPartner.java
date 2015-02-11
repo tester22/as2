@@ -1,13 +1,15 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/gui/TreeCellRendererPartner.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.partner.gui;
 
-import de.mendelson.comm.as2.partner.Partner;
 import java.awt.Component;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
+
+import de.mendelson.comm.as2.partner.Partner;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

@@ -1,5 +1,5 @@
 package de.mendelson.comm.as2.database;
-import java.sql.*;
+import java.sql.Connection;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *

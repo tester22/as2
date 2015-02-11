@@ -1,7 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/user/User.java,v 1.1 2015/01/06 11:07:55 heller Exp $
 package de.mendelson.util.clientserver.user;
 
-import de.mendelson.util.Crypt;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,6 +12,8 @@ import java.util.Map;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
+
+import de.mendelson.util.Crypt;
 
 /**
  * A single user for the client server system

@@ -1,10 +1,11 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/importexport/ConfigurationImportRequest.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.importexport;
 
-import de.mendelson.comm.as2.partner.Partner;
-import de.mendelson.util.clientserver.clients.datatransfer.UploadRequestFile;
 import java.io.Serializable;
 import java.util.List;
+
+import de.mendelson.comm.as2.partner.Partner;
+import de.mendelson.util.clientserver.clients.datatransfer.UploadRequestFile;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *

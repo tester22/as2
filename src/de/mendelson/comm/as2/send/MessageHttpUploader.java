@@ -1,29 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/send/MessageHttpUploader.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.send;
 
-import de.mendelson.comm.as2.clientserver.message.IncomingMessageRequest;
-import de.mendelson.comm.as2.clientserver.message.IncomingMessageResponse;
-import de.mendelson.comm.as2.clientserver.message.RefreshClientMessageOverviewList;
-import de.mendelson.comm.as2.message.AS2Info;
-import de.mendelson.comm.as2.message.AS2MDNInfo;
-import de.mendelson.comm.as2.message.AS2Message;
-import de.mendelson.comm.as2.message.AS2MessageInfo;
-import de.mendelson.comm.as2.message.MDNAccessDB;
-import de.mendelson.comm.as2.message.MessageAccessDB;
-import de.mendelson.comm.as2.message.store.MessageStoreHandler;
-import de.mendelson.comm.as2.partner.HTTPAuthentication;
-import de.mendelson.comm.as2.partner.Partner;
-import de.mendelson.comm.as2.partner.PartnerHttpHeader;
-import de.mendelson.comm.as2.preferences.PreferencesAS2;
-import de.mendelson.comm.as2.server.AS2Server;
-import de.mendelson.comm.as2.statistic.QuotaAccessDB;
-import de.mendelson.util.AS2Tools;
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.clientserver.AnonymousTextClient;
-import de.mendelson.util.clientserver.ClientServer;
-import de.mendelson.util.security.BCCryptoHelper;
-import de.mendelson.util.security.cert.KeystoreStorage;
-import de.mendelson.util.security.cert.KeystoreStorageImplFile;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -49,8 +26,10 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -87,6 +66,30 @@ import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
+
+import de.mendelson.comm.as2.clientserver.message.IncomingMessageRequest;
+import de.mendelson.comm.as2.clientserver.message.IncomingMessageResponse;
+import de.mendelson.comm.as2.clientserver.message.RefreshClientMessageOverviewList;
+import de.mendelson.comm.as2.message.AS2Info;
+import de.mendelson.comm.as2.message.AS2MDNInfo;
+import de.mendelson.comm.as2.message.AS2Message;
+import de.mendelson.comm.as2.message.AS2MessageInfo;
+import de.mendelson.comm.as2.message.MDNAccessDB;
+import de.mendelson.comm.as2.message.MessageAccessDB;
+import de.mendelson.comm.as2.message.store.MessageStoreHandler;
+import de.mendelson.comm.as2.partner.HTTPAuthentication;
+import de.mendelson.comm.as2.partner.Partner;
+import de.mendelson.comm.as2.partner.PartnerHttpHeader;
+import de.mendelson.comm.as2.preferences.PreferencesAS2;
+import de.mendelson.comm.as2.server.AS2Server;
+import de.mendelson.comm.as2.statistic.QuotaAccessDB;
+import de.mendelson.util.AS2Tools;
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.clientserver.AnonymousTextClient;
+import de.mendelson.util.clientserver.ClientServer;
+import de.mendelson.util.security.BCCryptoHelper;
+import de.mendelson.util.security.cert.KeystoreStorage;
+import de.mendelson.util.security.cert.KeystoreStorageImplFile;
 
 
 /*

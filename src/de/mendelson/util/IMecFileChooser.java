@@ -1,7 +1,7 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/IMecFileChooser.java,v 1.1 2015/01/06 11:07:51 heller Exp $
 package de.mendelson.util;
-import javax.swing.*;
-import javax.swing.filechooser.*;
+import javax.swing.JComponent;
+import javax.swing.filechooser.FileView;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

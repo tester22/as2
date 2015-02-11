@@ -1,9 +1,10 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/MecResourceBundle.java,v 1.1 2015/01/06 11:07:51 heller Exp $
 package de.mendelson.util;
 
-import java.util.*;
-import java.io.*;
+import java.io.Serializable;
 import java.text.MessageFormat;
+import java.util.ListResourceBundle;
+import java.util.MissingResourceException;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

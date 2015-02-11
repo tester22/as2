@@ -1,9 +1,10 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/cem/messages/CertificateReference.java,v 1.1 2015/01/06 11:07:36 heller Exp $
 package de.mendelson.comm.as2.cem.messages;
 
-import de.mendelson.util.security.cert.KeystoreCertificate;
-import de.mendelson.util.XPathHelper;
 import java.io.ByteArrayInputStream;
+
+import de.mendelson.util.XPathHelper;
+import de.mendelson.util.security.cert.KeystoreCertificate;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

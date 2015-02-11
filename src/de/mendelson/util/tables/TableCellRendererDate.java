@@ -5,8 +5,10 @@ import java.awt.Component;
 import java.awt.Rectangle;
 import java.text.DateFormat;
 import java.util.Date;
-import javax.swing.*;
-import javax.swing.table.*;
+
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *

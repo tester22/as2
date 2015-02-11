@@ -1,13 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/CertificateUsedByPartnerChecker.java,v 1.1 2015/01/06 11:07:43 heller Exp $
 package de.mendelson.comm.as2.partner;
 
-import de.mendelson.comm.as2.partner.clientserver.PartnerListRequest;
-import de.mendelson.comm.as2.partner.clientserver.PartnerListResponse;
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.clientserver.BaseClient;
-import de.mendelson.util.security.cert.CertificateInUseChecker;
-import de.mendelson.util.security.cert.CertificateInUseInfo;
-import de.mendelson.util.security.cert.KeystoreCertificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.MissingResourceException;
@@ -19,6 +12,14 @@ import java.util.ResourceBundle;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
+
+import de.mendelson.comm.as2.partner.clientserver.PartnerListRequest;
+import de.mendelson.comm.as2.partner.clientserver.PartnerListResponse;
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.clientserver.BaseClient;
+import de.mendelson.util.security.cert.CertificateInUseChecker;
+import de.mendelson.util.security.cert.CertificateInUseInfo;
+import de.mendelson.util.security.cert.KeystoreCertificate;
 
 /**
  * Checks if a certificate is in use by a partner

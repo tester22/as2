@@ -2,6 +2,7 @@
 package de.mendelson.util.log;
 
 import java.awt.Color;
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.Style;

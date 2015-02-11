@@ -1,14 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/AS2MessageParser.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
-import de.mendelson.comm.as2.AS2Exception;
-import de.mendelson.comm.as2.notification.Notification;
-import de.mendelson.comm.as2.partner.Partner;
-import de.mendelson.comm.as2.partner.PartnerAccessDB;
-import de.mendelson.util.AS2Tools;
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.security.BCCryptoHelper;
-import de.mendelson.util.security.cert.CertificateManager;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -28,6 +20,7 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.activation.DataHandler;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
@@ -39,6 +32,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.util.ByteArrayDataSource;
+
 import org.apache.commons.io.output.DeferredFileOutputStream;
 import org.bouncycastle.cms.KeyTransRecipientId;
 import org.bouncycastle.cms.RecipientInformation;
@@ -48,6 +42,15 @@ import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId;
 import org.bouncycastle.cms.jcajce.ZlibExpanderProvider;
 import org.bouncycastle.mail.smime.SMIMECompressed;
 import org.bouncycastle.mail.smime.SMIMEEnveloped;
+
+import de.mendelson.comm.as2.AS2Exception;
+import de.mendelson.comm.as2.notification.Notification;
+import de.mendelson.comm.as2.partner.Partner;
+import de.mendelson.comm.as2.partner.PartnerAccessDB;
+import de.mendelson.util.AS2Tools;
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.security.BCCryptoHelper;
+import de.mendelson.util.security.cert.CertificateManager;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

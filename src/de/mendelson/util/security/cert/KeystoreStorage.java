@@ -2,8 +2,8 @@
 package de.mendelson.util.security.cert;
 
 import java.security.Key;
-import java.security.cert.Certificate;
 import java.security.KeyStore;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 

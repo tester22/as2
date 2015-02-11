@@ -2,6 +2,7 @@
 package de.mendelson.comm.as2.notification;
 
 import java.io.Serializable;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

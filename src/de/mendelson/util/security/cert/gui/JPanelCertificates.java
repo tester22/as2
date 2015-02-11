@@ -1,16 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/cert/gui/JPanelCertificates.java,v 1.1 2015/01/06 11:07:59 heller Exp $
 package de.mendelson.util.security.cert.gui;
 
-import de.mendelson.util.ImageUtil;
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.clientserver.AllowModificationCallback;
-import de.mendelson.util.security.cert.CertificateInUseChecker;
-import de.mendelson.util.security.cert.CertificateInUseInfo;
-import de.mendelson.util.security.cert.CertificateManager;
-import de.mendelson.util.security.cert.KeystoreCertificate;
-import de.mendelson.util.security.cert.TableModelCertificates;
-import de.mendelson.util.tables.JTableColumnResizer;
-import de.mendelson.util.tables.TableCellRendererDate;
 import java.security.cert.PKIXCertPathBuilderResult;
 import java.security.cert.TrustAnchor;
 import java.text.DateFormat;
@@ -22,6 +12,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Vector;
 import java.util.logging.Logger;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -43,6 +34,17 @@ import javax.swing.table.TableRowSorter;
  * Please read and agree to all terms before using this software. Other product
  * and brand names are trademarks of their respective owners.
  */
+
+import de.mendelson.util.ImageUtil;
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.clientserver.AllowModificationCallback;
+import de.mendelson.util.security.cert.CertificateInUseChecker;
+import de.mendelson.util.security.cert.CertificateInUseInfo;
+import de.mendelson.util.security.cert.CertificateManager;
+import de.mendelson.util.security.cert.KeystoreCertificate;
+import de.mendelson.util.security.cert.TableModelCertificates;
+import de.mendelson.util.tables.JTableColumnResizer;
+import de.mendelson.util.tables.TableCellRendererDate;
 
 /**
  * Panel to configure the Certificates

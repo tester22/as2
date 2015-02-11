@@ -3,11 +3,16 @@ package de.mendelson.util.security.cert;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import javax.swing.ImageIcon;
 import javax.swing.table.AbstractTableModel;
+
 import de.mendelson.util.MecResourceBundle;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
@@ -17,10 +22,6 @@ import de.mendelson.util.MecResourceBundle;
  * Other product and brand names are trademarks of their respective owners.
  */
 import de.mendelson.util.security.DNUtil;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 
 /**
  * table model to display a configuration grid

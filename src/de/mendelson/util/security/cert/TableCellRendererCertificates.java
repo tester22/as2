@@ -1,12 +1,14 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/cert/TableCellRendererCertificates.java,v 1.1 2015/01/06 11:07:58 heller Exp $
 package de.mendelson.util.security.cert;
 
-import javax.swing.*;
-import javax.swing.table.*;
-import java.awt.Component;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Rectangle;
 import java.security.PrivateKey;
+
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 
 /** 
  * Renders a certificater in a JTable column

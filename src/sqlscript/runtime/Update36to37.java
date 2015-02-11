@@ -1,8 +1,6 @@
 //$Header: /mec_as2/sqlscript/runtime/Update36to37.java 6     5.08.13 11:27 Heller $
 package sqlscript.runtime;
 
-import de.mendelson.comm.as2.database.IUpdater;
-import de.mendelson.util.ConsoleProgressBar;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,6 +8,9 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.TimeZone;
+
+import de.mendelson.comm.as2.database.IUpdater;
+import de.mendelson.util.ConsoleProgressBar;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

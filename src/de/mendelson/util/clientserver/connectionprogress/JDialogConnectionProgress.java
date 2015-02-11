@@ -1,11 +1,13 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/connectionprogress/JDialogConnectionProgress.java,v 1.1 2015/01/06 11:07:54 heller Exp $
 package de.mendelson.util.clientserver.connectionprogress;
 
-import de.mendelson.util.MecResourceBundle;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+
+import de.mendelson.util.MecResourceBundle;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

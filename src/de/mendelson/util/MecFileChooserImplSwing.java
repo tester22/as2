@@ -1,12 +1,16 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/MecFileChooserImplSwing.java,v 1.1 2015/01/06 11:07:51 heller Exp $
 package de.mendelson.util;
 
-import javax.swing.filechooser.*;
-import javax.swing.text.JTextComponent;
-import javax.swing.*;
 import java.awt.Frame;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileSystemView;
+import javax.swing.text.JTextComponent;
 
 
 /*

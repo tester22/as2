@@ -1,10 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/MessageAccessDB.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
-import de.mendelson.comm.as2.notification.Notification;
-import de.mendelson.comm.as2.partner.Partner;
-import de.mendelson.comm.as2.server.AS2Server;
-import de.mendelson.comm.as2.statistic.ServerInteroperabilityAccessDB;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,7 +12,13 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Logger;
+
 import org.hsqldb.types.Types;
+
+import de.mendelson.comm.as2.notification.Notification;
+import de.mendelson.comm.as2.partner.Partner;
+import de.mendelson.comm.as2.server.AS2Server;
+import de.mendelson.comm.as2.statistic.ServerInteroperabilityAccessDB;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

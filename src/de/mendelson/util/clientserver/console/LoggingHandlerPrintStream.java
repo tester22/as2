@@ -2,6 +2,7 @@
 package de.mendelson.util.clientserver.console;
 
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.logging.ErrorManager;
 import java.util.logging.Handler;
 import java.util.logging.Level;

@@ -1,8 +1,6 @@
 //$Header: /as2/sqlscript/config/Update24to25.java 12    11.11.11 11:54 Heller $
 package sqlscript.config;
 
-import de.mendelson.comm.as2.database.IUpdater;
-import de.mendelson.comm.as2.preferences.PreferencesAS2;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,6 +14,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+
+import de.mendelson.comm.as2.database.IUpdater;
+import de.mendelson.comm.as2.preferences.PreferencesAS2;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

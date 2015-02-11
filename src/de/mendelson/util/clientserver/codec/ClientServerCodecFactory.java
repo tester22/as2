@@ -2,6 +2,7 @@
 package de.mendelson.util.clientserver.codec;
 
 import java.util.logging.Logger;
+
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.apache.mina.filter.codec.ProtocolDecoder;

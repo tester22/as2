@@ -2,9 +2,10 @@
 package de.mendelson.util.tables;
 
 import java.awt.Component;
+
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
-import javax.swing.table.*;
+import javax.swing.table.TableCellRenderer;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *
@@ -12,6 +13,7 @@ import javax.swing.table.*;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
+import javax.swing.table.TableColumn;
 
 /**
  * Looks at the content of the columns of a JTable and sets the prefered widths

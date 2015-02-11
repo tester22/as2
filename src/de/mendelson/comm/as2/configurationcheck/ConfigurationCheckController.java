@@ -1,16 +1,17 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/configurationcheck/ConfigurationCheckController.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.configurationcheck;
 
-import de.mendelson.comm.as2.preferences.PreferencesAS2;
-import de.mendelson.comm.as2.timing.CertificateExpireController;
-import de.mendelson.comm.as2.message.MessageAccessDB;
-import de.mendelson.util.security.cert.CertificateManager;
-import de.mendelson.util.security.cert.KeystoreCertificate;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import de.mendelson.comm.as2.message.MessageAccessDB;
+import de.mendelson.comm.as2.preferences.PreferencesAS2;
+import de.mendelson.comm.as2.timing.CertificateExpireController;
+import de.mendelson.util.security.cert.CertificateManager;
+import de.mendelson.util.security.cert.KeystoreCertificate;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

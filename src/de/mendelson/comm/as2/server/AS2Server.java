@@ -1,6 +1,20 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/server/AS2Server.java,v 1.1 2015/01/06 11:07:49 heller Exp $
 package de.mendelson.comm.as2.server;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.net.URL;
+import java.sql.Connection;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.xml.XmlConfiguration;
+
 import de.mendelson.Copyright;
 import de.mendelson.comm.as2.AS2ServerVersion;
 import de.mendelson.comm.as2.AS2ShutdownThread;
@@ -27,19 +41,6 @@ import de.mendelson.util.security.BCCryptoHelper;
 import de.mendelson.util.security.cert.CertificateManager;
 import de.mendelson.util.security.cert.KeystoreStorage;
 import de.mendelson.util.security.cert.KeystoreStorageImplFile;
-import java.io.File;
-import java.io.FileWriter;
-import java.net.URL;
-import java.sql.Connection;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.xml.XmlConfiguration;
 
 /**
  * Class to start the AS2 server

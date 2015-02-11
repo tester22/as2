@@ -10,6 +10,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
+
 import de.mendelson.Copyright;
 import de.mendelson.comm.as2.AS2ServerVersion;
 

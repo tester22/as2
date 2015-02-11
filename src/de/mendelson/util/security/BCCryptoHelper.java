@@ -614,7 +614,7 @@ public class BCCryptoHelper {
      * for sha1 is e.g. "1.3.14.3.2.26".
      */
     public String getDigestAlgOIDFromSignature(InputStream signed, Certificate cert) throws Exception {
-        CMSSignedDataParser parser = new CMSSignedDataParser(signed);
+        CMSSignedDataParser parser = new CMSSignedDataParser(new JcaDigestCalculatorProviderBuilder().setProvider("BC").build(), signed);
         parser.getSignedContent().drain();
         SignerInformationStore signers = parser.getSignerInfos();
         Collection signerCollection = signers.getSigners();
@@ -648,7 +648,7 @@ public class BCCryptoHelper {
             throw new Exception("verify: Signature length is 0");
         }
         CMSTypedStream signedContent = new CMSTypedStream(new ByteArrayInputStream(content));
-        CMSSignedDataParser dataParser = new CMSSignedDataParser(signedContent, new ByteArrayInputStream(signature));
+        CMSSignedDataParser dataParser = new CMSSignedDataParser(new BcDigestCalculatorProvider(), signedContent, new ByteArrayInputStream(signature));
         dataParser.getSignedContent().drain();
         SignerInformationStore signers = dataParser.getSignerInfos();
         Collection signerCollection = signers.getSigners();
@@ -1078,7 +1078,7 @@ public class BCCryptoHelper {
     }
 
     public boolean verifySignatureCMS(InputStream signed, Certificate cert) throws Exception {
-        CMSSignedDataParser parser = new CMSSignedDataParser(signed);
+        CMSSignedDataParser parser = new CMSSignedDataParser(new JcaDigestCalculatorProviderBuilder().setProvider("BC").build(), signed);
         parser.getSignedContent().drain();
         SignerInformationStore signers = parser.getSignerInfos();
         Collection signerCollection = signers.getSigners();
@@ -1099,7 +1099,7 @@ public class BCCryptoHelper {
     }
 
     public void removeSignatureCMS(InputStream signed, OutputStream unsigned, Certificate cert) throws Exception {
-        CMSSignedDataParser parser = new CMSSignedDataParser(signed);
+        CMSSignedDataParser parser = new CMSSignedDataParser(new JcaDigestCalculatorProviderBuilder().setProvider("BC").build(), signed);
         InputStream signedContent = parser.getSignedContent().getContentStream();
         this.copyStreams(signedContent, unsigned);
         unsigned.flush();

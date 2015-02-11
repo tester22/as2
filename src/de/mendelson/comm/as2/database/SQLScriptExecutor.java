@@ -1,9 +1,6 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/database/SQLScriptExecutor.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.database;
 
-import de.mendelson.comm.as2.AS2ServerVersion;
-import de.mendelson.comm.as2.server.AS2Server;
-import de.mendelson.util.ConsoleProgressBar;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,6 +20,10 @@ import java.util.logging.Logger;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
+
+import de.mendelson.comm.as2.AS2ServerVersion;
+import de.mendelson.comm.as2.server.AS2Server;
+import de.mendelson.util.ConsoleProgressBar;
 
 /**
  * Class that can execute SQL scripts or execute predefined

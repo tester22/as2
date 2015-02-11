@@ -1,13 +1,14 @@
 //$Header: /as2/sqlscript/config/Update26to27.java 5     19.03.13 17:44 Heller $
 package sqlscript.config;
 
-import de.mendelson.comm.as2.database.IUpdater;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import de.mendelson.comm.as2.database.IUpdater;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

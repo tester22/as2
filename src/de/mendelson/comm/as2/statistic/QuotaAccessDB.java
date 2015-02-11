@@ -1,11 +1,12 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/statistic/QuotaAccessDB.java,v 1.1 2015/01/06 11:07:50 heller Exp $
 package de.mendelson.comm.as2.statistic;
 
-import java.sql.SQLException;
-import de.mendelson.comm.as2.partner.Partner;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import de.mendelson.comm.as2.partner.Partner;
 
 /**
  * Dummy class, not used

@@ -1,14 +1,16 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/webclient2/StateDialog.java,v 1.1 2015/01/06 11:07:50 heller Exp $
 package de.mendelson.comm.as2.webclient2;
 
+import java.text.DateFormat;
+
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
+
 import de.mendelson.comm.as2.clientserver.message.ServerInfoRequest;
 import de.mendelson.comm.as2.clientserver.message.ServerInfoResponse;
 import de.mendelson.comm.as2.preferences.PreferencesAS2;
 import de.mendelson.util.clientserver.AnonymousTextClient;
-import java.text.DateFormat;
 
 
 /*

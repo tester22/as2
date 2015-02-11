@@ -2,11 +2,11 @@
 package de.mendelson.util.clientserver.clients.filesystemview;
 
 import java.awt.Component;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.filechooser.FileSystemView;
-import javax.swing.filechooser.FileView;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 

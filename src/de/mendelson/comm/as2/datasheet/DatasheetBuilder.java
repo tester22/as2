@@ -1,6 +1,24 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/datasheet/DatasheetBuilder.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.datasheet;
 
+import java.awt.Rectangle;
+import java.io.File;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+/*
+ * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
+ *
+ * This software is subject to the license agreement set forth in the license.
+ * Please read and agree to all terms before using this software.
+ * Other product and brand names are trademarks of their respective owners.
+ */
+
 import de.intarsys.pdf.cds.CDSRectangle;
 import de.intarsys.pdf.content.common.CSCreator;
 import de.intarsys.pdf.encoding.WinAnsiEncoding;
@@ -21,23 +39,6 @@ import de.mendelson.comm.as2.message.AS2Message;
 import de.mendelson.comm.as2.message.ResourceBundleAS2Message;
 import de.mendelson.comm.as2.partner.Partner;
 import de.mendelson.util.MecResourceBundle;
-import java.awt.Rectangle;
-import java.io.File;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-/*
- * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
- *
- * This software is subject to the license agreement set forth in the license.
- * Please read and agree to all terms before using this software.
- * Other product and brand names are trademarks of their respective owners.
- */
 
 /**
  * Class that is responsible for the creation of a PDF file

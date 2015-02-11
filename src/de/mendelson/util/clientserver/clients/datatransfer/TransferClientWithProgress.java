@@ -1,9 +1,10 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/clients/datatransfer/TransferClientWithProgress.java,v 1.1 2015/01/06 11:07:53 heller Exp $
 package de.mendelson.util.clientserver.clients.datatransfer;
 
+import java.io.InputStream;
+
 import de.mendelson.util.ProgressPanel;
 import de.mendelson.util.clientserver.BaseClient;
-import java.io.InputStream;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

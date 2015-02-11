@@ -5,8 +5,9 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
 import javax.swing.JTable;
-import javax.swing.table.*;
+import javax.swing.table.JTableHeader;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *
@@ -14,6 +15,7 @@ import javax.swing.table.*;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
+import javax.swing.table.TableColumn;
 
 /**
  * Adapter that allows to fit the size of columns on click, use it in the

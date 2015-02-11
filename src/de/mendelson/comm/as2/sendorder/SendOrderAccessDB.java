@@ -1,15 +1,15 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/sendorder/SendOrderAccessDB.java,v 1.1 2015/01/06 11:07:49 heller Exp $
 package de.mendelson.comm.as2.sendorder;
 
-import de.mendelson.comm.as2.notification.Notification;
-import de.mendelson.comm.as2.server.AS2Server;
-import java.io.InvalidClassException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import de.mendelson.comm.as2.notification.Notification;
+import de.mendelson.comm.as2.server.AS2Server;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

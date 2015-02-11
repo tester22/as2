@@ -1,7 +1,6 @@
 //$Header: /as2/sqlscript/config/Update21to22.java 7     18.05.12 11:17 Heller $
 package sqlscript.config;
 
-import de.mendelson.comm.as2.database.IUpdater;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,6 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import de.mendelson.comm.as2.database.IUpdater;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

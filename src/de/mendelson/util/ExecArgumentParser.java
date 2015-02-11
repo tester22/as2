@@ -1,7 +1,8 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/ExecArgumentParser.java,v 1.1 2015/01/06 11:07:51 heller Exp $
 package de.mendelson.util;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *
@@ -9,6 +10,7 @@ import java.util.*;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
+import java.util.StringTokenizer;
 
 /**
  * Parses the arguments of an exec call, allows to quote arguments by double quote

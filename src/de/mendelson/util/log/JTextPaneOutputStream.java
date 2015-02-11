@@ -2,8 +2,9 @@
 package de.mendelson.util.log;
 
 import java.io.OutputStream;
-import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 /*

@@ -1,12 +1,13 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/clients/datatransfer/TransferClient.java,v 1.1 2015/01/06 11:07:53 heller Exp $
 package de.mendelson.util.clientserver.clients.datatransfer;
 
-import de.mendelson.util.clientserver.SyncRequestTransportLevelException;
-import de.mendelson.util.clientserver.BaseClient;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
+
+import de.mendelson.util.clientserver.BaseClient;
+import de.mendelson.util.clientserver.SyncRequestTransportLevelException;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

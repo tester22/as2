@@ -1,10 +1,11 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/clientserver/message/DeleteMessageRequest.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.clientserver.message;
 
-import de.mendelson.comm.as2.message.AS2MessageInfo;
-import de.mendelson.util.clientserver.messages.ClientServerMessage;
 import java.io.Serializable;
 import java.util.List;
+
+import de.mendelson.comm.as2.message.AS2MessageInfo;
+import de.mendelson.util.clientserver.messages.ClientServerMessage;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *

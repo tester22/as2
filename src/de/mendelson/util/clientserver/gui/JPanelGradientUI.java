@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
+
 import javax.swing.JComponent;
 import javax.swing.plaf.basic.BasicPanelUI;
 /*

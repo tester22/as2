@@ -1,9 +1,10 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/PasswordValidationHandler.java,v 1.1 2015/01/06 11:07:53 heller Exp $
 package de.mendelson.util.clientserver;
 
+import java.util.logging.Logger;
+
 import de.mendelson.util.clientserver.messages.LoginState;
 import de.mendelson.util.clientserver.user.User;
-import java.util.logging.Logger;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

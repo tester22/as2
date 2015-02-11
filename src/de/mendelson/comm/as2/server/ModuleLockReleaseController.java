@@ -1,11 +1,12 @@
 //$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/server/ModuleLockReleaseController.java,v 1.1 2015/01/06 11:07:49 heller Exp $
 package de.mendelson.comm.as2.server;
 
-import de.mendelson.comm.as2.modulelock.ModuleLock;
 import java.sql.Connection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+
+import de.mendelson.comm.as2.modulelock.ModuleLock;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
