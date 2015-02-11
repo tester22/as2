@@ -2,6 +2,7 @@
 package de.mendelson.comm.as2;
 
 import de.mendelson.comm.as2.database.DBServer;
+import de.mendelson.comm.as2.sendorder.SendOrderReceiver;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *
@@ -10,7 +11,10 @@ import de.mendelson.comm.as2.database.DBServer;
  * Other product and brand names are trademarks of their respective owners.
  */
 import de.mendelson.comm.as2.server.AS2Server;
+
 import java.io.File;
+
+import org.eclipse.jetty.server.Server;
 
 /**
  * Thread that is executed if the VM will shut down (that means the server
@@ -21,14 +25,28 @@ import java.io.File;
 public class AS2ShutdownThread extends Thread {
 
     private DBServer dbServer;
+    private Server httpServer;
+    private SendOrderReceiver receiver;
 
-    public AS2ShutdownThread(DBServer dbServer) {
+    public AS2ShutdownThread(DBServer dbServer, Server httpServer, SendOrderReceiver receiver) {
         this.dbServer = dbServer;
+        this.httpServer = httpServer;
+        this.receiver = receiver;
     }
 
     /**This will start the thread, it is called if the JVM shutdown is detected*/
     @Override
     public void run() {        
+        try {
+            this.receiver.stopReceiver();
+        } catch (Throwable e) {
+            //nop
+        }
+        try {
+            this.httpServer.stop();
+        } catch (Throwable e) {
+            //nop
+        }
         try {
             this.dbServer.shutdown();
         } catch (Throwable e) {

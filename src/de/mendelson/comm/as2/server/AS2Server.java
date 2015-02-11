@@ -68,6 +68,12 @@ public class AS2Server extends AbstractAS2Server implements AS2ServerMBean {
      */
     private DBServer dbServer = null;
     /**
+     * The HTTP server.
+     */
+    private Server httpServer = null;
+    private SendOrderReceiver receiver = null;
+    
+    /**
      * Localize the output
      */
     private MecResourceBundle rb = null;
@@ -173,7 +179,7 @@ public class AS2Server extends AbstractAS2Server implements AS2ServerMBean {
         lockReleaseController.startLockReleaseControl();
         CertificateCEMController cemController = new CertificateCEMController(this.clientserver, this.configConnection, this.runtimeConnection, this.certificateManagerEncSign);
         new Thread(cemController).start();
-        Runtime.getRuntime().addShutdownHook(new AS2ShutdownThread(this.dbServer));
+        Runtime.getRuntime().addShutdownHook(new AS2ShutdownThread(this.dbServer, this.httpServer, this.receiver));
         //listen for inbound client connects
         this.clientserver.start();
         this.logger.info(rb.getResourceString("server.started",
@@ -245,13 +251,12 @@ public class AS2Server extends AbstractAS2Server implements AS2ServerMBean {
         //reset the send order state of available send orders back to waiting
         SendOrderAccessDB sendOrderAccess = new SendOrderAccessDB(this.configConnection, this.runtimeConnection);
         sendOrderAccess.resetAllToWaiting();
-        SendOrderReceiver receiver = new SendOrderReceiver(this.configConnection, this.runtimeConnection,
+        this.receiver = new SendOrderReceiver(this.configConnection, this.runtimeConnection,
                 this.clientserver);
-        // new Thread(receiver).start(); // Why this?
         new Thread(receiver).start();
     }
 
-    private Server startHTTPServer() throws Exception {
+    private void startHTTPServer() throws Exception {
         //start the HTTP server if this is requested
         if (this.startHTTPServer) {
             //setup jetty base and home path
@@ -267,11 +272,10 @@ public class AS2Server extends AbstractAS2Server implements AS2ServerMBean {
             org.eclipse.jetty.server.Server server = new org.eclipse.jetty.server.Server();
             jettyXMLConfiguration.configure(server);
             server.start();
-            return (server);
+            this.httpServer = server;
         } else {
             this.logger.info(rb.getResourceString("server.nohttp"));
         }
-        return (null);
     }
 
     /**
