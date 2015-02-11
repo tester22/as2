@@ -183,7 +183,7 @@ public class PreferencesPanelNotification extends PreferencesPanel {
                 }
             }
         };
-        Executors.newSingleThreadExecutor().submit(test);
+        new Thread(test).start();
     }
 
     /**

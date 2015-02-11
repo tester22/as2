@@ -4,7 +4,6 @@ package de.mendelson.comm.as2.client;
 import java.awt.Cursor;
 import java.awt.Desktop;
 import java.net.URL;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.swing.JPanel;
 import javax.swing.event.HyperlinkEvent;
@@ -48,7 +47,7 @@ public class BrowserLinkedPanel extends JPanel implements HyperlinkListener {
             this.cycler.pleaseStop();
         }
         this.cycler = new TextCycler(text);
-        Executors.newSingleThreadExecutor().submit(this.cycler);
+        new Thread(this.cycler).start();
     }
 
     /**Listen to be a HyperlinkListener*/

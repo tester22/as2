@@ -86,7 +86,7 @@ public abstract class GUIClient extends JFrame implements ClientSessionHandlerCa
             throw new RuntimeException("GUIClient.connect: No logger set.");
         }
         ProgressRun progress = new ProgressRun(address);
-        Executors.newSingleThreadExecutor().submit(progress);
+        new Thread(progress).start();
         boolean connected = false;
         try {
             connected = client.connect(address, timeout);

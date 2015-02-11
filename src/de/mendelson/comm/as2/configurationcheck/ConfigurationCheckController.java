@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /*
@@ -60,7 +59,7 @@ public class ConfigurationCheckController {
      */
     public void start() {
         this.checkThread = new ConfigurationCheckThread(this.configConnection, this.runtimeConnection);
-        Executors.newSingleThreadExecutor().submit(this.checkThread);
+        new Thread(this.checkThread).start();
     }
 
     public class ConfigurationCheckThread implements Runnable {

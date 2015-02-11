@@ -381,7 +381,7 @@ public class AS2ServerProcessing implements ClientServerProcessing {
                 System.exit(0);
             }
         };
-        Executors.newSingleThreadExecutor().submit(shutdownThread);
+        new Thread(shutdownThread).start();
     }
 
     private void performNotificationTest(IoSession session, PerformNotificationTestRequest message) throws Exception {

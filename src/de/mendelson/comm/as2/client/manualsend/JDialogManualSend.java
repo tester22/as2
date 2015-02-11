@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -222,7 +221,7 @@ public class JDialogManualSend extends JDialog {
                 }
             }
         };
-        Executors.newSingleThreadExecutor().submit(runnable);
+        new Thread(runnable).start();
     }
 
     /**

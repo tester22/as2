@@ -172,7 +172,7 @@ public class AS2Server extends AbstractAS2Server implements AS2ServerMBean {
                 this.configConnection, this.runtimeConnection);
         lockReleaseController.startLockReleaseControl();
         CertificateCEMController cemController = new CertificateCEMController(this.clientserver, this.configConnection, this.runtimeConnection, this.certificateManagerEncSign);
-        Executors.newSingleThreadExecutor().submit(cemController);
+        new Thread(cemController).start();
         Runtime.getRuntime().addShutdownHook(new AS2ShutdownThread(this.dbServer));
         //listen for inbound client connects
         this.clientserver.start();
@@ -247,7 +247,8 @@ public class AS2Server extends AbstractAS2Server implements AS2ServerMBean {
         sendOrderAccess.resetAllToWaiting();
         SendOrderReceiver receiver = new SendOrderReceiver(this.configConnection, this.runtimeConnection,
                 this.clientserver);
-        Executors.newSingleThreadExecutor().submit(receiver);
+        // new Thread(receiver).start(); // Why this?
+        new Thread(receiver).start();
     }
 
     private Server startHTTPServer() throws Exception {

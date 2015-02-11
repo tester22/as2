@@ -93,7 +93,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -348,7 +347,7 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
                 }
             }
         };
-        Executors.newSingleThreadExecutor().submit(dailyNewsThread);
+        new Thread(dailyNewsThread).start();
         this.as2StatusBar.setConnectedHost(this.host);
     }
 
@@ -357,7 +356,7 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
         this.performLogin("admin", "admin".toCharArray(), AS2ServerVersion.getFullProductName());
         this.as2StatusBar.setConnectedHost(this.host);
         //start the table update thread
-        Executors.newSingleThreadExecutor().submit(this.refreshThread);
+        new Thread(this.refreshThread).start();
         this.as2StatusBar.initialize(this.getBaseClient(), this);
         this.as2StatusBar.startConfigurationChecker();
     }
@@ -461,7 +460,7 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
                 try {
                     if (hasLock) {
                         lockRefresher = new LockRefreshThread(AS2Gui.this.getBaseClient(), ModuleLock.MODULE_SSL_KEYSTORE);
-                        Executors.newSingleThreadExecutor().submit(lockRefresher);
+                        new Thread(lockRefresher).start();
                     }
                     //ask the server for the password
                     PreferencesClient client = new PreferencesClient(AS2Gui.this.getBaseClient());
@@ -497,7 +496,7 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
                 }
             }
         };
-        Executors.newSingleThreadExecutor().submit(runnable);
+        new Thread(runnable).start();
     }
 
     @Override
@@ -517,7 +516,7 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
                 try {
                     if (hasLock) {
                         lockRefresher = new LockRefreshThread(AS2Gui.this.getBaseClient(), ModuleLock.MODULE_ENCSIGN_KEYSTORE);
-                        Executors.newSingleThreadExecutor().submit(lockRefresher);
+                        new Thread(lockRefresher).start();
                     }
                     //ask the server for the password
                     PreferencesClient client = new PreferencesClient(AS2Gui.this.getBaseClient());
@@ -554,7 +553,7 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
                 }
             }
         };
-        Executors.newSingleThreadExecutor().submit(runnable);
+        new Thread(runnable).start();
     }
 
     /**
@@ -617,7 +616,7 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
                 }
             }
         };
-        Executors.newSingleThreadExecutor().submit(runnable);
+        new Thread(runnable).start();
     }
 
     /**
@@ -921,7 +920,7 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
 
             }
         };
-        Executors.newSingleThreadExecutor().submit(runnable);
+        new Thread(runnable).start();
     }
 
     private void displayPartnerDialog() {
@@ -941,7 +940,7 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
                 try {
                     if (hasLock) {
                         lockRefresher = new LockRefreshThread(AS2Gui.this.getBaseClient(), ModuleLock.MODULE_PARTNER);
-                        Executors.newSingleThreadExecutor().submit(lockRefresher);
+                        new Thread(lockRefresher).start();
                     }
                     dialog = new JDialogPartnerConfig(AS2Gui.this,
                             AS2Gui.this,
@@ -968,7 +967,7 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
                 }
             }
         };
-        Executors.newSingleThreadExecutor().submit(runnable);
+        new Thread(runnable).start();
     }
 
     private void displayHelpSystem() {
@@ -989,7 +988,7 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
                     }
                 }
             };
-            Executors.newSingleThreadExecutor().submit(test);
+            new Thread(test).start();
         }
     }
 
@@ -1022,7 +1021,7 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
                 }
             }
         };
-        Executors.newSingleThreadExecutor().submit(test);
+        new Thread(test).start();
     }
 
     private void createDatasheet() {
@@ -1953,7 +1952,7 @@ private void jMenuItemHelpShopActionPerformed(java.awt.event.ActionEvent evt) {/
          */
         private void lazyloadPayloads(final List<AS2Message> messageList) {
             this.lazyLoader = new LazyLoaderThread(messageList);
-            Executors.newSingleThreadExecutor().submit(this.lazyLoader);
+            new Thread(this.lazyLoader).start();
         }
 
         /**

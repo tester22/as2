@@ -144,7 +144,7 @@ public class DirPollManager {
         DirPollThread thread = new DirPollThread(this.configConnection, this.runtimeConnection);
         thread.setRelationShip(localStation, partner);
         this.mapPollThread.put(localStation.getDBId() + "_" + partner.getDBId(), thread);
-        Executors.newSingleThreadExecutor().submit(thread);
+        new Thread(thread).start();
         String pollIgnoreList = partner.getPollIgnoreListAsString();
         if (pollIgnoreList == null) {
             pollIgnoreList = "--";

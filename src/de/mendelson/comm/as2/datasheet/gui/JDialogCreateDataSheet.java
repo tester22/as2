@@ -193,7 +193,7 @@ public class JDialogCreateDataSheet extends JDialog {
                 }
             }
         };
-        Executors.newSingleThreadExecutor().submit(runnable);
+        new Thread(runnable).start();
     }
 
     /**

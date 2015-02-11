@@ -12,7 +12,6 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -65,7 +64,7 @@ public class AS2StatusBar extends JPanel {
             throw new IllegalArgumentException("Status bar: Please pass the base client to the status bar before starting the config checker.");
         }
         this.checkThread = new ConfigurationCheckThread();
-        Executors.newSingleThreadExecutor().submit(this.checkThread);
+        new Thread(this.checkThread).start();
     }
 
     public void setTransactionCount(int countAll, int countOk, int countPending, int countFailed, int countSelected) {
