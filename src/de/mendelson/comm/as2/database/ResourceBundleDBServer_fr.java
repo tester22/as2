@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/database/ResourceBundleDBServer_fr.java,v 1.1 2012/04/18 14:10:29 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/database/ResourceBundleDBServer_fr.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.database;
 
 import de.mendelson.util.MecResourceBundle;
@@ -28,8 +28,8 @@ public class ResourceBundleDBServer_fr extends MecResourceBundle {
         {"update.versioninfo", "Mise à jour automatique de BD: la version de BD trouvé est {0}"
             + ", la version de BD requise est {1}."},
         {"update.progress", "Mise à jour incrementale de base de données ..."},
-        {"update.progress.version.start", "(Commencement) La BD a été mise à jour vers la version {0}."},
-        {"update.progress.version.end", "(Fin) La BD a été mise à jour vers la version {0}."},
+        {"update.progress.version.start", "(Commencement) La {1} BD a été mise à jour vers la version {0}."},
+        {"update.progress.version.end", "(Fin) La {1} BD a été mise à jour vers la version {0}."},
         {"update.error", "FATAL: impossible de mettre à jour la base de données "
             + " de la version {0} vers la version {1}.\n"
             + "Merci de supprimer entièrement la base de donnée par la suppression"

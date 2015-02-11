@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/message/AS2MessageCreation.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/AS2MessageCreation.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
 import com.sun.mail.util.LineOutputStream;
@@ -9,6 +9,7 @@ import de.mendelson.util.MecResourceBundle;
 import de.mendelson.util.security.BCCryptoHelper;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,7 +30,6 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.activation.DataHandler;
-import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
@@ -38,8 +38,12 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.io.output.DeferredFileOutputStream;
-import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedDataStreamGenerator;
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.bouncycastle.cms.jcajce.ZlibCompressor;
 import org.bouncycastle.mail.smime.SMIMECompressedGenerator;
 import org.bouncycastle.mail.smime.SMIMEException;
 
@@ -52,6 +56,7 @@ import org.bouncycastle.mail.smime.SMIMEException;
  */
 /**
  * Packs a message with all necessary headers and attachments
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
@@ -81,19 +86,25 @@ public class AS2MessageCreation {
         this.encryptionCertManager = encryptionCertManager;
     }
 
-    /**Passes a logger to this creation class*/
+    /**
+     * Passes a logger to this creation class
+     */
     public void setLogger(Logger logger) {
         this.logger = logger;
     }
 
-    /**Passes a database connection to this class to allow logging functionality*/
+    /**
+     * Passes a database connection to this class to allow logging functionality
+     */
     public void setServerResources(Connection configConnection, Connection runtimeConnection) {
         this.runtimeConnection = runtimeConnection;
         this.configConnection = configConnection;
     }
 
-    /**Escapes the AS2-TO and AS2-FROM headers in sending direction, related to
+    /**
+     * Escapes the AS2-TO and AS2-FROM headers in sending direction, related to
      * RFC 4130 section 6.2
+     *
      * @param identification as2-from or as2-to value to escape
      * @return escaped value
      */
@@ -119,7 +130,9 @@ public class AS2MessageCreation {
         return (builder.toString());
     }
 
-    /**Displays a bundle of byte arrays as hex string, for debug purpose only*/
+    /**
+     * Displays a bundle of byte arrays as hex string, for debug purpose only
+     */
     private String toHexDisplay(byte[] data) {
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < data.length; i++) {
@@ -129,7 +142,9 @@ public class AS2MessageCreation {
         return result.toString();
     }
 
-    /**Prepares the message if it contains no MIME structure*/
+    /**
+     * Prepares the message if it contains no MIME structure
+     */
     public AS2Message createMessageNoMIME(AS2Message message, Partner receiver) throws Exception {
         AS2MessageInfo info = (AS2MessageInfo) message.getAS2Info();
         BCCryptoHelper cryptoHelper = new BCCryptoHelper();
@@ -143,16 +158,32 @@ public class AS2MessageCreation {
                         info.getMessageId()
                     }), info);
         }
-        //compute content mic. Use sha1 as hash alg.
-        String digestOID = cryptoHelper.convertAlgorithmNameToOID(BCCryptoHelper.ALGORITHM_SHA1);
-        String mic = cryptoHelper.calculateMIC(message.getPayload(0).getData(), digestOID);
-        info.setReceivedContentMIC(mic + ", sha1");
+        //compute content mic. Use SHA-1 as hash alg.
+        //RFC 4130 7.3.1. Signed Receipt Considerations:        
+        //*For unsigned, unencrypted messages, the MIC MUST be calculated
+        //over the message contents without the MIME or any other RFC
+        //2822 headers, since these are sometimes altered or reordered by
+        //Mail Transport Agents (MTAs).
+        String digestOIDSHA1 = cryptoHelper.convertAlgorithmNameToOID(BCCryptoHelper.ALGORITHM_SHA1);
+        String mic = null;
+        cryptoHelper.calculateMIC(new ByteArrayInputStream(message.getPayload(0).getData()), digestOIDSHA1);
+        info.setReceivedContentMIC(mic + ", " + BCCryptoHelper.ALGORITHM_SHA1);
         //add compression
         if (receiver.getCompressionType() == AS2Message.COMPRESSION_ZLIB) {
             info.setCompressionType(AS2Message.COMPRESSION_ZLIB);
-            int uncompressedSize = message.getDecryptedRawData().length;
-            MimeBodyPart bodyPart = this.compressPayload(receiver, message.getDecryptedRawData(), receiver.getContentType());
-            int compressedSize = bodyPart.getSize();
+            int uncompressedSize = message.getDecryptedRawDataSize();
+            InputStream dataStream = null;
+            int compressedSize = -1;
+            MimeBodyPart bodyPart = null;
+            try {
+                dataStream = message.getDecryptedRawDataInputStream();
+                bodyPart = this.compressPayload(receiver, dataStream, receiver.getContentType());
+                compressedSize = bodyPart.getSize();
+            } finally {
+                if (dataStream != null) {
+                    dataStream.close();
+                }
+            }
             //sometimes size() is unable to determine the size of the compressed body part and will return -1. Dont log the
             //compression ratio in this case.
             if (compressedSize == -1) {
@@ -188,14 +219,21 @@ public class AS2MessageCreation {
             }
             message.setRawData(message.getDecryptedRawData());
         } else {
-            //encrypt the message raw data
+            //encrypt the message raw data:
+            //RFC 4130 7.3.1. Signed Receipt Considerations:
+            //*For encrypted, unsigned messages, the MIC to be returned is
+            //calculated on the decrypted RFC 1767/RFC3023 MIME header and
+            //content.  The content after decryption MUST be canonicalized
+            //before the MIC is calculated.
             String cryptAlias = this.encryptionCertManager.getAliasByFingerprint(receiver.getCryptFingerprintSHA1());
             this.encryptDataToMessage(message, cryptAlias, info.getEncryptionType(), receiver);
         }
         return (message);
     }
 
-    /**Enwrapps the data into a signed MIME message structure and returns it*/
+    /**
+     * Enwrapps the data into a signed MIME message structure and returns it
+     */
     private void enwrappInMessageAndSign(AS2Message message, Part contentPart, Partner sender, Partner receiver) throws Exception {
         AS2MessageInfo info = (AS2MessageInfo) message.getAS2Info();
         MimeMessage messagePart = new MimeMessage(Session.getInstance(System.getProperties(), null));
@@ -258,14 +296,18 @@ public class AS2MessageCreation {
         message.setDecryptedRawData(signedOut.toByteArray());
     }
 
-    /**Builds up a new message from the passed message parts
+    /**
+     * Builds up a new message from the passed message parts
      */
     public AS2Message createMessage(Partner sender, Partner receiver, File[] payloadFiles) throws Exception {
         return (this.createMessage(sender, receiver, payloadFiles, AS2Message.MESSAGETYPE_AS2));
     }
 
-    /**Builds up a new message from the passed message parts
-     * @param messageType one of the message types definfed in the class AS2Message
+    /**
+     * Builds up a new message from the passed message parts
+     *
+     * @param messageType one of the message types definfed in the class
+     * AS2Message
      */
     public AS2Message createMessage(Partner sender, Partner receiver, File[] payloadFiles, int messageType) throws Exception {
         //create payloads from the payload files
@@ -287,20 +329,36 @@ public class AS2MessageCreation {
         return (this.createMessage(sender, receiver, payloads, messageType));
     }
 
-    /**Builds up a new message from the passed message parts
-     * @param messageType one of the message types definfed in the class AS2Message
+    /**
+     * Builds up a new message from the passed message parts
+     *
+     * @param messageType one of the message types definfed in the class
+     * AS2Message
      */
-    public AS2Message createMessage(Partner sender, Partner receiver, AS2Payload[] payloads, int messageType) throws Exception {        
-        return( this.createMessage(sender, receiver, payloads, messageType, null ));
+    public AS2Message createMessage(Partner sender, Partner receiver, AS2Payload[] payloads, int messageType) throws Exception {
+        return (this.createMessage(sender, receiver, payloads, messageType, null));
     }
-    
-    
-    /**Builds up a new message from the passed message parts
-     * @param messageType one of the message types definfed in the class AS2Message
+
+    /**
+     * Builds up a new message from the passed message parts
+     *
+     * @param messageType one of the message types definfed in the class
+     * AS2Message
      */
     public AS2Message createMessage(Partner sender, Partner receiver, AS2Payload[] payloads, int messageType,
-            String messageId ) throws Exception {
-        if( messageId == null ){
+            String messageId) throws Exception {
+        return (this.createMessage(sender, receiver, payloads, messageType, null, null));
+    }
+
+    /**
+     * Builds up a new message from the passed message parts
+     *
+     * @param messageType one of the message types definfed in the class
+     * AS2Message
+     */
+    public AS2Message createMessage(Partner sender, Partner receiver, AS2Payload[] payloads, int messageType,
+            String messageId, String userdefinedId) throws Exception {
+        if (messageId == null) {
             messageId = UniqueId.createMessageId(sender.getAS2Identification(), receiver.getAS2Identification());
         }
         BCCryptoHelper cryptoHelper = new BCCryptoHelper();
@@ -323,6 +381,7 @@ public class AS2MessageCreation {
         } catch (UnknownHostException e) {
             //nop
         }
+        info.setUserdefinedId(userdefinedId);
         //create message object to return
         AS2Message message = new AS2Message(info);
         //stores all the available body parts that have been prepared
@@ -417,18 +476,31 @@ public class AS2MessageCreation {
                 }
             }
         }
-        //compute content mic. Try to use sign digest as hash alg. For unsigned messages take sha-1
+        //compute content mic. If the sign digest is md5 use it else use sha-1/sha-2
         String digestOID = null;
         if (info.getSignType() == AS2Message.SIGNATURE_MD5) {
             digestOID = cryptoHelper.convertAlgorithmNameToOID(BCCryptoHelper.ALGORITHM_MD5);
+        } else if (info.getSignType() == AS2Message.SIGNATURE_SHA256) {
+            digestOID = cryptoHelper.convertAlgorithmNameToOID(BCCryptoHelper.ALGORITHM_SHA256);
+        } else if (info.getSignType() == AS2Message.SIGNATURE_SHA384) {
+            digestOID = cryptoHelper.convertAlgorithmNameToOID(BCCryptoHelper.ALGORITHM_SHA384);
+        } else if (info.getSignType() == AS2Message.SIGNATURE_SHA512) {
+            digestOID = cryptoHelper.convertAlgorithmNameToOID(BCCryptoHelper.ALGORITHM_SHA512);
         } else {
+            //For unsigned messages take sha-1
             digestOID = cryptoHelper.convertAlgorithmNameToOID(BCCryptoHelper.ALGORITHM_SHA1);
         }
         String mic = cryptoHelper.calculateMIC(contentPart, digestOID);
         if (info.getSignType() == AS2Message.SIGNATURE_MD5) {
-            info.setReceivedContentMIC(mic + ", md5");
+            info.setReceivedContentMIC(mic + ", " + BCCryptoHelper.ALGORITHM_MD5);
+        } else if (info.getSignType() == AS2Message.SIGNATURE_SHA256) {
+            info.setReceivedContentMIC(mic + ", " + BCCryptoHelper.ALGORITHM_SHA256);
+        } else if (info.getSignType() == AS2Message.SIGNATURE_SHA384) {
+            info.setReceivedContentMIC(mic + ", " + BCCryptoHelper.ALGORITHM_SHA384);
+        } else if (info.getSignType() == AS2Message.SIGNATURE_SHA512) {
+            info.setReceivedContentMIC(mic + ", " + BCCryptoHelper.ALGORITHM_SHA512);
         } else {
-            info.setReceivedContentMIC(mic + ", sha1");
+            info.setReceivedContentMIC(mic + ", " + BCCryptoHelper.ALGORITHM_SHA1);
         }
         this.enwrappInMessageAndSign(message, contentPart, sender, receiver);
         //encryption requested for the receiver?
@@ -447,46 +519,80 @@ public class AS2MessageCreation {
         return (message);
     }
 
-    /**Encrypts a byte array and returns it*/
+    /**
+     * Encrypts a byte array and returns it
+     */
     private void encryptDataToMessage(AS2Message message, String receiverCryptAlias, int encryptionType, Partner receiver) throws Exception {
         AS2MessageInfo info = (AS2MessageInfo) message.getAS2Info();
         BCCryptoHelper cryptoHelper = new BCCryptoHelper();
         X509Certificate certificate = this.encryptionCertManager.getX509Certificate(receiverCryptAlias);
         CMSEnvelopedDataStreamGenerator dataGenerator = new CMSEnvelopedDataStreamGenerator();
-        dataGenerator.addKeyTransRecipient(certificate);
-        DeferredFileOutputStream encryptedOutput = new DeferredFileOutputStream(1024 * 1024, "as2encryptdata_", ".mem", null);
+        dataGenerator.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(certificate).setProvider("BC"));
+        DeferredFileOutputStream encryptedOutput = null;
         OutputStream out = null;
-        if (encryptionType == AS2Message.ENCRYPTION_3DES) {
-            out = dataGenerator.open(encryptedOutput, CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
-        } else if (encryptionType == AS2Message.ENCRYPTION_DES) {
-            out = dataGenerator.open(encryptedOutput, cryptoHelper.convertAlgorithmNameToOID(BCCryptoHelper.ALGORITHM_DES), 56, "BC");
-        } else if (encryptionType == AS2Message.ENCRYPTION_RC2_40) {
-            out = dataGenerator.open(encryptedOutput, CMSEnvelopedDataGenerator.RC2_CBC, 40, "BC");
-        } else if (encryptionType == AS2Message.ENCRYPTION_RC2_64) {
-            out = dataGenerator.open(encryptedOutput, CMSEnvelopedDataGenerator.RC2_CBC, 64, "BC");
-        } else if (encryptionType == AS2Message.ENCRYPTION_RC2_128) {
-            out = dataGenerator.open(encryptedOutput, CMSEnvelopedDataGenerator.RC2_CBC, 128, "BC");
-        } else if (encryptionType == AS2Message.ENCRYPTION_RC2_196) {
-            out = dataGenerator.open(encryptedOutput, CMSEnvelopedDataGenerator.RC2_CBC, 196, "BC");
-        } else if (encryptionType == AS2Message.ENCRYPTION_AES_128) {
-            out = dataGenerator.open(encryptedOutput, CMSEnvelopedDataGenerator.AES128_CBC, "BC");
-        } else if (encryptionType == AS2Message.ENCRYPTION_AES_192) {
-            out = dataGenerator.open(encryptedOutput, CMSEnvelopedDataGenerator.AES192_CBC, "BC");
-        } else if (encryptionType == AS2Message.ENCRYPTION_AES_256) {
-            out = dataGenerator.open(encryptedOutput, CMSEnvelopedDataGenerator.AES256_CBC, "BC");
-        } else if (encryptionType == AS2Message.ENCRYPTION_RC4_40) {
-            out = dataGenerator.open(encryptedOutput, cryptoHelper.convertAlgorithmNameToOID(BCCryptoHelper.ALGORITHM_RC4), 40, "BC");
-        } else if (encryptionType == AS2Message.ENCRYPTION_RC4_56) {
-            out = dataGenerator.open(encryptedOutput, cryptoHelper.convertAlgorithmNameToOID(BCCryptoHelper.ALGORITHM_RC4), 56, "BC");
-        } else if (encryptionType == AS2Message.ENCRYPTION_RC4_128) {
-            out = dataGenerator.open(encryptedOutput, cryptoHelper.convertAlgorithmNameToOID(BCCryptoHelper.ALGORITHM_RC4), 128, "BC");
+        try {
+            //if the data is less then 3MB perform the operaion in memory else stream to disk
+            encryptedOutput = new DeferredFileOutputStream(3 * 1024 * 1024, "as2encryptdata_", ".mem", null);
+            if (encryptionType == AS2Message.ENCRYPTION_3DES) {
+                out = dataGenerator.open(encryptedOutput, new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC)
+                        .setProvider("BC").build());
+            } else if (encryptionType == AS2Message.ENCRYPTION_DES) {
+                out = dataGenerator.open(encryptedOutput, new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_WRAP, 56)
+                        .setProvider("BC").build());
+            } else if (encryptionType == AS2Message.ENCRYPTION_RC2_40) {
+                out = dataGenerator.open(encryptedOutput, new JceCMSContentEncryptorBuilder(CMSAlgorithm.RC2_CBC, 40)
+                        .setProvider("BC").build());
+            } else if (encryptionType == AS2Message.ENCRYPTION_RC2_64) {
+                out = dataGenerator.open(encryptedOutput, new JceCMSContentEncryptorBuilder(CMSAlgorithm.RC2_CBC, 64)
+                        .setProvider("BC").build());
+            } else if (encryptionType == AS2Message.ENCRYPTION_RC2_128) {
+                out = dataGenerator.open(encryptedOutput, new JceCMSContentEncryptorBuilder(CMSAlgorithm.RC2_CBC, 128)
+                        .setProvider("BC").build());
+            } else if (encryptionType == AS2Message.ENCRYPTION_RC2_196) {
+                out = dataGenerator.open(encryptedOutput, new JceCMSContentEncryptorBuilder(CMSAlgorithm.RC2_CBC, 196)
+                        .setProvider("BC").build());
+            } else if (encryptionType == AS2Message.ENCRYPTION_AES_128) {
+                out = dataGenerator.open(encryptedOutput, new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES128_CBC)
+                        .setProvider("BC").build());
+            } else if (encryptionType == AS2Message.ENCRYPTION_AES_192) {
+                out = dataGenerator.open(encryptedOutput, new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES192_CBC)
+                        .setProvider("BC").build());
+            } else if (encryptionType == AS2Message.ENCRYPTION_AES_256) {
+                out = dataGenerator.open(encryptedOutput, new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC)
+                        .setProvider("BC").build());
+            } else if (encryptionType == AS2Message.ENCRYPTION_RC4_40) {
+                out = dataGenerator.open(encryptedOutput, new JceCMSContentEncryptorBuilder(
+                        new ASN1ObjectIdentifier(cryptoHelper.convertAlgorithmNameToOID(BCCryptoHelper.ALGORITHM_RC4)), 40)
+                        .setProvider("BC").build());
+            } else if (encryptionType == AS2Message.ENCRYPTION_RC4_56) {
+                out = dataGenerator.open(encryptedOutput, new JceCMSContentEncryptorBuilder(
+                        new ASN1ObjectIdentifier(cryptoHelper.convertAlgorithmNameToOID(BCCryptoHelper.ALGORITHM_RC4)), 56)
+                        .setProvider("BC").build());
+            } else if (encryptionType == AS2Message.ENCRYPTION_RC4_128) {
+                out = dataGenerator.open(encryptedOutput, new JceCMSContentEncryptorBuilder(
+                        new ASN1ObjectIdentifier(cryptoHelper.convertAlgorithmNameToOID(BCCryptoHelper.ALGORITHM_RC4)), 128)
+                        .setProvider("BC").build());
+            }
+            if (out == null) {
+                throw new Exception("Internal failure: unsupported encryption type " + encryptionType);
+            }
+            InputStream in = null;
+            try {
+                in = message.getDecryptedRawDataInputStream();
+                this.copyStreams(in, out);
+            } finally {
+                if (in != null) {
+                    in.close();
+                }
+            }
+        } finally {
+            if (out != null) {
+                out.close();
+            }
+            if (encryptedOutput != null) {
+                encryptedOutput.close();
+            }
         }
-        if (out == null) {
-            throw new Exception("Internal failure: unsupported encryption type " + encryptionType);
-        }
-        out.write(message.getDecryptedRawData());
-        out.close();
-        encryptedOutput.close();
         //size of the data was < than the threshold
         if (encryptedOutput.isInMemory()) {
             message.setRawData(encryptedOutput.getData());
@@ -510,11 +616,12 @@ public class AS2MessageCreation {
         }
     }
 
-    /**Compresses the payload using the ZLIB algorithm
+    /**
+     * Compresses the payload using the ZLIB algorithm
      */
-    private MimeBodyPart compressPayload(Partner receiver, byte[] data, String contentType) throws SMIMEException, MessagingException {
+    private MimeBodyPart compressPayload(Partner receiver, InputStream dataStream, String contentType) throws Exception {
         MimeBodyPart bodyPart = new MimeBodyPart();
-        bodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(data, contentType)));
+        bodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(dataStream, contentType)));
         bodyPart.addHeader("Content-Type", contentType);
         if (receiver.getContentTransferEncoding() == AS2Message.CONTENT_TRANSFER_ENCODING_BASE64) {
             bodyPart.addHeader("Content-Transfer-Encoding", "base64");
@@ -527,10 +634,11 @@ public class AS2MessageCreation {
         } else {
             generator.setContentTransferEncoding("binary");
         }
-        return (generator.generate(bodyPart, SMIMECompressedGenerator.ZLIB));
+        return (generator.generate(bodyPart, new ZlibCompressor()));
     }
 
-    /**Compresses the payload using the ZLIB algorithm
+    /**
+     * Compresses the payload using the ZLIB algorithm
      */
     private MimeBodyPart compressPayload(Partner receiver, Part contentPart) throws SMIMEException {
         SMIMECompressedGenerator generator = new SMIMECompressedGenerator();
@@ -540,15 +648,16 @@ public class AS2MessageCreation {
             generator.setContentTransferEncoding("binary");
         }
         if (contentPart instanceof MimeBodyPart) {
-            return (generator.generate((MimeBodyPart) contentPart, SMIMECompressedGenerator.ZLIB));
+            return (generator.generate((MimeBodyPart) contentPart, new ZlibCompressor()));
         } else if (contentPart instanceof MimeMessage) {
-            return (generator.generate((MimeMessage) contentPart, SMIMECompressedGenerator.ZLIB));
+            return (generator.generate((MimeMessage) contentPart, new ZlibCompressor()));
         } else {
             throw new IllegalArgumentException("compressPayload: Unable to compress a Part of class " + contentPart.getClass().getName());
         }
     }
 
-    /**Signs the passed data and returns it
+    /**
+     * Signs the passed data and returns it
      */
     private MimeMultipart signContentPart(Part part, Partner sender, Partner receiver) throws Exception {
         MimeMultipart signedPart = null;
@@ -562,7 +671,8 @@ public class AS2MessageCreation {
         return (signedPart);
     }
 
-    /**Signs the passed data and returns it
+    /**
+     * Signs the passed data and returns it
      */
     private MimeMultipart signContent(MimeMessage message, Partner sender, Partner receiver) throws Exception {
         PrivateKey senderKey = this.signatureCertManager.getPrivateKeyByFingerprintSHA1(sender.getSignFingerprintSHA1());
@@ -574,9 +684,17 @@ public class AS2MessageCreation {
         Certificate[] chain = this.signatureCertManager.getCertificateChain(senderSignAlias);
         String digest = null;
         if (receiver.getSignType() == AS2Message.SIGNATURE_SHA1) {
-            digest = "sha1";
+            digest = BCCryptoHelper.ALGORITHM_SHA1;
         } else if (receiver.getSignType() == AS2Message.SIGNATURE_MD5) {
-            digest = "md5";
+            digest = BCCryptoHelper.ALGORITHM_MD5;
+        } else if (receiver.getSignType() == AS2Message.SIGNATURE_SHA224) {
+            digest = BCCryptoHelper.ALGORITHM_SHA224;
+        } else if (receiver.getSignType() == AS2Message.SIGNATURE_SHA256) {
+            digest = BCCryptoHelper.ALGORITHM_SHA256;
+        } else if (receiver.getSignType() == AS2Message.SIGNATURE_SHA384) {
+            digest = BCCryptoHelper.ALGORITHM_SHA384;
+        } else if (receiver.getSignType() == AS2Message.SIGNATURE_SHA512) {
+            digest = BCCryptoHelper.ALGORITHM_SHA512;
         } else {
             throw new Exception("Internal failure: Unsupported sign type " + receiver.getSignType());
         }
@@ -584,7 +702,8 @@ public class AS2MessageCreation {
         return (helper.sign(message, chain, senderKey, digest));
     }
 
-    /**Signs the passed message and returns it
+    /**
+     * Signs the passed message and returns it
      */
     private MimeMultipart signContent(MimeBodyPart body, Partner sender, Partner receiver) throws Exception {
         PrivateKey senderKey = this.signatureCertManager.getPrivateKeyByFingerprintSHA1(sender.getSignFingerprintSHA1());
@@ -592,9 +711,17 @@ public class AS2MessageCreation {
         Certificate[] chain = this.signatureCertManager.getCertificateChain(senderSignAlias);
         String digest = null;
         if (receiver.getSignType() == AS2Message.SIGNATURE_SHA1) {
-            digest = "sha1";
+            digest = BCCryptoHelper.ALGORITHM_SHA1;
         } else if (receiver.getSignType() == AS2Message.SIGNATURE_MD5) {
-            digest = "md5";
+            digest = BCCryptoHelper.ALGORITHM_MD5;
+        } else if (receiver.getSignType() == AS2Message.SIGNATURE_SHA224) {
+            digest = BCCryptoHelper.ALGORITHM_SHA224;
+        } else if (receiver.getSignType() == AS2Message.SIGNATURE_SHA256) {
+            digest = BCCryptoHelper.ALGORITHM_SHA256;
+        } else if (receiver.getSignType() == AS2Message.SIGNATURE_SHA384) {
+            digest = BCCryptoHelper.ALGORITHM_SHA384;
+        } else if (receiver.getSignType() == AS2Message.SIGNATURE_SHA512) {
+            digest = BCCryptoHelper.ALGORITHM_SHA512;
         } else {
             throw new Exception("Internal failure: Unsupported sign type " + receiver.getSignType());
         }
@@ -602,7 +729,9 @@ public class AS2MessageCreation {
         return (helper.sign(body, chain, senderKey, digest));
     }
 
-    /**Copies all data from one stream to another*/
+    /**
+     * Copies all data from one stream to another
+     */
     private void copyStreams(InputStream in, OutputStream out) throws IOException {
         BufferedInputStream inStream = new BufferedInputStream(in);
         BufferedOutputStream outStream = new BufferedOutputStream(out);

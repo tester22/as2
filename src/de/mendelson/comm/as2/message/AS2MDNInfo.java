@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/message/AS2MDNInfo.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/AS2MDNInfo.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
 import de.mendelson.comm.as2.AS2ServerVersion;
@@ -99,10 +99,12 @@ public class AS2MDNInfo implements AS2Info {
         this.receiverId = receiverId;
     }
 
+    @Override
     public Date getInitDate() {
         return initDate;
     }
 
+    @Override
     public void setInitDate(Date messageDate) {
         this.initDate = messageDate;
     }

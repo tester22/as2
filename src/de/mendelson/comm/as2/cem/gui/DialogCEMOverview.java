@@ -1,15 +1,18 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/cem/gui/DialogCEMOverview.java,v 1.1 2012/04/18 14:10:20 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/cem/gui/DialogCEMOverview.java,v 1.1 2015/01/06 11:07:35 heller Exp $
 package de.mendelson.comm.as2.cem.gui;
 
-import de.mendelson.comm.as2.cem.CEMAccessDB;
 import de.mendelson.comm.as2.cem.CEMEntry;
+import de.mendelson.comm.as2.cem.clientserver.CEMCancelRequest;
+import de.mendelson.comm.as2.cem.clientserver.CEMDeleteRequest;
+import de.mendelson.comm.as2.cem.clientserver.CEMListRequest;
+import de.mendelson.comm.as2.cem.clientserver.CEMListResponse;
 import de.mendelson.comm.as2.clientserver.message.RefreshClientCEMDisplay;
-import de.mendelson.util.security.cert.CertificateManager;
-import de.mendelson.util.security.cert.KeystoreCertificate;
-import de.mendelson.comm.as2.log.LogAccessDB;
 import de.mendelson.comm.as2.message.AS2MessageInfo;
 import de.mendelson.comm.as2.message.AS2Payload;
-import de.mendelson.comm.as2.message.MessageAccessDB;
+import de.mendelson.comm.as2.message.clientserver.MessagePayloadRequest;
+import de.mendelson.comm.as2.message.clientserver.MessagePayloadResponse;
+import de.mendelson.comm.as2.message.clientserver.MessageRequestLastMessage;
+import de.mendelson.comm.as2.message.clientserver.MessageResponseLastMessage;
 import de.mendelson.comm.as2.message.loggui.DialogMessageDetails;
 import de.mendelson.comm.as2.partner.gui.TableCellRendererPartner;
 import de.mendelson.comm.as2.preferences.PreferencesAS2;
@@ -18,12 +21,14 @@ import de.mendelson.util.clientserver.ClientsideMessageProcessor;
 import de.mendelson.util.clientserver.GUIClient;
 import de.mendelson.util.clientserver.clients.preferences.PreferencesClient;
 import de.mendelson.util.clientserver.messages.ClientServerMessage;
+import de.mendelson.util.clientserver.messages.ClientServerResponse;
 import de.mendelson.util.security.BCCryptoHelper;
+import de.mendelson.util.security.cert.CertificateManager;
+import de.mendelson.util.security.cert.KeystoreCertificate;
 import de.mendelson.util.security.cert.KeystoreStorage;
 import de.mendelson.util.security.cert.TableCellRendererCertificates;
 import de.mendelson.util.security.cert.clientserver.KeystoreStorageImplClientServer;
 import de.mendelson.util.tables.JTableColumnResizer;
-import java.sql.Connection;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -44,26 +49,28 @@ import javax.swing.event.ListSelectionListener;
  */
 /**
  * Gives an overview on all CEM messages
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
 public class DialogCEMOverview extends JDialog implements ListSelectionListener, ClientsideMessageProcessor {
 
-    /**Manages all internal certificates*/
+    /**
+     * Manages all internal certificates
+     */
     private CertificateManager certificateManager;
-    /**DB connection of the application*/
-    private Connection configConnection;
-    private Connection runtimeConnection;
-    /**localizes the GUI*/
+    /**
+     * localizes the GUI
+     */
     private MecResourceBundle rb;
     private GUIClient guiClient;
     private Logger logger = Logger.getLogger("de.mendelson.as2.client");
 
-    /** Creates new form DialogCEMOverview */
-    public DialogCEMOverview(JFrame parent, Connection configConnection, Connection runtimeConnection, GUIClient guiClient) {
+    /**
+     * Creates new form DialogCEMOverview
+     */
+    public DialogCEMOverview(JFrame parent, GUIClient guiClient) {
         super(parent, true);
-        this.configConnection = configConnection;
-        this.runtimeConnection = runtimeConnection;
         this.guiClient = guiClient;
         //load resource bundle
         try {
@@ -88,12 +95,12 @@ public class DialogCEMOverview extends JDialog implements ListSelectionListener,
             this.logger.severe(e.getMessage());
             throw new RuntimeException(e);
         }
-        CEMAccessDB cemAccess = new CEMAccessDB(this.configConnection, this.runtimeConnection);
-        ((TableModelCEMOverview) (this.jTable.getModel())).passNewData(cemAccess.getCEMEntries());
+        List<CEMEntry> cemEntries = ((CEMListResponse) this.guiClient.getBaseClient().sendSync(new CEMListRequest())).getList();
+        ((TableModelCEMOverview) (this.jTable.getModel())).passNewData(cemEntries);
         this.jTable.getColumnModel().getColumn(0).setCellRenderer(new TableCellRendererCEMSystemState());
-        this.jTable.getColumnModel().getColumn(1).setCellRenderer(new TableCellRendererCEMState(this.configConnection, this.runtimeConnection));
-        this.jTable.getColumnModel().getColumn(3).setCellRenderer(new TableCellRendererPartner(this.configConnection, this.runtimeConnection));
-        this.jTable.getColumnModel().getColumn(4).setCellRenderer(new TableCellRendererPartner(this.configConnection, this.runtimeConnection));
+        this.jTable.getColumnModel().getColumn(1).setCellRenderer(new TableCellRendererCEMState(this.guiClient.getBaseClient()));
+        this.jTable.getColumnModel().getColumn(3).setCellRenderer(new TableCellRendererPartner(this.guiClient.getBaseClient()));
+        this.jTable.getColumnModel().getColumn(4).setCellRenderer(new TableCellRendererPartner(this.guiClient.getBaseClient()));
         this.jTable.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererCertificates(this.certificateManager,
                 TableCellRendererCertificates.TYPE_FINGERPRINT_SHA1));
         JTableColumnResizer.adjustColumnWidthByContent(this.jTable);
@@ -122,11 +129,13 @@ public class DialogCEMOverview extends JDialog implements ListSelectionListener,
     }
 
     private void refresh() {
-        CEMAccessDB cemAccess = new CEMAccessDB(this.configConnection, this.runtimeConnection);
-        ((TableModelCEMOverview) (this.jTable.getModel())).passNewData(cemAccess.getCEMEntries());
+        List<CEMEntry> list = ((CEMListResponse) this.guiClient.getBaseClient().sendSync(new CEMListRequest())).getList();
+        ((TableModelCEMOverview) (this.jTable.getModel())).passNewData(list);
     }
 
-    /**Updates the actual selected rows content*/
+    /**
+     * Updates the actual selected rows content
+     */
     private void updateRowDetails() {
         int selectedRow = this.jTable.getSelectedRow();
         if (selectedRow < 0) {
@@ -147,10 +156,10 @@ public class DialogCEMOverview extends JDialog implements ListSelectionListener,
         }
     }
 
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -327,7 +336,7 @@ public class DialogCEMOverview extends JDialog implements ListSelectionListener,
     private void jButtonSendCEMActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSendCEMActionPerformed
         JFrame parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, this);
         DialogSendCEM dialog = new DialogSendCEM(parent, this.certificateManager,
-                this.configConnection, this.runtimeConnection, this.guiClient.getBaseClient());
+                this.guiClient.getBaseClient());
         dialog.setVisible(true);
     }//GEN-LAST:event_jButtonSendCEMActionPerformed
 
@@ -335,17 +344,16 @@ public class DialogCEMOverview extends JDialog implements ListSelectionListener,
         int selectedRow = this.jTable.getSelectedRow();
         if (selectedRow >= 0) {
             CEMEntry entry = ((TableModelCEMOverview) this.jTable.getModel()).getRowAt(selectedRow);
-            MessageAccessDB messageAccess = new MessageAccessDB(this.configConnection, this.runtimeConnection);
-            AS2MessageInfo info = messageAccess.getLastMessageEntry(entry.getRequestMessageid());
-            if (info != null) {
-                List<AS2Payload> payload = messageAccess.getPayload(entry.getRequestMessageid());
+            try {
+                List<AS2Payload> payloads = ((MessagePayloadResponse) this.guiClient.getBaseClient().sendSync(new MessagePayloadRequest(entry.getRequestMessageid()))).getList();
                 JFrame parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, this);
+                AS2MessageInfo cemInfo = new AS2MessageInfo();
+                cemInfo.setMessageId(entry.getRequestMessageid());
                 DialogMessageDetails dialog = new DialogMessageDetails(parent,
-                        this.configConnection, this.runtimeConnection,
-                        this.guiClient.getBaseClient(), info, payload);
+                        this.guiClient.getBaseClient(), cemInfo, payloads);
                 dialog.setVisible(true);
-            } else {
-                this.logger.warning("CEMOverview: No message info available for for message id " + entry.getRequestMessageid());
+            } catch (Throwable e) {
+                this.logger.warning("CEMOverview: No message details available for for message id " + entry.getRequestMessageid());
             }
         }
     }//GEN-LAST:event_jButtonDisplayRequestDetailsActionPerformed
@@ -354,14 +362,12 @@ public class DialogCEMOverview extends JDialog implements ListSelectionListener,
         int selectedRow = this.jTable.getSelectedRow();
         if (selectedRow >= 0) {
             CEMEntry entry = ((TableModelCEMOverview) this.jTable.getModel()).getRowAt(selectedRow);
-            MessageAccessDB messageAccess = new MessageAccessDB(this.configConnection, this.runtimeConnection);
-            AS2MessageInfo info = messageAccess.getLastMessageEntry(entry.getResponseMessageid());
+            AS2MessageInfo info = ((MessageResponseLastMessage) this.guiClient.getBaseClient().sendSync(new MessageRequestLastMessage(entry.getResponseMessageid()))).getInfo();
             if (info != null) {
-                List<AS2Payload> payload = messageAccess.getPayload(entry.getResponseMessageid());
+                List<AS2Payload> payloads = ((MessagePayloadResponse) this.guiClient.getBaseClient().sendSync(new MessagePayloadRequest(entry.getResponseMessageid()))).getList();
                 JFrame parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, this);
                 DialogMessageDetails dialog = new DialogMessageDetails(parent,
-                        this.configConnection, this.runtimeConnection,
-                        this.guiClient.getBaseClient(), info, payload);
+                        this.guiClient.getBaseClient(), info, payloads);
                 dialog.setVisible(true);
             }
         }
@@ -380,22 +386,7 @@ public class DialogCEMOverview extends JDialog implements ListSelectionListener,
             TableModelCEMOverview model = (TableModelCEMOverview) this.jTable.getModel();
             //cancel the operation
             CEMEntry entry = model.getRowAt(selectedRow);
-            CEMAccessDB cemAccess = new CEMAccessDB(this.configConnection, this.runtimeConnection);
-            cemAccess.setPendingRequestsToState(entry.getInitiatorAS2Id(), entry.getReceiverAS2Id(), entry.getCategory(), entry.getRequestId(),
-                    CEMEntry.STATUS_CANCELED_INT);
-            //remove the underlaying log entries
-            LogAccessDB logAccess = new LogAccessDB(this.configConnection, this.runtimeConnection);
-            //remove the underlaying messages
-            MessageAccessDB messageAccess = new MessageAccessDB(this.configConnection, this.runtimeConnection);
-            if (entry.getRequestMessageid() != null) {
-                logAccess.deleteMessageLog(entry.getRequestMessageid());
-                messageAccess.deleteMessage(entry.getRequestMessageid());
-            }
-            if (entry.getResponseMessageid() != null) {
-                logAccess.deleteMessageLog(entry.getResponseMessageid());
-                messageAccess.deleteMessage(entry.getResponseMessageid());
-            }
-            cemAccess.removeEntry(entry.getInitiatorAS2Id(), entry.getReceiverAS2Id(), entry.getCategory(), entry.getRequestId());
+            this.guiClient.getBaseClient().sendSync(new CEMDeleteRequest(entry));
             this.refresh();
             if (selectedRow >= model.getRowCount()) {
                 selectedRow = model.getRowCount() - 1;
@@ -414,10 +405,7 @@ public class DialogCEMOverview extends JDialog implements ListSelectionListener,
         int selectedRow = this.jTable.getSelectedRow();
         if (selectedRow >= 0) {
             CEMEntry entry = ((TableModelCEMOverview) this.jTable.getModel()).getRowAt(selectedRow);
-            CEMAccessDB cemAccess = new CEMAccessDB(this.configConnection, this.runtimeConnection);
-            //cancel entry
-            cemAccess.setPendingRequestsToState(entry.getInitiatorAS2Id(), entry.getReceiverAS2Id(), entry.getCategory(), entry.getRequestId(),
-                    CEMEntry.STATUS_CANCELED_INT);
+            this.guiClient.getBaseClient().sendSync(new CEMCancelRequest(entry));
             this.refresh();
             this.jTable.setRowSelectionInterval(selectedRow, selectedRow);
         }
@@ -445,7 +433,9 @@ public class DialogCEMOverview extends JDialog implements ListSelectionListener,
     private javax.swing.JToolBar jToolBar;
     // End of variables declaration//GEN-END:variables
 
-    /**Makes this a ListSelectionListener*/
+    /**
+     * Makes this a ListSelectionListener
+     */
     @Override
     public void valueChanged(ListSelectionEvent e) {
         this.jTabbedPane.remove(this.jPanelReasonForRejection);
@@ -461,5 +451,9 @@ public class DialogCEMOverview extends JDialog implements ListSelectionListener,
             return (true);
         }
         return (false);
+    }
+
+    @Override
+    public void processSyncResponseFromServer(ClientServerResponse response) {
     }
 }

@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/message/loggui/TableModelMessageOverview.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/loggui/TableModelMessageOverview.java,v 1.1 2015/01/06 11:07:41 heller Exp $
 package de.mendelson.comm.as2.message.loggui;
 
 import de.mendelson.comm.as2.message.AS2Message;
@@ -30,6 +30,7 @@ import javax.swing.table.AbstractTableModel;
  */
 /**
  * Model to display the message overview
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
@@ -41,19 +42,30 @@ public class TableModelMessageOverview extends AbstractTableModel {
     public static final ImageIcon ICON_STOPPED = new ImageIcon(TableModelMessageOverview.class.getResource("/de/mendelson/comm/as2/message/loggui/state_stopped16x16.gif"));
     public static final ImageIcon ICON_FINISHED = new ImageIcon(TableModelMessageOverview.class.getResource("/de/mendelson/comm/as2/message/loggui/state_finished16x16.gif"));
     public static final ImageIcon ICON_RESEND_OVERLAY = new ImageIcon(TableModelMessageOverview.class.getResource("/de/mendelson/comm/as2/message/loggui/resend_overlay16x16.gif"));
-    /**ResourceBundle to localize the headers*/
+    /**
+     * ResourceBundle to localize the headers
+     */
     private MecResourceBundle rb = null;
-    /**ResourceBundle to localize the enc/signature stuff*/
+    /**
+     * ResourceBundle to localize the enc/signature stuff
+     */
     private MecResourceBundle rbMessage = null;
-    /**Stores all partner ids and the corresponding partner objects*/
+    /**
+     * Stores all partner ids and the corresponding partner objects
+     */
     private final Map<String, Partner> partnerMap = Collections.synchronizedMap(new HashMap<String, Partner>());
-    /**Data to display*/
+    /**
+     * Data to display
+     */
     private final List<AS2Message> data = Collections.synchronizedList(new ArrayList<AS2Message>());
-    /**Format the date display*/
+    /**
+     * Format the date display
+     */
     private DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
-    private ImageUtil imageUtil = new ImageUtil(); 
-    
-    /** Creates new LogTableModel
+    private ImageUtil imageUtil = new ImageUtil();
+
+    /**
+     * Creates new LogTableModel
      */
     public TableModelMessageOverview() {
         //load resource bundle
@@ -66,12 +78,13 @@ public class TableModelMessageOverview extends AbstractTableModel {
         catch (MissingResourceException e) {
             throw new RuntimeException("Oops..resource bundle "
                     + e.getClassName() + " not found.");
-        }        
+        }
     }
 
-    
-    /**Passes a list of partner ot this table
-     **/
+    /**
+     * Passes a list of partner ot this table
+     *
+     */
     public void passPartner(Map<String, Partner> partnerMap) {
         synchronized (this.partnerMap) {
             this.partnerMap.putAll(partnerMap);
@@ -79,7 +92,9 @@ public class TableModelMessageOverview extends AbstractTableModel {
         this.fireTableDataChanged();
     }
 
-    /**Passes data to the model and fires a table data update*/
+    /**
+     * Passes data to the model and fires a table data update
+     */
     public void passNewData(List<AS2Message> newData) {
         synchronized (this.data) {
             this.data.clear();
@@ -102,8 +117,11 @@ public class TableModelMessageOverview extends AbstractTableModel {
         }
     }
 
-    /**Returns the data stored in the specific row
-     *@param row Row to look into*/
+    /**
+     * Returns the data stored in the specific row
+     *
+     * @param row Row to look into
+     */
     public AS2Message getRow(int row) {
         synchronized (this.data) {
             if (row > this.data.size() - 1) {
@@ -113,8 +131,11 @@ public class TableModelMessageOverview extends AbstractTableModel {
         }
     }
 
-    /**Returns the data stored in specific rows
-     *@param row Rows to look into*/
+    /**
+     * Returns the data stored in specific rows
+     *
+     * @param row Rows to look into
+     */
     public AS2Message[] getRows(int[] row) {
         AS2Message[] rows = new AS2Message[row.length];
         synchronized (this.data) {
@@ -125,7 +146,9 @@ public class TableModelMessageOverview extends AbstractTableModel {
         }
     }
 
-    /**Number of rows to display*/
+    /**
+     * Number of rows to display
+     */
     @Override
     public int getRowCount() {
         synchronized (this.data) {
@@ -133,13 +156,16 @@ public class TableModelMessageOverview extends AbstractTableModel {
         }
     }
 
-    /**Number of cols to display*/
+    /**
+     * Number of cols to display
+     */
     @Override
     public int getColumnCount() {
-        return (10);
+        return (11);
     }
 
-    /**Returns a value at a specific position in the grid
+    /**
+     * Returns a value at a specific position in the grid
      */
     @Override
     public Object getValueAt(int row, int col) {
@@ -151,15 +177,15 @@ public class TableModelMessageOverview extends AbstractTableModel {
         switch (col) {
             case 0:
                 if (info.getState() == AS2Message.STATE_FINISHED) {
-                    if( info.getResendCounter() == 0 ){
+                    if (info.getResendCounter() == 0) {
                         return (ICON_FINISHED);
-                    }else{
+                    } else {
                         return (this.imageUtil.mixImages(ICON_FINISHED, ICON_RESEND_OVERLAY));
                     }
                 } else if (info.getState() == AS2Message.STATE_STOPPED) {
-                    if( info.getResendCounter() == 0 ){
+                    if (info.getResendCounter() == 0) {
                         return (ICON_STOPPED);
-                    }else{
+                    } else {
                         return (this.imageUtil.mixImages(ICON_STOPPED, ICON_RESEND_OVERLAY));
                     }
                 }
@@ -237,12 +263,19 @@ public class TableModelMessageOverview extends AbstractTableModel {
                 } else {
                     return ("ASYNC");
                 }
-
+            case 10:
+                if (info.getUserdefinedId() == null) {
+                    return ("--");
+                } else {
+                    return (info.getUserdefinedId());
+                }
         }
         return (null);
     }
 
-    /**Returns the name of every column
+    /**
+     * Returns the name of every column
+     *
      * @param col Column to get the header name of
      */
     @Override
@@ -268,26 +301,31 @@ public class TableModelMessageOverview extends AbstractTableModel {
                 return (this.rb.getResourceString("header.signature"));
             case 9:
                 return (this.rb.getResourceString("header.mdn"));
+            case 10:
+                return (this.rb.getResourceString("header.userdefinedid"));
         }
         return (null);
     }
 
-    /**Set how to display the grid elements
+    /**
+     * Set how to display the grid elements
+     *
      * @param col requested column
      */
     @Override
     public Class getColumnClass(int col) {
         return (new Class[]{
-                    ImageIcon.class,
-                    ImageIcon.class,
-                    Date.class,
-                    String.class,
-                    String.class,
-                    String.class,
-                    String.class,
-                    String.class,
-                    String.class,
-                    String.class
-                }[col]);
+            ImageIcon.class,
+            ImageIcon.class,
+            Date.class,
+            String.class,
+            String.class,
+            String.class,
+            String.class,
+            String.class,
+            String.class,
+            String.class,
+            String.class    
+        }[col]);
     }
 }

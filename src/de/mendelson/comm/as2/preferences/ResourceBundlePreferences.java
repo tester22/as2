@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/preferences/ResourceBundlePreferences.java,v 1.1 2012/04/18 14:10:35 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/preferences/ResourceBundlePreferences.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.preferences;
 
 import de.mendelson.util.MecResourceBundle;
@@ -25,7 +25,6 @@ public class ResourceBundlePreferences extends MecResourceBundle {
     static final Object[][] contents = {
         //preferences localized
         {PreferencesAS2.SERVER_HOST, "Server host"},
-        {PreferencesAS2.SERVER_RMI_PORT, "Server RMI port"},
         {PreferencesAS2.DIR_MSG, "Message storage"},
         {"button.ok", "Ok"},
         {"button.cancel", "Cancel"},
@@ -68,7 +67,7 @@ public class ResourceBundlePreferences extends MecResourceBundle {
         {"checkbox.notifyfailure", "Notify system problems"},
         {"checkbox.notifyresend", "Notify rejected resends"},
         {"button.testmail", "Send test mail"},
-        {"label.mailhost", "Mail server host:"},
+        {"label.mailhost", "Mail server host (SMTP):"},
         {"label.mailport", "Port:"},
         {"label.mailaccount", "Mail server account:"},
         {"label.mailpass", "Mail server password:"},
@@ -77,9 +76,11 @@ public class ResourceBundlePreferences extends MecResourceBundle {
         {"label.smtpauthentication", "Use SMTP authentication"},
         {"label.smtpauthentication.user", "User name:"},
         {"label.smtpauthentication.pass", "Password:"},
+        {"label.security", "Connection security:" },
         {"testmail.message.success", "Test mail sent successfully."},
         {"testmail.message.error", "Error sending test mail:\n{0}"},
         {"testmail.title", "Test mail send result"},
+        {"testmail", "Test mail"},
         //interface
         {"label.showhttpheader", "Allow to configure the HTTP headers in the partner configuration"},
         {"label.showquota", "Allow to configure quota notification in the partner configuration"},
@@ -87,5 +88,10 @@ public class ResourceBundlePreferences extends MecResourceBundle {
         {"label.outboundstatusfiles", "Write outbound transaction status files"},
         {"info.restart.client", "A client restart is required to make these changes valid!" },
         {"remotedir.select", "Select a directory on the server" },
+        //retry
+        {"label.retry.max", "Max number of connection retries" },
+        {"label.retry.waittime", "Wait time between connection retries" },
+        {"label.sec", "seconds" },
+        {"keystore.hint", "Warning:\nDo not modify these parameter unless you used a third party tool to modify your keystore passwords (which is not recommended). Setting up passwords here will not modify the underlaying keystore passwords - these options will just allow to access external keystores."},
     };
 }

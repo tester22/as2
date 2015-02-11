@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/cem/CEMReceiptController.java,v 1.1 2012/04/18 14:10:17 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/cem/CEMReceiptController.java,v 1.1 2015/01/06 11:07:31 heller Exp $
 package de.mendelson.comm.as2.cem;
 
 import de.mendelson.comm.as2.AS2Exception;
@@ -39,6 +39,7 @@ import java.io.OutputStreamWriter;
 import java.security.Provider;
 import java.security.Security;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -167,7 +168,8 @@ public class CEMReceiptController {
                     //do not loalize, will be returned in an MDN
                     throw new Exception("Related CEM request with requestId " + response.getRequestId() + " does not exist.");
                 } else {
-                    this.logger.log(Level.INFO, this.rb.getResourceString("cem.response.relatedrequest.found", response.getRequestId()), info);
+                    this.logger.log(Level.INFO, this.rb.getResourceString("cem.response.relatedrequest.found", 
+                            new Object[]{info.getMessageId(), response.getRequestId()}), info);
                 }
                 if (!response.getTradingPartnerInfo().getSenderAS2Id().equals(info.getSenderId())) {
                     //do not loalize, will be returned in an MDN
@@ -238,9 +240,16 @@ public class CEMReceiptController {
                     //cert should be imported now
                     KeystoreCertificate referencedCert = this.certificateManager.getKeystoreCertificateByIssuerAndSerial(
                             trustRequest.getEndEntity().getIssuerName(), trustRequest.getEndEntity().getSerialNumber());
-                    if (referencedCert == null) {
+                    if (referencedCert == null) {                        
+                        List<KeystoreCertificate> list = this.certificateManager.getKeyStoreCertificateList();
+                        for( KeystoreCertificate cert:list ){
+                            System.out.println("---");
+                            System.out.println(cert.getIssuerDN());
+                            System.out.println(cert.getSerialNumberDEC());  
+                            System.out.println(cert.getSubjectDN());
+                        }
                         throw new Exception("Certificate with issuer " + trustRequest.getEndEntity().getIssuerName()
-                                + " and serial " + trustRequest.getEndEntity().getSerialNumber() + " not found");
+                                + " and serial " + trustRequest.getEndEntity().getSerialNumber() + " not found");                                                
                     }
                     initiator.getPartnerCertificateInformationList().
                             insertNewCertificate(referencedCert.getFingerPrintSHA1(),

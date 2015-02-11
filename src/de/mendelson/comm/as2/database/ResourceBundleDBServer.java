@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/database/ResourceBundleDBServer.java,v 1.1 2012/04/18 14:10:29 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/database/ResourceBundleDBServer.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.database;
 import de.mendelson.util.MecResourceBundle;
 /*
@@ -24,13 +24,12 @@ public class ResourceBundleDBServer extends MecResourceBundle{
   /**List of messages in the specific language*/
   static final Object[][] contents = {
               
-    {"server.started", "{0} started." },
-        
+    {"server.started", "{0} started." },        
     {"update.versioninfo", "Automatic DB updater: Found DB version is {0}"
         + ", the required DB version is {1}."},
     {"update.progress", "Incremental updating database ..." },
-    {"update.progress.version.start", "Starting DB update to version {0}..." },
-    {"update.progress.version.end", "Updated DB to version {0}." },
+    {"update.progress.version.start", "Starting {1} DB update to version {0}..." },
+    {"update.progress.version.end", "Updated {1} DB to version {0}." },
     {"update.error", "FATAL: impossible to update database "
         + " from version {0} to {1}.\n"
         + "Please delete the entire database by deleting"

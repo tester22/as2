@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/server/ResourceBundleAS2Server.java,v 1.1 2012/04/18 14:10:39 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/server/ResourceBundleAS2Server.java,v 1.1 2015/01/06 11:07:49 heller Exp $
 package de.mendelson.comm.as2.server;
 
 import de.mendelson.comm.as2.AS2ServerVersion;
@@ -27,7 +27,6 @@ public class ResourceBundleAS2Server extends MecResourceBundle {
         {"fatal.limited.strength", "Limited key strength has been detected in the JVM. Please install the \"Unlimited jurisdiction key strength policy files\" before running the " + AS2ServerVersion.getProductName() + " server." },
         {"server.willstart", "{0}"},
         {"server.started", AS2ServerVersion.getFullProductName() + " startup in {0} ms."},
-        {"rmi.port.in.use", "Unable to start the {2} server: The RMI port\n" + "{0} is already in use by an other process.\n" + "The {2} is based on a client-server architecture. Therefor it needs\n" + "a port to communicate via Remote Method Invocation.\n" + "Error message of the bind command: \n" + "{1}."},
         {"server.already.running", "An instance of " + AS2ServerVersion.getProductName() + " seems to be already running.\nIt is also possible that the previous instance of the program did not exit correctly. If you are sure that no other instance is running\nplease delete the lock file \"{0}\" (start date {1}) and restart the server."},
         {"server.nohttp", "The integrated HTTP server has not been started." },
     };

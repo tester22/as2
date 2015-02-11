@@ -1,4 +1,4 @@
-//$Header: /as2/sqlscript/config/Update21to22.java 6     11.11.11 11:54 Heller $
+//$Header: /as2/sqlscript/config/Update21to22.java 7     18.05.12 11:17 Heller $
 package sqlscript.config;
 
 import de.mendelson.comm.as2.database.IUpdater;
@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
@@ -20,7 +21,7 @@ import java.util.ArrayList;
  *
  * Update the database from version21 to version 22: create secondary keys
  * @author S.Heller
- * @version $Revision: 6 $
+ * @version $Revision: 7 $
  * @since build 128
  */
 public class Update21to22 implements IUpdater {
@@ -40,7 +41,7 @@ public class Update21to22 implements IUpdater {
         //set new primary key for messages table
         Statement statement = connection.createStatement();
         ResultSet result = statement.executeQuery("SELECT messageid,COUNT(messageid)AS idcount FROM messages GROUP BY messageid HAVING(COUNT(messageid)>1)");
-        ArrayList<String> messageIdList = new ArrayList<String>();
+        List<String> messageIdList = new ArrayList<String>();
         while (result.next()) {
             messageIdList.add(result.getString("messageid"));
         }
@@ -48,8 +49,8 @@ public class Update21to22 implements IUpdater {
         statement.close();
         this.deleteDuplicateMessages(connection, messageIdList);
         statement = connection.createStatement();
-        statement.executeQuery("ALTER TABLE messages DROP COLUMN id");
-        statement.executeQuery("ALTER TABLE messages ADD PRIMARY KEY(messageid)");
+        statement.execute("ALTER TABLE messages DROP COLUMN id");
+        statement.execute("ALTER TABLE messages ADD PRIMARY KEY(messageid)");
         statement.close();
         statement = connection.createStatement();
         //find all unreferenced messagelog entries and delete them, then create a secondary key on the table
@@ -81,7 +82,7 @@ public class Update21to22 implements IUpdater {
         statement = connection.createStatement();
         ////find all unreferenced payload entries and delete them, then create a secondary key on the table
         result = statement.executeQuery("SELECT payload.messageid FROM payload LEFT OUTER JOIN messages ON (payload.messageid = messages.messageid) WHERE messages.messageid IS NULL");
-        ArrayList<String> payloadIdList = new ArrayList<String>();
+        List<String> payloadIdList = new ArrayList<String>();
         while (result.next()) {
             payloadIdList.add(result.getString("messageid"));
         }
@@ -103,14 +104,14 @@ public class Update21to22 implements IUpdater {
         }
         //add the secondary key
         statement = connection.createStatement();
-        statement.executeQuery("ALTER TABLE payload ADD COLUMN id INTEGER IDENTITY PRIMARY KEY");
+        statement.execute("ALTER TABLE payload ADD COLUMN id INTEGER IDENTITY PRIMARY KEY");
         statement.execute("ALTER TABLE payload ADD FOREIGN KEY(messageid)REFERENCES messages(messageid)");
         statement.close();
         this.success = true;
     }
 
     /**Deletes duplicate messageid entries from the database*/
-    private void deleteDuplicateMessages(Connection connection, ArrayList<String> messageIdList) throws SQLException {
+    private void deleteDuplicateMessages(Connection connection, List<String> messageIdList) throws SQLException {
         for (String messageId : messageIdList) {
             PreparedStatement statement = null;
             statement = connection.prepareStatement("DELETE FROM messages WHERE messageid=?");

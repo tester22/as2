@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/cem/CEMInitiator.java,v 1.1 2012/04/18 14:10:17 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/cem/CEMInitiator.java,v 1.1 2015/01/06 11:07:31 heller Exp $
 package de.mendelson.comm.as2.cem;
 
 import de.mendelson.comm.as2.cem.messages.EDIINTCertificateExchangeRequest;
@@ -6,24 +6,29 @@ import de.mendelson.comm.as2.cem.messages.EndEntity;
 import de.mendelson.comm.as2.cem.messages.TradingPartnerInfo;
 import de.mendelson.comm.as2.cem.messages.TrustRequest;
 import de.mendelson.comm.as2.cert.CertificateAccessDB;
-import de.mendelson.util.security.cert.CertificateManager;
-import de.mendelson.util.security.cert.KeystoreCertificate;
 import de.mendelson.comm.as2.message.AS2Message;
 import de.mendelson.comm.as2.message.AS2MessageCreation;
 import de.mendelson.comm.as2.message.AS2MessageInfo;
 import de.mendelson.comm.as2.message.AS2Payload;
 import de.mendelson.comm.as2.message.UniqueId;
 import de.mendelson.comm.as2.partner.Partner;
+import de.mendelson.comm.as2.partner.PartnerAccessDB;
+import de.mendelson.comm.as2.partner.PartnerSystem;
+import de.mendelson.comm.as2.partner.PartnerSystemAccessDB;
 import de.mendelson.comm.as2.sendorder.SendOrder;
 import de.mendelson.comm.as2.sendorder.SendOrderSender;
 import de.mendelson.comm.as2.server.AS2Server;
 import de.mendelson.util.AS2Tools;
 import de.mendelson.util.security.KeyStoreUtil;
+import de.mendelson.util.security.cert.CertificateManager;
+import de.mendelson.util.security.cert.KeystoreCertificate;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 /*
@@ -35,33 +40,80 @@ import java.util.logging.Logger;
  */
 /**
  * Initiates a CEM request
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
 public class CEMInitiator {
 
-    /**Logger to log inforamtion to*/
-    private Logger logger = Logger.getLogger(AS2Server.SERVER_LOGGER_NAME);
-    /**Connection to the database*/
-    private Connection configConnection = null;
-    private Connection runtimeConnection = null;
-    /**Stores the certificates*/
-    private CertificateManager certificateManagerEncSign;
-    /**Partner access*/
-    private CertificateAccessDB certificateAccess;
-
-    /** Creates new message I/O log and connects to localhost
-     *@param host host to connect to
+    /**
+     * Logger to log inforamtion to
      */
-    public CEMInitiator(Connection configConnection, Connection runtimeConnection, CertificateManager certificateManagerEncSign) {
+    private Logger logger = Logger.getLogger(AS2Server.SERVER_LOGGER_NAME);
+    /**
+     * Stores the certificates
+     */
+    private CertificateManager certificateManagerEncSign;
+    /**
+     * Partner access
+     */
+    private CertificateAccessDB certificateAccess;
+    private Connection configConnection;
+    private Connection runtimeConnection;
+
+    /**
+     * Creates new message I/O log and connects to localhost
+     *
+     * @param host host to connect to
+     */
+    public CEMInitiator(Connection configConnection,
+            Connection runtimeConnection, CertificateManager certificateManagerEncSign) {
         this.configConnection = configConnection;
         this.runtimeConnection = runtimeConnection;
         this.certificateManagerEncSign = certificateManagerEncSign;
         this.certificateAccess = new CertificateAccessDB(this.configConnection, this.runtimeConnection);
     }
 
-    /**Sends the request to the partner*/
-    public void sendRequest(Partner initiator, Partner receiver, KeystoreCertificate certificate,
+    /**
+     * Returns a list of partners that have bee informed by the requests
+     */
+    public List<Partner> sendRequests(Partner initiator, KeystoreCertificate certificate,
+            boolean encryptionUsage, boolean signatureUsage, boolean sslUsage, Date respondByDate)
+            throws Exception {
+        //get all partner that are CEM enabled
+        List<Partner> cemPartnerList = new ArrayList<Partner>();
+        PartnerAccessDB partnerAccess = new PartnerAccessDB(this.configConnection, this.runtimeConnection);
+        PartnerSystemAccessDB systemAccess = new PartnerSystemAccessDB(this.configConnection, this.runtimeConnection);
+        List<Partner> remotePartnerList = partnerAccess.getNonLocalStations();
+        for (Partner partner : remotePartnerList) {
+            PartnerSystem partnerSystem = systemAccess.getPartnerSystem(partner);
+            if (partnerSystem != null && partnerSystem.supportsCEM()) {
+                cemPartnerList.add(partner);
+            }
+        }
+        List<SendOrder> orderList = new ArrayList<SendOrder>();
+        for (Partner receiver : cemPartnerList) {
+            SendOrder sendOrder = this.createRequest(initiator, receiver, certificate, encryptionUsage, signatureUsage, sslUsage, respondByDate);
+            orderList.add(sendOrder);
+        }
+        for (SendOrder order : orderList) {
+            SendOrderSender orderSender = new SendOrderSender(this.configConnection, this.runtimeConnection);
+            orderSender.send(order);
+            //set the certificates as fallback to the partner
+            if (encryptionUsage) {
+                this.setCertificateToPartner(initiator, certificate, CEMEntry.CATEGORY_CRYPT, 2);
+            }
+            if (signatureUsage) {
+                this.setCertificateToPartner(initiator, certificate, CEMEntry.CATEGORY_SIGN, 2);
+            }
+        }
+        return (cemPartnerList);
+    }
+
+    /**
+     * Sends the request to the partner
+     */
+    private SendOrder createRequest(Partner initiator, Partner receiver, KeystoreCertificate certificate,
             boolean encryptionUsage, boolean signatureUsage, boolean sslUsage, Date respondByDate)
             throws Exception {
         EDIINTCertificateExchangeRequest request = new EDIINTCertificateExchangeRequest();
@@ -104,26 +156,20 @@ public class CEMInitiator {
         payloads[1] = payloadCert;
         //send the message
         AS2MessageCreation creation = new AS2MessageCreation(this.certificateManagerEncSign, this.certificateManagerEncSign);
-        AS2Message message = creation.createMessage(initiator, receiver, payloads, AS2Message.MESSAGETYPE_CEM);        
+        AS2Message message = creation.createMessage(initiator, receiver, payloads, AS2Message.MESSAGETYPE_CEM);
         SendOrder order = new SendOrder();
         order.setReceiver(receiver);
         order.setMessage(message);
-        order.setSender(initiator);        
-        SendOrderSender orderSender = new SendOrderSender(this.configConnection, this.runtimeConnection);
-        orderSender.send(order);
-        //set the certificates as fallback to the partner
-        if (encryptionUsage) {
-            this.setCertificateToPartner(initiator, certificate, CEMEntry.CATEGORY_CRYPT, 2);
-        }
-        if (signatureUsage) {
-            this.setCertificateToPartner(initiator, certificate, CEMEntry.CATEGORY_SIGN, 2);
-        }
+        order.setSender(initiator);
         //enter the request to the CEM table in the db
         CEMAccessDB cemAccess = new CEMAccessDB(this.configConnection, this.runtimeConnection);
-        cemAccess.insertRequest((AS2MessageInfo) message.getAS2Info(), initiator, receiver, request);
+        cemAccess.insertRequest((AS2MessageInfo) order.getMessage().getAS2Info(), initiator, order.getReceiver(), request);
+        return (order);
     }
 
-    /**Sets a certificate to a partner*/
+    /**
+     * Sets a certificate to a partner
+     */
     private void setCertificateToPartner(Partner partner, KeystoreCertificate certificate, int category, int prio) {
         partner.getPartnerCertificateInformationList().insertNewCertificate(certificate.getFingerPrintSHA1(), category, prio);
         this.certificateAccess.storePartnerCertificateInformationList(partner);

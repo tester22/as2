@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/AS2ServerVersion.java,v 1.1 2012/04/18 14:10:16 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/AS2ServerVersion.java,v 1.1 2015/01/06 11:07:29 heller Exp $
 package de.mendelson.comm.as2;
 
 import de.mendelson.Copyright;
@@ -38,11 +38,11 @@ public class AS2ServerVersion {
 
     /**Returns the internal build number*/
     public static int getBuildNo() {
-        return (39);
+        return (47);
     }
 
     /**returns the name of this product*/
-    public static final String getProductName() {
+    public static String getProductName() {
         return ("mendelson opensource AS2");
     }
 
@@ -51,7 +51,7 @@ public class AS2ServerVersion {
      *an auto update of the database is performed.
      */
     public static int getRequiredDBVersionConfig() {
-        return (35);
+        return (37);
     }
 
     /**The data base has a version. It is found in the column actualversion of the
@@ -59,7 +59,7 @@ public class AS2ServerVersion {
      *an auto update of the database is performed.
      */
     public static int getRequiredDBVersionRuntime() {
-        return (36);
+        return (39);
     }
 
     /**returns the short name of this product, return the full name if not such
@@ -71,7 +71,7 @@ public class AS2ServerVersion {
 
     /**Returns the date the package was last modified*/
     public static String getLastModificationDate() {
-        String fullDate = "$Date: 2012/04/18 14:10:16 $";
+        String fullDate = "$Date: 2015/01/06 11:07:29 $";
         return (fullDate.substring(fullDate.indexOf(":") + 1, fullDate.lastIndexOf("$")));
     }
 

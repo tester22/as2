@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/client/ResourceBundleAS2Gui.java,v 1.1 2012/04/18 14:10:23 heller Exp $ 
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/ResourceBundleAS2Gui.java,v 1.1 2015/01/06 11:07:37 heller Exp $ 
 package de.mendelson.comm.as2.client;
 
 import de.mendelson.util.MecResourceBundle;
@@ -26,6 +26,7 @@ public class ResourceBundleAS2Gui extends MecResourceBundle {
         {"menu.file", "File"},
         {"menu.file.exit", "Exit"},
         {"menu.file.partner", "Partner"},
+        {"menu.file.datasheet", "Create communication datasheet"},
         {"menu.file.certificates", "Certificates"},
         {"menu.file.certificate", "Certificates"},
         {"menu.file.certificate.signcrypt", "Certificates (sign, crypt)"},
@@ -39,6 +40,7 @@ public class ResourceBundleAS2Gui extends MecResourceBundle {
         {"menu.file.preferences", "Preferences"},
         {"menu.file.send", "Send file to partner"},
         {"menu.file.resend", "Send as new transaction"},
+        {"menu.file.resend.multiple", "Send as new transactions"},
         {"menu.help", "Help"},
         {"menu.help.about", "About"},
         {"menu.help.shop", "mendelson online shop"},
@@ -75,8 +77,9 @@ public class ResourceBundleAS2Gui extends MecResourceBundle {
         {"login.failed.client.incompatible.title", "Login rejected"},
         {"uploading.to.server", "Uploading to server"},
         {"refresh.overview", "Refreshing transaction list"},
-        {"resend.performed", "This transaction has been manually resend as a new transaction."},
+        {"resend.performed", "This transaction has been manually resend as a new transaction ([{0}])."},
         {"dialog.resend.message", "Do you really want to resend the data of the selected transaction?"},
+        {"dialog.resend.message.multiple", "Do you really want to resend the data of the selected {0} transactions?"},
         {"dialog.resend.title", "Transaction resend"},
     };
 }

@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/send/ResourceBundleHttpSendManager_de.java,v 1.1 2012/04/18 14:10:35 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/send/ResourceBundleHttpSendManager_de.java,v 1.1 2015/01/06 11:07:46 heller Exp $
 package de.mendelson.comm.as2.send;
 import de.mendelson.util.MecResourceBundle;
 /*
@@ -24,7 +24,6 @@ public class ResourceBundleHttpSendManager_de extends MecResourceBundle{
     /**List of messages in the specific language*/
     static final Object[][] contents = {
         {"queue.started", "Warteschlange für Sendeaufträge (Http/Https) gestartet." }, 
-        {"async.mdn.wait", "{0}: Warte auf asynchrone MDN bis {1}." },
     };
     
 }

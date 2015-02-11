@@ -1,15 +1,14 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/message/AS2MessageParser.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/AS2MessageParser.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
 import de.mendelson.comm.as2.AS2Exception;
 import de.mendelson.comm.as2.notification.Notification;
-import de.mendelson.util.security.cert.CertificateManager;
 import de.mendelson.comm.as2.partner.Partner;
 import de.mendelson.comm.as2.partner.PartnerAccessDB;
 import de.mendelson.util.AS2Tools;
 import de.mendelson.util.MecResourceBundle;
 import de.mendelson.util.security.BCCryptoHelper;
-import javax.mail.util.ByteArrayDataSource;
+import de.mendelson.util.security.cert.CertificateManager;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -39,12 +38,14 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
+import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.io.output.DeferredFileOutputStream;
-import org.bouncycastle.cms.RecipientId;
+import org.bouncycastle.cms.KeyTransRecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId;
+import org.bouncycastle.cms.jcajce.ZlibExpanderProvider;
 import org.bouncycastle.mail.smime.SMIMECompressed;
 import org.bouncycastle.mail.smime.SMIMEEnveloped;
 
@@ -57,13 +58,16 @@ import org.bouncycastle.mail.smime.SMIMEEnveloped;
  */
 /**
  * Analyzes and builds AS2 messages
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
 public class AS2MessageParser {
 
     private Logger logger = null;
-    /**Access to all certificates*/
+    /**
+     * Access to all certificates
+     */
     private CertificateManager certificateManagerSignature;
     private CertificateManager certificateManagerEncryption;
     private MecResourceBundle rb = null;
@@ -85,25 +89,33 @@ public class AS2MessageParser {
         }
     }
 
-    /**Passes the certificate manager to this class*/
+    /**
+     * Passes the certificate manager to this class
+     */
     public void setCertificateManager(CertificateManager certificateManagerSignature, CertificateManager certificateManagerEncryption) {
         this.certificateManagerEncryption = certificateManagerEncryption;
         this.certificateManagerSignature = certificateManagerSignature;
     }
 
-    /**Passes a db connection to this class*/
+    /**
+     * Passes a db connection to this class
+     */
     public void setDBConnection(Connection configConnection, Connection runtimeConnection) {
         this.configConnection = configConnection;
         this.runtimeConnection = runtimeConnection;
     }
 
-    /**Passes a logger to this class*/
+    /**
+     * Passes a logger to this class
+     */
     public void setLogger(Logger logger) {
         this.logger = logger;
     }
 
-    /**Unescapes the AS2-TO and AS2-FROM headers in receiver direction, related to
-     * RFC 4130 section 6.2
+    /**
+     * Unescapes the AS2-TO and AS2-FROM headers in receiver direction, related
+     * to RFC 4130 section 6.2
+     *
      * @param identification as2-from or as2-to value to unescape
      * @return unescaped value
      */
@@ -132,7 +144,9 @@ public class AS2MessageParser {
         return (builder.toString());
     }
 
-    /**Displays a bundle of byte arrays as hex string, for debug purpose only*/
+    /**
+     * Displays a bundle of byte arrays as hex string, for debug purpose only
+     */
     private String toHexDisplay(byte[] data) {
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < data.length; i++) {
@@ -142,7 +156,9 @@ public class AS2MessageParser {
         return result.toString();
     }
 
-    /**Uncompresses message data*/
+    /**
+     * Uncompresses message data
+     */
     public byte[] decompressData(AS2MessageInfo info, byte[] data, String contentType) throws Exception {
         MimeBodyPart compressedPart = new MimeBodyPart();
         compressedPart.setDataHandler(new DataHandler(new ByteArrayDataSource(data, contentType)));
@@ -150,9 +166,11 @@ public class AS2MessageParser {
         return (this.decompressData(info, new SMIMECompressed(compressedPart), compressedPart.getSize()));
     }
 
-    /**Uncompresses message data*/
+    /**
+     * Uncompresses message data
+     */
     public byte[] decompressData(AS2MessageInfo info, SMIMECompressed compressed, long compressedSize) throws Exception {
-        byte[] decompressedData = compressed.getContent();
+        byte[] decompressedData = compressed.getContent(new ZlibExpanderProvider());
         info.setCompressionType(AS2Message.COMPRESSION_ZLIB);
         if (this.logger != null) {
             this.logger.log(Level.INFO, this.rb.getResourceString("data.compressed.expanded",
@@ -164,18 +182,27 @@ public class AS2MessageParser {
         return (decompressedData);
     }
 
-    /**Decodes data by its content transfer encoding and returns it*/
+    /**
+     * Decodes data by its content transfer encoding and returns it
+     */
     private byte[] decodeContentTransferEncoding(byte[] encodedData, String contentTransferEncoding) throws Exception {
-        ByteArrayInputStream bais = new ByteArrayInputStream(encodedData);
-        InputStream b64is = MimeUtility.decode(bais, contentTransferEncoding);
-        byte[] tmp = new byte[encodedData.length];
-        int n = b64is.read(tmp);
-        byte[] res = new byte[n];
-        System.arraycopy(tmp, 0, res, 0, n);
-        return res;
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(encodedData);
+            InputStream b64is = MimeUtility.decode(bais, contentTransferEncoding);
+            byte[] tmp = new byte[encodedData.length];
+            int n = b64is.read(tmp);
+            byte[] res = new byte[n];
+            System.arraycopy(tmp, 0, res, 0, n);
+            return res;
+        } catch (Exception e) {
+            this.logger.log(Level.SEVERE, this.rb.getResourceString("data.unable.to.process.content.transfer.encoding", contentTransferEncoding));
+            throw e;
+        }
     }
 
-    /**If a content transfer encoding is set this will decode the data*/
+    /**
+     * If a content transfer encoding is set this will decode the data
+     */
     private byte[] processContentTransferEncoding(byte[] data, Properties header) throws Exception {
         if (!header.containsKey("content-transfer-encoding")) {
             //no content transfer encoding set: the AS2 default is "binary" in this case (NOT 7bit!), binary
@@ -183,7 +210,8 @@ public class AS2MessageParser {
             return (data);
         } else {
             String transferEncoding = header.getProperty("content-transfer-encoding");
-            return (this.decodeContentTransferEncoding(data, transferEncoding));
+            byte[] decodedData = this.decodeContentTransferEncoding(data, transferEncoding);
+            return (decodedData);
         }
     }
 
@@ -234,14 +262,14 @@ public class AS2MessageParser {
                 if (this.logger != null) {
                     this.logger.log(Level.SEVERE,
                             this.rb.getResourceString("mdn.state",
-                            new Object[]{
-                                mdnInfo.getMessageId(), mdnParser.getDispositionState()
-                            }), relatedMessageInfo);
+                                    new Object[]{
+                                        mdnInfo.getMessageId(), mdnParser.getDispositionState()
+                                    }), relatedMessageInfo);
                     this.logger.log(Level.SEVERE,
                             this.rb.getResourceString("mdn.details",
-                            new Object[]{
-                                mdnInfo.getMessageId(), mdnParser.getMdnDetails()
-                            }), relatedMessageInfo);
+                                    new Object[]{
+                                        mdnInfo.getMessageId(), mdnParser.getMdnDetails()
+                                    }), relatedMessageInfo);
                 }
                 mdnInfo.setState(AS2Message.STATE_STOPPED);
                 mdnInfo.setRemoteMDNText("[" + mdnParser.getDispositionState() + "] " + mdnParser.getMdnDetails());
@@ -256,14 +284,14 @@ public class AS2MessageParser {
                 if (this.logger != null) {
                     this.logger.log(Level.FINE,
                             this.rb.getResourceString("mdn.state",
-                            new Object[]{
-                                mdnInfo.getMessageId(), mdnParser.getDispositionState()
-                            }), relatedMessageInfo);
+                                    new Object[]{
+                                        mdnInfo.getMessageId(), mdnParser.getDispositionState()
+                                    }), relatedMessageInfo);
                     this.logger.log(Level.FINE,
                             this.rb.getResourceString("mdn.details",
-                            new Object[]{
-                                mdnInfo.getMessageId(), mdnParser.getMdnDetails()
-                            }), relatedMessageInfo);
+                                    new Object[]{
+                                        mdnInfo.getMessageId(), mdnParser.getMdnDetails()
+                                    }), relatedMessageInfo);
                 }
                 mdnInfo.setState(AS2Message.STATE_FINISHED);
                 mdnInfo.setRemoteMDNText("[" + mdnParser.getDispositionState() + "] " + mdnParser.getMdnDetails());
@@ -307,7 +335,8 @@ public class AS2MessageParser {
         return (message);
     }
 
-    /**Analyzes and creates passed message data
+    /**
+     * Analyzes and creates passed message data
      */
     public AS2Message createMessageFromRequest(byte[] rawMessageData, Properties header, String contentType) throws AS2Exception {
         AS2Message message = new AS2Message(new AS2MessageInfo());
@@ -317,7 +346,12 @@ public class AS2MessageParser {
         }
         try {
             //decode the content transfer encoding if set
-            rawMessageData = this.processContentTransferEncoding(rawMessageData, header);
+            try {
+                rawMessageData = this.processContentTransferEncoding(rawMessageData, header);
+            } catch (Exception e) {
+                message.getAS2Info().setMessageId("UNKNOWN");
+                throw e;
+            }
             //check if this is a MDN
             MDNParser mdnParser = new MDNParser();
             AS2MDNInfo mdnInfo = mdnParser.parseMDNData(rawMessageData, contentType);
@@ -337,7 +371,10 @@ public class AS2MessageParser {
                 //figure out if the MDN should be signed NOW. If an error occurs beyond this point
                 //the info has to know if the returned MDN should be signed
                 messageInfo.getDispositionNotificationOptions().setHeaderValue(
-                        header.getProperty("disposition-notification-options"));                
+                        header.getProperty("disposition-notification-options"));
+                //indicates if a sync or async mdn is requested as answer
+                messageInfo.setAsyncMDNURL(header.getProperty("receipt-delivery-option"));
+                messageInfo.setRequestsSyncMDN(header.getProperty("receipt-delivery-option") == null || header.getProperty("receipt-delivery-option").trim().length() == 0);
                 //check for existing partners
                 PartnerAccessDB partnerAccess = new PartnerAccessDB(this.configConnection, this.runtimeConnection);
                 Partner sender = partnerAccess.getPartner(messageInfo.getSenderId());
@@ -355,13 +392,21 @@ public class AS2MessageParser {
                             "The receiver of the message (" + receiver.getAS2Identification() + ") is not defined as a local station.",
                             message);
                 }
-                MessageAccessDB messageAccess = new MessageAccessDB(this.configConnection, this.runtimeConnection);                
+                MessageAccessDB messageAccess = new MessageAccessDB(this.configConnection, this.runtimeConnection);
                 //check if the message already exists
                 AS2MessageInfo alreadyExistingInfo = this.messageAlreadyExists(messageAccess, messageInfo.getMessageId());
-                if( alreadyExistingInfo != null ){
+                if (alreadyExistingInfo != null) {
                     //perform notification: Resend detected, manual interaction might be required
                     Notification notification = new Notification(this.configConnection, this.runtimeConnection);
                     notification.sendResendDetected(messageInfo, alreadyExistingInfo, sender, receiver);
+                    if (this.logger != null) {
+                        //do not log before because the logging process is related to an already created message in the transaction log
+                        this.logger.log(Level.FINE, this.rb.getResourceString("msg.incoming",
+                                new Object[]{
+                                    messageInfo.getMessageId(),
+                                    AS2Tools.getDataSizeDisplay(rawMessageData.length)
+                                }), messageInfo);
+                    }
                     throw new AS2Exception(
                             AS2Exception.PROCESSING_ERROR,
                             "An AS2 message with the message id " + messageInfo.getMessageId()
@@ -370,7 +415,7 @@ public class AS2MessageParser {
                             + " resubmit the message with a new message id instead or resending it if it should be processed again.",
                             new AS2Message(messageInfo));
                 }
-                messageAccess.initializeOrUpdateMessage(messageInfo);      
+                messageAccess.initializeOrUpdateMessage(messageInfo);
                 if (this.logger != null) {
                     //do not log before because the logging process is related to an already created message in the transaction log
                     this.logger.log(Level.FINE, this.rb.getResourceString("msg.incoming",
@@ -378,11 +423,8 @@ public class AS2MessageParser {
                                 messageInfo.getMessageId(),
                                 AS2Tools.getDataSizeDisplay(rawMessageData.length)
                             }), messageInfo);
-                }
-                //indicates if a sync or async mdn is requested
-                messageInfo.setAsyncMDNURL(header.getProperty("receipt-delivery-option"));
-                messageInfo.setRequestsSyncMDN(header.getProperty("receipt-delivery-option") == null || header.getProperty("receipt-delivery-option").trim().length() == 0);
-                message.setRawData(rawMessageData);                
+                }                
+                message.setRawData(rawMessageData);
                 byte[] decryptedData = this.decryptMessage(message, rawMessageData, contentType, sender, receiver);
                 //may be already compressed here. Decompress first before going further
                 if (this.contentTypeIndicatesCompression(contentType)) {
@@ -445,6 +487,7 @@ public class AS2MessageParser {
                 return (message);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             if (e instanceof AS2Exception) {
                 throw (AS2Exception) e;
             } else {
@@ -456,24 +499,27 @@ public class AS2MessageParser {
 
     /**
      * Sending implementations MUST be capable of configuring a maximum number
-    of retries, and MUST stop retrying either when a successful send
-    occurs or when the total retry number is reached.
+     * of retries, and MUST stop retrying either when a successful send occurs
+     * or when the total retry number is reached.
+     *
      * @return
      */
     private AS2MessageInfo messageAlreadyExists(MessageAccessDB messageAccess, String messageId) {
         List<AS2MessageInfo> infos = messageAccess.getMessageOverview(messageId);
-        if( infos != null && !infos.isEmpty()){
-            return( infos.get(0));
+        if (infos != null && !infos.isEmpty()) {
+            return (infos.get(0));
         }
-        return( null);
+        return (null);
     }
 
-    /**Checks if the received content mic matches the send message mic. The content mic field is optional if
-     * the MDN is unsigned, see RFC 4130 section 7.4.3:
-     * The "Received-content-MIC" extension field is set when the integrity of the received
-     * message is verified. The MIC is the base64-encoded message-digest computed over the
-     * received message with a hash function. This field is required for signed receipts but
-     * optional for unsigned receipts.
+    /**
+     * Checks if the received content mic matches the send message mic. The
+     * content mic field is optional if the MDN is unsigned, see RFC 4130
+     * section 7.4.3: The "Received-content-MIC" extension field is set when the
+     * integrity of the received message is verified. The MIC is the
+     * base64-encoded message-digest computed over the received message with a
+     * hash function. This field is required for signed receipts but optional
+     * for unsigned receipts.
      */
     private void checkMDNReceivedContentMIC(AS2MDNInfo mdnMessageInfo) throws AS2Exception {
         //ignore this check if the received content mic has not been set in the MDN and the MDN is unsigned
@@ -487,18 +533,18 @@ public class AS2MessageParser {
             if (this.logger != null) {
                 this.logger.log(Level.INFO,
                         this.rb.getResourceString("contentmic.match",
-                        new Object[]{
-                            mdnMessageInfo.getMessageId()}), relatedMessageInfo);
+                                new Object[]{
+                                    mdnMessageInfo.getMessageId()}), relatedMessageInfo);
             }
         } else {
             if (this.logger != null) {
                 this.logger.log(Level.INFO,
                         this.rb.getResourceString("contentmic.failure",
-                        new Object[]{
-                            mdnMessageInfo.getMessageId(),
-                            relatedMessageInfo.getReceivedContentMIC(),
-                            mdnMessageInfo.getReceivedContentMIC()
-                        }), relatedMessageInfo);
+                                new Object[]{
+                                    mdnMessageInfo.getMessageId(),
+                                    relatedMessageInfo.getReceivedContentMIC(),
+                                    mdnMessageInfo.getReceivedContentMIC()
+                                }), relatedMessageInfo);
             }
             //uncomment for ERROR if mic does not match
 //            throw new AS2Exception(AS2Exception.INTEGRITY_ERROR,
@@ -511,8 +557,9 @@ public class AS2MessageParser {
         }
     }
 
-    /**Writes a passed payload data to the passed message object. Could be called from either the MDN
-     * processing or the message processing
+    /**
+     * Writes a passed payload data to the passed message object. Could be
+     * called from either the MDN processing or the message processing
      */
     public void writePayloadsToMessage(byte[] data, AS2Message message, Properties header) throws Exception {
         ByteArrayOutputStream payloadOut = new ByteArrayOutputStream();
@@ -578,7 +625,8 @@ public class AS2MessageParser {
         message.addPayload(as2Payload);
     }
 
-    /**Writes a passed payload part to the passed message object. 
+    /**
+     * Writes a passed payload part to the passed message object.
      */
     public void writePayloadsToMessage(Part payloadPart, AS2Message message, Properties header) throws Exception {
         List<Part> attachmentList = new ArrayList<Part>();
@@ -667,7 +715,9 @@ public class AS2MessageParser {
         }
     }
 
-    /**Computes the received content MIC and writes it to the message info object
+    /**
+     * Computes the received content MIC and writes it to the message info
+     * object
      */
     public void computeReceivedContentMIC(byte[] rawMessageData, AS2Message message, Part partWithHeader, String contentType) throws Exception {
         AS2MessageInfo messageInfo = (AS2MessageInfo) message.getAS2Info();
@@ -699,7 +749,20 @@ public class AS2MessageParser {
             MimeBodyPart signedPart = new MimeBodyPart();
             signedPart.setDataHandler(new DataHandler(new ByteArrayDataSource(message.getDecryptedRawData(), contentType)));
             signedPart.setHeader("Content-Type", singedPartContentType);
-            String digestOID = helper.getDigestAlgOIDFromSignature(signedPart);
+            int digest = messageInfo.getDispositionNotificationOptions().getPreferredSignatureAlgorithm();
+            String digestStr = BCCryptoHelper.ALGORITHM_SHA1;
+            if (digest == AS2Message.SIGNATURE_MD5) {
+                digestStr = BCCryptoHelper.ALGORITHM_MD5;
+            } else if (digest == AS2Message.SIGNATURE_SHA1) {
+                digestStr = BCCryptoHelper.ALGORITHM_SHA1;
+            } else if (digest == AS2Message.SIGNATURE_SHA256) {
+                digestStr = BCCryptoHelper.ALGORITHM_SHA256;
+            } else if (digest == AS2Message.SIGNATURE_SHA384) {
+                digestStr = BCCryptoHelper.ALGORITHM_SHA384;
+            } else if (digest == AS2Message.SIGNATURE_SHA512) {
+                digestStr = BCCryptoHelper.ALGORITHM_SHA512;
+            }
+            String digestOID = helper.convertAlgorithmNameToOID(digestStr);
             signedPart = null;
             String mic = helper.calculateMIC(partWithHeader, digestOID);
             String digestAlgorithmName = helper.convertOIDToAlgorithmName(digestOID);
@@ -711,8 +774,8 @@ public class AS2MessageParser {
             //For unsigned, unencrypted messages, the MIC is calculated
             //over the uncompressed data content including all MIME header
             //fields and any applied Content-Transfer-Encoding.
-            String mic = helper.calculateMIC(rawMessageData, sha1digestOID);
-            messageInfo.setReceivedContentMIC(mic + ", sha1");
+            String mic = helper.calculateMIC(new ByteArrayInputStream(rawMessageData), sha1digestOID);
+            messageInfo.setReceivedContentMIC(mic + ", " + BCCryptoHelper.ALGORITHM_SHA1);
         } else if (!signed && compressed && !encrypted) {
             //compressed, unencrypted, unsigned: uncompressed data mic
             //http://tools.ietf.org/html/draft-ietf-ediint-compression-12
@@ -720,25 +783,42 @@ public class AS2MessageParser {
             //For unsigned, unencrypted messages, the MIC is calculated
             //over the uncompressed data content including all MIME header
             //fields and any applied Content-Transfer-Encoding.
-            String mic = helper.calculateMIC(message.getDecryptedRawData(), sha1digestOID);
-            messageInfo.setReceivedContentMIC(mic + ", sha1");
+            InputStream dataStream = null;
+            try {
+                dataStream = message.getDecryptedRawDataInputStream();
+                String mic = helper.calculateMIC(dataStream, sha1digestOID);
+                messageInfo.setReceivedContentMIC(mic + ", " + BCCryptoHelper.ALGORITHM_SHA1);
+            } finally {
+                if (dataStream != null) {
+                    dataStream.close();
+                }
+            }
         } else if (!signed && encrypted) {
             //http://tools.ietf.org/html/draft-ietf-ediint-compression-12
             //4.2 MIC Calculation For Encrypted, Unsigned Message
             //For encrypted, unsigned messages, the MIC to be returned is
             //calculated over the uncompressed data content including all
             //MIME header fields and any applied Content-Transfer-Encoding.
-            String mic = helper.calculateMIC(message.getDecryptedRawData(), sha1digestOID);
-            messageInfo.setReceivedContentMIC(mic + ", sha1");
+            InputStream dataStream = null;
+            try {
+                dataStream = message.getDecryptedRawDataInputStream();
+                String mic = helper.calculateMIC(dataStream, sha1digestOID);
+                messageInfo.setReceivedContentMIC(mic + ", " + BCCryptoHelper.ALGORITHM_SHA1);
+            } finally {
+                if (dataStream != null) {
+                    dataStream.close();
+                }
+            }
         } else {
             //this should never happen:
             String mic = helper.calculateMIC(partWithHeader, sha1digestOID);
-            messageInfo.setReceivedContentMIC(mic + ", sha1");
+            messageInfo.setReceivedContentMIC(mic + ", " + BCCryptoHelper.ALGORITHM_SHA1);
         }
     }
 
-    /**Returns a compressed part of this container if it exists, else null. If the container itself
-     *is compressed it is returned.
+    /**
+     * Returns a compressed part of this container if it exists, else null. If
+     * the container itself is compressed it is returned.
      */
     public Part getCompressedEmbeddedPart(Part part) throws MessagingException, IOException {
         if (this.contentTypeIndicatesCompression(part.getContentType())) {
@@ -758,17 +838,37 @@ public class AS2MessageParser {
         return (null);
     }
 
-    /**Returns the signed part of the passed data or null if the data is not detected to be signed*/
+    /**
+     * Returns the signed part of the passed data or null if the data is not
+     * detected to be signed
+     */
     public Part getSignedPart(byte[] data, String contentType) throws Exception {
+        return (this.getSignedPart(new ByteArrayInputStream(data), contentType));
+    }
+
+    /**
+     * Returns the signed part of the passed data or null if the data is not
+     * detected to be signed
+     */
+    public Part getSignedPart(InputStream dataStream, String contentType) throws Exception {
         BCCryptoHelper helper = new BCCryptoHelper();
         MimeBodyPart possibleSignedPart = new MimeBodyPart();
-        possibleSignedPart.setDataHandler(new DataHandler(new ByteArrayDataSource(data, contentType)));
+        possibleSignedPart.setDataHandler(new DataHandler(new ByteArrayDataSource(dataStream, contentType)));
         possibleSignedPart.setHeader("content-type", contentType);
         return (helper.getSignedEmbeddedPart(possibleSignedPart));
     }
 
-    /**Verifies the signature of the passed signed part*/
+    /**
+     * Verifies the signature of the passed signed part
+     */
     public MimeBodyPart verifySignedPart(Part signedPart, byte[] data, String contentType, X509Certificate certificate) throws Exception {
+        return (this.verifySignedPart(signedPart, new ByteArrayInputStream(data), contentType, certificate));
+    }
+
+    /**
+     * Verifies the signature of the passed signed part
+     */
+    public MimeBodyPart verifySignedPart(Part signedPart, InputStream dataInputStream, String contentType, X509Certificate certificate) throws Exception {
         BCCryptoHelper helper = new BCCryptoHelper();
         String signatureTransferEncoding = null;
         MimeMultipart checkPart = (MimeMultipart) signedPart.getContent();
@@ -776,8 +876,7 @@ public class AS2MessageParser {
         //parser has problems parsing it. Don't know why sometimes a parsing fails for
         //MimeBodyPart. This check looks if the parser is able to find more than one subpart
         if (checkPart.getCount() == 1) {
-            MimeMultipart multipart = new MimeMultipart(
-                    new ByteArrayDataSource(data, contentType));
+            MimeMultipart multipart = new MimeMultipart(new ByteArrayDataSource(dataInputStream, contentType));
             MimeMessage possibleSignedMessage = new MimeMessage(Session.getInstance(System.getProperties(), null));
             possibleSignedMessage.setContent(multipart, multipart.getContentType());
             possibleSignedMessage.saveChanges();
@@ -794,13 +893,16 @@ public class AS2MessageParser {
         return (helper.verify(signedPart, signatureTransferEncoding, certificate));
     }
 
-    /**Verifies the signature of the passed message. If the transfer mode is unencrypted/unsigned, a new Bodypart will be constructed
-     *@return the payload part, this is important to compute the MIC later
+    /**
+     * Verifies the signature of the passed message. If the transfer mode is
+     * unencrypted/unsigned, a new Bodypart will be constructed
+     *
+     * @return the payload part, this is important to compute the MIC later
      */
     private Part verifySignature(AS2Message message, Partner sender, String contentType) throws Exception {
         if (this.certificateManagerSignature == null) {
             throw new AS2Exception(AS2Exception.PROCESSING_ERROR,
-                    "AS2MessageParser.verifySignature: pass a certification manager for the signature before calling verifySignature()", message);
+                    "AS2MessageParser.verifySignature: Pass a certification manager for the signature before calling verifySignature()", message);
         }
         AS2Info as2Info = message.getAS2Info();
         if (!as2Info.isMDN()) {
@@ -813,6 +915,15 @@ public class AS2MessageParser {
             }
         }
         Part signedPart = this.getSignedPart(message.getDecryptedRawData(), contentType);
+        InputStream dataStream = null;
+        try {
+            dataStream = message.getDecryptedRawDataInputStream();
+            signedPart = this.getSignedPart(dataStream, contentType);
+        } finally {
+            if (dataStream != null) {
+                dataStream.close();
+            }
+        }
         //part is NOT signed but is defined to be signed
         if (signedPart == null) {
             as2Info.setSignType(AS2Message.SIGNATURE_NONE);
@@ -862,15 +973,23 @@ public class AS2MessageParser {
                 int signDigest = this.getDigestFromSignature(signedPart);
                 String digest = null;
                 if (signDigest == AS2Message.SIGNATURE_SHA1) {
-                    digest = "SHA1";
+                    digest = BCCryptoHelper.ALGORITHM_SHA1;
                 } else if (signDigest == AS2Message.SIGNATURE_MD5) {
-                    digest = "MD5";
+                    digest = BCCryptoHelper.ALGORITHM_MD5;
+                } else if (signDigest == AS2Message.SIGNATURE_SHA224) {
+                    digest = BCCryptoHelper.ALGORITHM_SHA224;
+                } else if (signDigest == AS2Message.SIGNATURE_SHA256) {
+                    digest = BCCryptoHelper.ALGORITHM_SHA256;
+                } else if (signDigest == AS2Message.SIGNATURE_SHA384) {
+                    digest = BCCryptoHelper.ALGORITHM_SHA384;
+                } else if (signDigest == AS2Message.SIGNATURE_SHA512) {
+                    digest = BCCryptoHelper.ALGORITHM_SHA512;
                 }
                 as2Info.setSignType(signDigest);
                 if (this.logger != null) {
                     this.logger.log(Level.INFO, this.rb.getResourceString("signature.analyzed.digest",
                             new Object[]{
-                                as2Info.getMessageId(), digest
+                                as2Info.getMessageId(), digest.toUpperCase()
                             }), as2Info);
                 }
             }
@@ -901,8 +1020,10 @@ public class AS2MessageParser {
         }
         X509Certificate certificate = this.certificateManagerSignature.getX509Certificate(alias);
         MimeBodyPart payloadPart = null;
+        InputStream dataStream = null;
         try {
-            payloadPart = this.verifySignedPart(signedPart, message.getDecryptedRawData(), contentType, certificate);
+            dataStream = message.getDecryptedRawDataInputStream();
+            payloadPart = this.verifySignedPart(signedPart, dataStream, contentType, certificate);
         } catch (Exception e) {
             if (this.logger != null) {
                 this.logger.log(Level.INFO, this.rb.getResourceString("signature.failure",
@@ -914,6 +1035,14 @@ public class AS2MessageParser {
             throw new AS2Exception(AS2Exception.AUTHENTIFICATION_ERROR,
                     "Error verifying the senders digital signature: " + e.getMessage() + ".",
                     message);
+        } finally {
+            if (dataStream != null) {
+                try {
+                    dataStream.close();
+                } catch (Exception e) {
+                    //nop
+                }
+            }
         }
         if (this.logger != null) {
             this.logger.log(Level.INFO, this.rb.getResourceString("signature.ok", info.getMessageId()), info);
@@ -930,26 +1059,40 @@ public class AS2MessageParser {
         String as2Digest = helper.convertOIDToAlgorithmName(digestOID);
         if (as2Digest.equalsIgnoreCase(BCCryptoHelper.ALGORITHM_SHA1)) {
             return (AS2Message.SIGNATURE_SHA1);
-        }
-        if (as2Digest.equalsIgnoreCase(BCCryptoHelper.ALGORITHM_MD5)) {
+        } else if (as2Digest.equalsIgnoreCase(BCCryptoHelper.ALGORITHM_MD5)) {
             return (AS2Message.SIGNATURE_MD5);
+        } else if (as2Digest.equalsIgnoreCase(BCCryptoHelper.ALGORITHM_SHA224)) {
+            return (AS2Message.SIGNATURE_SHA224);
+        } else if (as2Digest.equalsIgnoreCase(BCCryptoHelper.ALGORITHM_SHA256)) {
+            return (AS2Message.SIGNATURE_SHA256);
+        } else if (as2Digest.equalsIgnoreCase(BCCryptoHelper.ALGORITHM_SHA384)) {
+            return (AS2Message.SIGNATURE_SHA384);
+        } else if (as2Digest.equalsIgnoreCase(BCCryptoHelper.ALGORITHM_SHA512)) {
+            return (AS2Message.SIGNATURE_SHA512);
         }
         //should never happen because unknown algorithms are thrown already by the conversion method
-        return (-1);
+        throw new Exception("Unable to get digest from signature: Found unsupported digest");
     }
 
-    /**Returns if the content type indicates a message encryption*/
+    /**
+     * Returns if the content type indicates a message encryption
+     */
     public boolean contentTypeIndicatesEncryption(String contentType) {
         return (contentType.toLowerCase().contains("application/pkcs7-mime"));
     }
 
-    /**Returns if the content type indicates message compression*/
+    /**
+     * Returns if the content type indicates message compression
+     */
     public boolean contentTypeIndicatesCompression(String contentType) {
         return (contentType.toLowerCase().contains("compressed-data"));
     }
 
-    /**Decrypts the data of a message with all given certificates etc
-     * @param info MessageInfo, the encryption algorith will be stored in the encryption type of this info
+    /**
+     * Decrypts the data of a message with all given certificates etc
+     *
+     * @param info MessageInfo, the encryption algorith will be stored in the
+     * encryption type of this info
      * @param rawMessageData encrypted data, will be decrypted
      * @param contentType contentType of the data
      * @param privateKey receivers private key
@@ -960,7 +1103,7 @@ public class AS2MessageParser {
         MimeBodyPart encryptedBody = new MimeBodyPart();
         encryptedBody.setHeader("content-type", contentType);
         encryptedBody.setDataHandler(new DataHandler(new ByteArrayDataSource(data, contentType)));
-        RecipientId recipientId = new JceKeyTransRecipientId(certificateReceiver);
+        JceKeyTransRecipientId recipientId = new JceKeyTransRecipientId(certificateReceiver);
         SMIMEEnveloped enveloped = new SMIMEEnveloped(encryptedBody);
         BCCryptoHelper helper = new BCCryptoHelper();
         String algorithm = helper.convertOIDToAlgorithmName(enveloped.getEncryptionAlgOID());
@@ -995,7 +1138,7 @@ public class AS2MessageParser {
                     this.logger.log(Level.SEVERE, this.rb.getResourceString("decryption.inforequired",
                             new Object[]{
                                 info.getMessageId(),
-                                recipientInfo.getRID()
+                                ((KeyTransRecipientId) recipientInfo.getRID()).getIssuer() + ", " + ((KeyTransRecipientId) recipientInfo.getRID()).getSerialNumber()
                             }),
                             info);
                 }
@@ -1005,7 +1148,7 @@ public class AS2MessageParser {
                         new Object[]{
                             info.getMessageId(),
                             receiverCryptAlias,
-                            recipientId
+                            recipientId.getIssuer() + ", " + recipientId.getSerialNumber()
                         }),
                         info);
             }
@@ -1049,13 +1192,14 @@ public class AS2MessageParser {
         return (decryptedData);
     }
 
-    /**Decrypts the passed data and returns it. Will return the original data
-     *if it is not marked as encrypted
+    /**
+     * Decrypts the passed data and returns it. Will return the original data if
+     * it is not marked as encrypted
      */
     private byte[] decryptMessage(AS2Message message, byte[] data, String contentType, Partner sender, Partner receiver) throws AS2Exception {
         if (this.certificateManagerEncryption == null) {
             throw new AS2Exception(AS2Exception.PROCESSING_ERROR,
-                    "AS2MessageParser.decryptMessage: pass a certification manager for the encryption before calling decryptMessage()", message);
+                    "AS2MessageParser.decryptMessage: Pass a certification manager for the encryption before calling decryptMessage()", message);
         }
         try {
             AS2MessageInfo info = (AS2MessageInfo) message.getAS2Info();
@@ -1103,7 +1247,8 @@ public class AS2MessageParser {
         }
     }
 
-    /**Looks if the data is compressed and decompresses it if necessary
+    /**
+     * Looks if the data is compressed and decompresses it if necessary
      */
     public Part decompressData(Part part, AS2Message message) throws Exception {
         Part compressedPart = this.getCompressedEmbeddedPart(part);
@@ -1116,7 +1261,7 @@ public class AS2MessageParser {
         } else {
             compressed = new SMIMECompressed((MimeMessage) compressedPart);
         }
-        byte[] decompressedData = compressed.getContent();
+        byte[] decompressedData = compressed.getContent(new ZlibExpanderProvider());
         ((AS2MessageInfo) message.getAS2Info()).setCompressionType(AS2Message.COMPRESSION_ZLIB);
         if (this.logger != null) {
             this.logger.log(Level.INFO, this.rb.getResourceString("data.compressed.expanded",
@@ -1131,12 +1276,14 @@ public class AS2MessageParser {
         return (uncompressedPayload);
     }
 
-    /**Copies all data from one stream to another*/
+    /**
+     * Copies all data from one stream to another
+     */
     private void copyStreams(InputStream in, OutputStream out) throws IOException {
         BufferedInputStream inStream = new BufferedInputStream(in);
         BufferedOutputStream outStream = new BufferedOutputStream(out);
         //copy the contents to an output stream
-        byte[] buffer = new byte[2048];
+        byte[] buffer = new byte[4096];
         int read = 0;
         //a read of 0 must be allowed, sometimes it takes time to
         //extract data from the input

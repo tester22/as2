@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/client/ResourceBundleAS2Gui_de.java,v 1.1 2012/04/18 14:10:23 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/ResourceBundleAS2Gui_de.java,v 1.1 2015/01/06 11:07:37 heller Exp $
 package de.mendelson.comm.as2.client;
 
 import de.mendelson.util.MecResourceBundle;
@@ -26,6 +26,7 @@ public class ResourceBundleAS2Gui_de extends MecResourceBundle {
         {"menu.file", "Datei"},
         {"menu.file.exit", "Beenden"},
         {"menu.file.partner", "Partner"},
+        {"menu.file.datasheet", "Datenblatt für Anbindung"},        
         {"menu.file.certificates", "Zertifikate"},
         {"menu.file.certificate", "Zertifikate"},
         {"menu.file.certificate.signcrypt", "Zertifikate (Signatur, Verschlüsselung)"},
@@ -35,6 +36,7 @@ public class ResourceBundleAS2Gui_de extends MecResourceBundle {
         {"menu.file.preferences", "Einstellungen"},
         {"menu.file.send", "Datei an Partner versenden"},
         {"menu.file.resend", "Als neue Transaktion versenden"},
+        {"menu.file.resend.multiple", "Als neue Transaktionen versenden"},
         {"menu.file.statistic", "Statistik"},
         {"menu.file.quota", "Kontingente"},
         {"menu.file.export", "Konfiguration exportieren"},
@@ -75,8 +77,9 @@ public class ResourceBundleAS2Gui_de extends MecResourceBundle {
         {"login.failed.client.incompatible.title", "Login wurde zurückgewiesen"},
         {"uploading.to.server", "Übertrage zum Server"},
         {"refresh.overview", "Aktualisiere Transaktionsliste"},
-        {"resend.performed", "Diese Transaktion wurde manuell als neue Transaktion erneut verschickt"},
+        {"resend.performed", "Diese Transaktion wurde manuell als neue Transaktion erneut verschickt ([{0}])"},
         {"dialog.resend.message", "Wollen Sie die selektierte Transaktion wirklich erneut senden?"},
+        {"dialog.resend.message.multiple", "Wollen Sie die {0} selektierten Transaktionen wirklich erneut senden?"},
         {"dialog.resend.title", "Daten erneut senden"},
     };
 }

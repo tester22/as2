@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/util/log/JTextPaneLoggingHandler.java,v 1.1 2012/04/18 14:10:45 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/log/JTextPaneLoggingHandler.java,v 1.1 2015/01/06 11:07:55 heller Exp $
 package de.mendelson.util.log;
 
 import java.awt.Color;
@@ -26,13 +26,16 @@ import javax.swing.text.StyledDocument;
  */
 /**
  * Handler to log logger data to a swing text component
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
 public class JTextPaneLoggingHandler extends Handler {
 
-    /**The max number of bytes that are displayed. If the content exceeds this there is data
-     * removed at the start*/
+    /**
+     * The max number of bytes that are displayed. If the content exceeds this
+     * there is data removed at the start
+     */
     private long maxBuffersize = 30000;
     private boolean doneHeader;
     private JTextPane jTextPane = null;
@@ -43,7 +46,9 @@ public class JTextPaneLoggingHandler extends Handler {
     // Line separator string.  This is the value of the line.separator
     // property at the moment that the Formatter was created.
     private String lineSeparator = System.getProperty("line.separator");
-    /**Stores the logging colors for the logging levels*/
+    /**
+     * Stores the logging colors for the logging levels
+     */
     private final Map<Level, String> colorMap = Collections.synchronizedMap(new HashMap<Level, String>());
 
     public JTextPaneLoggingHandler(JTextPane jTextPane, Formatter formatter) {
@@ -60,8 +65,10 @@ public class JTextPaneLoggingHandler extends Handler {
         this.resetStyle();
     }
 
-    /**Sets a color for the log levels. The color is a constant of the class IRCColor
-     * 
+    /**
+     * Sets a color for the log levels. The color is a constant of the class
+     * IRCColor
+     *
      */
     public void setColor(Level loglevel, String color) {
         synchronized (this.colorMap) {
@@ -69,7 +76,8 @@ public class JTextPaneLoggingHandler extends Handler {
         }
     }
 
-    /**Returns the current set color for the passed log level. May return null
+    /**
+     * Returns the current set color for the passed log level. May return null
      * if no color is defined for the passed level
      */
     public String getColor(Level loglevel) {
@@ -78,7 +86,10 @@ public class JTextPaneLoggingHandler extends Handler {
         }
     }
 
-    /** Appends a message to the output area. IRC color codes will be decoded first. */
+    /**
+     * Appends a message to the output area. IRC color codes will be decoded
+     * first.
+     */
     public void messageDecode(String message) {
         // quick checks to speed things up
         if ((message.indexOf('\002') >= 0)
@@ -147,8 +158,8 @@ public class JTextPaneLoggingHandler extends Handler {
     }
 
     /**
-     * Appends the current buffer's contents to the output area while decoding a message.
-     * The StringBuffer will be setLength(0) afterwards.
+     * Appends the current buffer's contents to the output area while decoding a
+     * message. The StringBuffer will be setLength(0) afterwards.
      */
     private void messageDecodeWrite(StringBuilder buffer) {
         final StyledDocument document = (StyledDocument) this.jTextPane.getDocument();
@@ -157,21 +168,27 @@ public class JTextPaneLoggingHandler extends Handler {
                 long documentLength = document.getLength();
                 long oversize = (documentLength + buffer.length()) - this.maxBuffersize;
                 if (oversize > 0) {
-                    document.remove(0, (int) oversize);
+                    if (documentLength >= oversize) {
+                        document.remove(0, (int) oversize);
+                    } else {
+                        document.remove(0, (int) documentLength);
+                        if (buffer.length() > this.maxBuffersize) {
+                            buffer.delete(0, (int) (buffer.length() - this.maxBuffersize));
+                        }
+                    }
                 }
                 document.insertString(document.getLength(),
                         buffer.toString(), this.currentStyle);
 
             } catch (Throwable ex) {
-                if( ex instanceof Exception ){
-                    reportError(null, (Exception)ex, ErrorManager.WRITE_FAILURE);
+                if (ex instanceof Exception) {
+                    reportError(null, (Exception) ex, ErrorManager.WRITE_FAILURE);
                 }
             }
         }
         buffer.setLength(0);
         //scroll to the last line, enqueue into the swing paint queue
         SwingUtilities.invokeLater(new Runnable() {
-
             @Override
             public void run() {
                 try {
@@ -180,10 +197,12 @@ public class JTextPaneLoggingHandler extends Handler {
                     //ignore
                 }
             }
-        });        
+        });
     }
 
-    /** Reset all style attributes to plain text. */
+    /**
+     * Reset all style attributes to plain text.
+     */
     private void resetStyle() {
         this.setStyleBold(false);
         this.setStyleItalic(false);
@@ -191,7 +210,9 @@ public class JTextPaneLoggingHandler extends Handler {
         this.setStyleForeground(1);
     }
 
-    /** Enable or disable boldface mode for subsequent messages. */
+    /**
+     * Enable or disable boldface mode for subsequent messages.
+     */
     public void setStyleBold(boolean bold) {
         synchronized (this.currentStyle) {
             this.currentStyle.removeAttribute(StyleConstants.Bold);
@@ -202,7 +223,9 @@ public class JTextPaneLoggingHandler extends Handler {
         }
     }
 
-    /** Enable or disable italic mode for subsequent messages. */
+    /**
+     * Enable or disable italic mode for subsequent messages.
+     */
     public void setStyleItalic(boolean italic) {
         synchronized (this.currentStyle) {
             this.currentStyle.removeAttribute(StyleConstants.Italic);
@@ -213,12 +236,16 @@ public class JTextPaneLoggingHandler extends Handler {
         }
     }
 
-    /** Toggle boldface mode for subsequent messages. */
+    /**
+     * Toggle boldface mode for subsequent messages.
+     */
     private void toggleStyleBold() {
         this.setStyleBold(!bold);
     }
 
-    /** Enable or disable underline mode for subsequent messages. */
+    /**
+     * Enable or disable underline mode for subsequent messages.
+     */
     private void setStyleUnderline(boolean underline) {
         synchronized (this.currentStyle) {
             this.currentStyle.removeAttribute(StyleConstants.Underline);
@@ -229,22 +256,30 @@ public class JTextPaneLoggingHandler extends Handler {
         }
     }
 
-    /** Toggle underline mode for subsequent messages. */
+    /**
+     * Toggle underline mode for subsequent messages.
+     */
     private void toggleStyleItalic() {
         this.setStyleItalic(!this.italic);
     }
 
-    /** Toggle underline mode for subsequent messages. */
+    /**
+     * Toggle underline mode for subsequent messages.
+     */
     private void toggleStyleUnderline() {
         this.setStyleUnderline(!this.underline);
     }
 
-    /** Set foreground for subsequent messages (IRC standard indexed color). */
+    /**
+     * Set foreground for subsequent messages (IRC standard indexed color).
+     */
     private void setStyleForeground(int index) {
         setStyleForeground(IRCColors.indexedColors[index]);
     }
 
-    /** Set foreground for subsequent messages. */
+    /**
+     * Set foreground for subsequent messages.
+     */
     private void setStyleForeground(Color col) {
         synchronized (this.currentStyle) {
             this.currentStyle.removeAttribute(StyleConstants.Foreground);
@@ -253,17 +288,16 @@ public class JTextPaneLoggingHandler extends Handler {
     }
 
     /**
-     * Set (or change) the character encoding used by this <tt>Handler</tt>.
-     * <p>
-     * The encoding should be set before any <tt>LogRecords</tt> are written
-     * to the <tt>Handler</tt>.
+     * Set (or change) the character encoding used by this <tt>Handler</tt>. <p>
+     * The encoding should be set before any <tt>LogRecords</tt> are written to
+     * the <tt>Handler</tt>.
      *
-     * @param encoding  The name of a supported character encoding.
-     *	      May be null, to indicate the default platform encoding.
-     * @exception  SecurityException  if a security manager exists and if
-     *             the caller does not have <tt>LoggingPermission("control")</tt>.
-     * @exception  UnsupportedEncodingException if the named encoding is
-     *		not supported.
+     * @param encoding The name of a supported character encoding. May be null,
+     * to indicate the default platform encoding.
+     * @exception SecurityException if a security manager exists and if the
+     * caller does not have <tt>LoggingPermission("control")</tt>.
+     * @exception UnsupportedEncodingException if the named encoding is not
+     * supported.
      */
     @Override
     public void setEncoding(String encoding)
@@ -273,7 +307,8 @@ public class JTextPaneLoggingHandler extends Handler {
 
     /**
      * Format and publish a LogRecord.
-     * @param  record  description of the log event
+     *
+     * @param record description of the log event
      */
     @Override
     public synchronized void publish(LogRecord record) {
@@ -288,10 +323,12 @@ public class JTextPaneLoggingHandler extends Handler {
             if (rawMessage != null) {
                 rawMessageLength = rawMessage.length();
             }
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             // We don't want to throw an exception here, but we
             // report the exception to any registered ErrorManager.
-            reportError(null, ex, ErrorManager.FORMAT_FAILURE);
+            if (ex instanceof Exception) {
+                reportError(null, (Exception)ex, ErrorManager.FORMAT_FAILURE);
+            }
             return;
         }
         try {
@@ -300,16 +337,19 @@ public class JTextPaneLoggingHandler extends Handler {
                 doneHeader = true;
             }
             this.logMessage(record.getLevel(), msg, rawMessageLength);
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             // We don't want to throw an exception here, but we
             // report the exception to any registered ErrorManager.
-            reportError(null, ex, ErrorManager.WRITE_FAILURE);
+            if (ex instanceof Exception) {
+                reportError(null, (Exception)ex, ErrorManager.WRITE_FAILURE);
+            }
         }
     }
 
     /**
-     * Check if this Handler would actually log a given LogRecord, depending of the
-     * log level
+     * Check if this Handler would actually log a given LogRecord, depending of
+     * the log level
+     *
      * @param record a LogRecord
      * @return true if the LogRecord would be logged.
      *
@@ -326,14 +366,17 @@ public class JTextPaneLoggingHandler extends Handler {
     public synchronized void flush() {
     }
 
-    /**Just flushes the current message
+    /**
+     * Just flushes the current message
      */
     @Override
     public synchronized void close() throws SecurityException {
         this.flush();
     }
 
-    /**Finally logs the passed message to the text component and sets the canvas pos
+    /**
+     * Finally logs the passed message to the text component and sets the canvas
+     * pos
      */
     private void logMessage(Level level, String message, int rawMessageLength) {
         int timeStampPos = message.length() - rawMessageLength - this.lineSeparator.length();

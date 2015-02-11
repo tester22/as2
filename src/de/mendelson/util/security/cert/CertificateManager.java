@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/util/security/cert/CertificateManager.java,v 1.1 2012/04/18 14:10:47 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/cert/CertificateManager.java,v 1.1 2015/01/06 11:07:57 heller Exp $
 package de.mendelson.util.security.cert;
 
 import de.mendelson.util.MecResourceBundle;
@@ -29,6 +29,7 @@ import javax.security.auth.x500.X500Principal;
 
 /**
  * Helper class to store
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
@@ -54,7 +55,10 @@ public class CertificateManager {
         this(null);
     }
 
-    /**Returns the cert alias that is assigned to the cert/key of the passed fingerprint (SHA1)*/
+    /**
+     * Returns the cert alias that is assigned to the cert/key of the passed
+     * fingerprint (SHA1)
+     */
     public String getAliasByFingerprint(byte[] fingerprintSHA1) {
         KeystoreCertificate cert = this.getKeystoreCertificateByFingerprintSHA1(fingerprintSHA1);
         //fingerprint not found
@@ -65,7 +69,10 @@ public class CertificateManager {
         }
     }
 
-    /**Returns the cert alias that is assigned to the cert/key of the passed fingerprint (SHA1)*/
+    /**
+     * Returns the cert alias that is assigned to the cert/key of the passed
+     * fingerprint (SHA1)
+     */
     public String getAliasByFingerprint(String fingerprintSHA1) {
         KeystoreCertificate cert = this.getKeystoreCertificateByFingerprintSHA1(fingerprintSHA1);
         //fingerprint not found
@@ -76,14 +83,16 @@ public class CertificateManager {
         }
     }
 
-    /**Returns the certificate chain for a special alias
+    /**
+     * Returns the certificate chain for a special alias
      */
     public Certificate[] getCertificateChain(String alias) throws Exception {
         Certificate[] chain = this.storage.getCertificateChain(alias);
         return (chain);
     }
 
-    /**Returns the X509 certificate assigned to the passed alias
+    /**
+     * Returns the X509 certificate assigned to the passed alias
      */
     public X509Certificate getX509Certificate(String alias) throws Exception {
         X509Certificate certificate = this.storage.getCertificate(alias);
@@ -93,7 +102,8 @@ public class CertificateManager {
         return (certificate);
     }
 
-    /**Returns the list of available X509 certificates
+    /**
+     * Returns the list of available X509 certificates
      */
     public List<X509Certificate> getX509CertificateList() {
         List<X509Certificate> certList = new ArrayList<X509Certificate>();
@@ -105,8 +115,9 @@ public class CertificateManager {
         return (certList);
     }
 
-    /**Returns the private key for an alias. If the assigned certificate
-     *does not contain a private key an exception is thrown
+    /**
+     * Returns the private key for an alias. If the assigned certificate does
+     * not contain a private key an exception is thrown
      */
     public PrivateKey getPrivateKey(String alias) throws Exception {
         PrivateKey key = (PrivateKey) this.storage.getKey(alias);
@@ -117,14 +128,16 @@ public class CertificateManager {
         }
     }
 
-    /**Returns the public key for an alias.
+    /**
+     * Returns the public key for an alias.
      */
     public PublicKey getPublicKey(String alias) throws Exception {
         return (this.storage.getCertificate(alias).getPublicKey());
     }
 
-    /**Returns the private key for a passed fingerprint (SHA1). If the assigned certificate
-     *does not contain a private key an exception is thrown
+    /**
+     * Returns the private key for a passed fingerprint (SHA1). If the assigned
+     * certificate does not contain a private key an exception is thrown
      */
     public PrivateKey getPrivateKeyByFingerprintSHA1(byte[] fingerprintStrSHA1) throws Exception {
         //this will always return the private key if there is a public and a private key entry with the same serial in
@@ -133,8 +146,9 @@ public class CertificateManager {
         return (this.getPrivateKey(certificate.getAlias()));
     }
 
-    /**Returns the private key for a passed fingerprint (SHA1). If the assigned certificate
-     *does not contain a private key an exception is thrown
+    /**
+     * Returns the private key for a passed fingerprint (SHA1). If the assigned
+     * certificate does not contain a private key an exception is thrown
      */
     public PrivateKey getPrivateKeyByFingerprintSHA1(String fingerprintStrSHA1) throws Exception {
         //this will always return the private key if there is a public and a private key entry with the same serial in
@@ -143,7 +157,8 @@ public class CertificateManager {
         return (this.getPrivateKey(certificate.getAlias()));
     }
 
-    /**Returns the public key or the private key for an alias.
+    /**
+     * Returns the public key or the private key for an alias.
      */
     public Key getKey(String alias) throws Exception {
         Key key = this.storage.getKey(alias);
@@ -154,7 +169,8 @@ public class CertificateManager {
         }
     }
 
-    /**Stores the manages keystore
+    /**
+     * Stores the manages keystore
      */
     public void saveKeystore() throws Throwable {
         this.storage.save();
@@ -162,14 +178,17 @@ public class CertificateManager {
         this.rereadKeystoreCertificates();
     }
 
-    /**Deletes an entry from the actual keystore*/
+    /**
+     * Deletes an entry from the actual keystore
+     */
     public void deleteKeystoreEntry(String alias) throws Throwable {
         this.storage.deleteEntry(alias);
     }
 
-    /**Renames an entry in the underlaying keystore. Please remember that PKCS#12 contains no
-     * key pair password, pass null in this case
-     * 
+    /**
+     * Renames an entry in the underlaying keystore. Please remember that
+     * PKCS#12 contains no key pair password, pass null in this case
+     *
      */
     public void renameAlias(String oldAlias, String newAlias, char[] keypairPass) throws Exception {
         this.storage.renameEntry(oldAlias, newAlias, keypairPass);
@@ -184,7 +203,8 @@ public class CertificateManager {
         }
     }
 
-    /**Refreshes the data
+    /**
+     * Refreshes the data
      */
     public void rereadKeystoreCertificates() throws Exception {
         synchronized (this.keyStoreCertificateList) {
@@ -211,8 +231,21 @@ public class CertificateManager {
         }
     }
 
-    /**Called from external if the certificate storage has been changed. This method
-     *calls the normal rereadkeystore method but logs the step
+    /**
+     * Adds a single certificate to the list without saving it
+     */
+    public void addCertificate(String alias, X509Certificate x509Certificate) {
+        synchronized (this.keyStoreCertificateList) {
+            KeystoreCertificate certificate = new KeystoreCertificate();
+            certificate.setAlias(alias);
+            certificate.setCertificate(x509Certificate);
+            certificate.setIsKeyPair(false);
+        }
+    }
+
+    /**
+     * Called from external if the certificate storage has been changed. This
+     * method calls the normal rereadkeystore method but logs the step
      */
     public void rereadKeystoreCertificatesLogged() {
         try {
@@ -228,7 +261,23 @@ public class CertificateManager {
         }
     }
 
-    /**Reads the certificates of the actual key store
+    /**
+     * Wrapper function for the underlaying keystore storage implementation
+     */
+    public boolean canWrite() {
+        return (this.storage.canWrite());
+    }
+
+    /**
+     * Wrapper function for the underlaying keystore storage implementation
+     */
+    public String getKeystoreType() {
+        return (this.storage.getKeystoreType());
+    }
+
+    /**
+     * Reads the certificates of the actual key store
+     *
      * @param type keystore typ as defined in the class BCCryptoHelper
      */
     public void loadKeystoreCertificates(KeystoreStorage storage) {
@@ -243,7 +292,9 @@ public class CertificateManager {
         }
     }
 
-    /**returns null if the alias does not exist*/
+    /**
+     * returns null if the alias does not exist
+     */
     public KeystoreCertificate getKeystoreCertificate(String alias) {
         synchronized (this.keyStoreCertificateList) {
             for (KeystoreCertificate cert : this.keyStoreCertificateList) {
@@ -255,14 +306,43 @@ public class CertificateManager {
         return (null);
     }
 
-    /**returns null if a certificate with the issuerDN and the serial does not exist*/
+    private boolean issuerDNIsEqual(String issuerDN1, String issuerDN2) {
+        String[] issuerDN1String = issuerDN1.split(",");
+        Map<String, String> issuer1Map = new HashMap<String, String>();
+        for (int i = 0; i < issuerDN1String.length; i++) {
+            String keyValue = issuerDN1String[i].trim();
+            int equalIndex = keyValue.indexOf("=");
+            String key = keyValue.substring(0, equalIndex).trim();
+            String value = keyValue.substring(equalIndex).trim();
+            if( key.equals( "E" ) || key.equals("EMAILADDRESS")){
+                issuer1Map.put("EMAILADDRESS", value);
+                issuer1Map.put("E", value);
+            }
+            issuer1Map.put(key, value);
+        }
+        String[] issuerDN2String = issuerDN2.split(",");
+        for (int i = 0; i < issuerDN2String.length; i++) {
+            String keyValue = issuerDN2String[i].trim();
+            int equalIndex = keyValue.indexOf("=");
+            String key = keyValue.substring(0, equalIndex).trim();
+            String value = keyValue.substring(equalIndex).trim();
+            if (!issuer1Map.containsKey(key) || !issuer1Map.get(key).equals(value)) {
+                return (false);
+            }
+        }
+        return (true);
+    }
+
+    /**
+     * returns null if a certificate with the issuerDN and the serial does not exist
+     */
     public KeystoreCertificate getKeystoreCertificateByIssuerAndSerial(String issuerDN, String serial) {
         //it could happen that a cert and a key with the same fingerprint are in the keystore.
         //Always return the key in this case.
         KeystoreCertificate foundCert = null;
         synchronized (this.keyStoreCertificateList) {
             for (KeystoreCertificate cert : this.keyStoreCertificateList) {
-                if (cert.getSerialNumberDEC().equals(serial) && cert.getIssuerDN().equals(issuerDN)) {
+                if (cert.getSerialNumberDEC().equals(serial) && this.issuerDNIsEqual(issuerDN, cert.getIssuerDN())) {
                     //no entry found so far: always store the found one
                     if (foundCert == null) {
                         foundCert = cert;
@@ -278,7 +358,9 @@ public class CertificateManager {
         return (foundCert);
     }
 
-    /**returns null if a certificate with the issuerDN and the serial does not exist*/
+    /**
+     * returns null if a certificate with the issuerDN and the serial does not exist
+     */
     public KeystoreCertificate getKeystoreCertificateByIssuerAndSerial(X500Principal issuer, String serialDEC) {
         //it could happen that a cert and a key with the same fingerprint are in the keystore.
         //Always return the key in this case.
@@ -301,7 +383,9 @@ public class CertificateManager {
         return (foundCert);
     }
 
-    /**Throws an exception if the requested certificate does not exist in the keystore*/
+    /**
+     * Throws an exception if the requested certificate does not exist in the keystore
+     */
     public KeystoreCertificate getKeystoreCertificateByFingerprintSHA1NonNull(String fingerprintSHA1) throws Exception {
         KeystoreCertificate certificate = this.getKeystoreCertificateByFingerprintSHA1(fingerprintSHA1);
         if (certificate == null) {
@@ -311,7 +395,9 @@ public class CertificateManager {
         }
     }
 
-    /**Throws an exception if the requested certificate does not exist in the keystore*/
+    /**
+     * Throws an exception if the requested certificate does not exist in the keystore
+     */
     public KeystoreCertificate getKeystoreCertificateByFingerprintSHA1NonNull(byte[] fingerprintSHA1) throws Exception {
         KeystoreCertificate certificate = this.getKeystoreCertificateByFingerprintSHA1(fingerprintSHA1);
         if (certificate == null) {
@@ -322,7 +408,9 @@ public class CertificateManager {
         }
     }
 
-    /**returns null if the fingerprint does not exist*/
+    /**
+     * returns null if the fingerprint does not exist
+     */
     public KeystoreCertificate getKeystoreCertificateByFingerprintSHA1(byte[] fingerprintSHA1) {
         //if there is a prio in the partners certificates, e.g. for AS2/CEM it could happen that
         //a null request happends here. sample: A decryption request fails, the program tries
@@ -351,7 +439,9 @@ public class CertificateManager {
         return (foundCert);
     }
 
-    /**returns null if the fingerprint does not exist*/
+    /**
+     * returns null if the fingerprint does not exist
+     */
     public KeystoreCertificate getKeystoreCertificateByFingerprintSHA1(String fingerprintSHA1) {
         //if there is a prio in the partners certificates, e.g. for AS2/CEM it could happen that
         //a null request happends here. sample: A decryption request fails, the program tries
@@ -363,14 +453,19 @@ public class CertificateManager {
         return (this.getKeystoreCertificateByFingerprintSHA1(fingerprintSHA1Bytes));
     }
 
-    /**Returns the list of certificates*/
+    /**
+     * Returns the list of certificates
+     */
     public List<KeystoreCertificate> getKeyStoreCertificateList() {
         synchronized (this.keyStoreCertificateList) {
             return (this.keyStoreCertificateList);
         }
     }
 
-    /**Passes a logger to the certificate manager. There will be no logging if no logger has been passed*/
+    /**
+     * Passes a logger to the certificate manager. There will be no logging if
+     * no logger has been passed
+     */
     public void setLogger(Logger logger) {
         this.logger = logger;
     }
@@ -415,4 +510,10 @@ public class CertificateManager {
         keystore.setKeyEntry(alias, key, this.getKeystorePass(), chain);
         this.saveKeystore();
     }
+
+//    public static final void main(String[] args) {
+//        String dn1 = "CN=mend, OU=mendelson-e-commerce GmbH, O=mendelson-e-commerce GmbH, L=Berlin, ST=Berlin, C=DE, EMAILADDRESS=rosettanet@mendelson.de";
+//        String dn2 = "E=rosettanet@mendelson.de,C=DE,ST=Berlin,L=Berlin,O=mendelson-e-commerce GmbH,OU=mendelson-e-commerce GmbH,CN=mend";
+//        System.out.println(CertificateManager.issuerDNIsEqual(dn1, dn2));
+//    }
 }

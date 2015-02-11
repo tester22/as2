@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/webclient2/TransactionDetailsDialog.java,v 1.1 2012/04/18 14:10:41 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/webclient2/TransactionDetailsDialog.java,v 1.1 2015/01/06 11:07:50 heller Exp $
 package de.mendelson.comm.as2.webclient2;
 
 import com.vaadin.data.Property;
@@ -158,7 +158,7 @@ public class TransactionDetailsDialog extends OkDialog {
         TextArea textArea = new TextArea();
         textArea.setRows(7);
         textArea.setSizeFull();
-        LogEntry[] entries = this.logAccess.getLog(this.messageId);
+        List<LogEntry> entries = this.logAccess.getLog(this.messageId);
         StringBuilder log = new StringBuilder();
         for (LogEntry entry : entries) {
             log.append("[").append(format.format(entry.getMillis())).append("] ");

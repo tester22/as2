@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/log/DBLoggingHandler.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/log/DBLoggingHandler.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.log;
 
 import de.mendelson.comm.as2.database.DBDriverManager;
@@ -34,7 +34,7 @@ public class DBLoggingHandler extends Handler {
             Connection runtimeConnection 
                     = DBDriverManager.getConnectionWithoutErrorHandling(DBDriverManager.DB_RUNTIME, "localhost");
             Connection configConnection 
-                    = DBDriverManager.getConnectionWithoutErrorHandling(DBDriverManager.DB_RUNTIME, "localhost");
+                    = DBDriverManager.getConnectionWithoutErrorHandling(DBDriverManager.DB_CONFIG, "localhost");
             this.access = new LogAccessDB(configConnection, runtimeConnection);
         } catch (Exception e) {
             this.logger.severe("DBLoggingHandler: " + e.getMessage());

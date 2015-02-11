@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/util/clientserver/clients/filesystemview/FileSystemViewClientServer.java,v 1.1 2012/04/18 14:10:44 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/clients/filesystemview/FileSystemViewClientServer.java,v 1.1 2015/01/06 11:07:54 heller Exp $
 package de.mendelson.util.clientserver.clients.filesystemview;
 
 import de.mendelson.util.clientserver.BaseClient;

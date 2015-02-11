@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/sendorder/SendOrderSender.java,v 1.1 2012/04/18 14:10:38 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/sendorder/SendOrderSender.java,v 1.1 2015/01/06 11:07:49 heller Exp $
 package de.mendelson.comm.as2.sendorder;
 
 import de.mendelson.comm.as2.message.AS2Message;
@@ -119,14 +119,15 @@ public class SendOrderSender {
      * @return NULL in the case of an error
      */
     public AS2Message send(CertificateManager certificateManager, Partner sender, Partner receiver,
-            AS2Payload payload) {
+            AS2Payload payload, String userdefinedId) {
         try {
             long startProcessTime = System.currentTimeMillis();
             AS2MessageCreation messageCreation = new AS2MessageCreation(certificateManager, certificateManager);
             messageCreation.setLogger(this.logger);
             messageCreation.setServerResources(this.configConnection, this.runtimeConnection);
+            //this will also add the transaction to the database
             AS2Message message = messageCreation.createMessage(sender, receiver, new AS2Payload[]{payload},
-                    AS2Message.MESSAGETYPE_AS2);
+                    AS2Message.MESSAGETYPE_AS2, null, userdefinedId);
             this.logger.log(Level.INFO,
                     rb.getResourceString("message.packed",
                     new Object[]{
@@ -141,6 +142,7 @@ public class SendOrderSender {
             order.setReceiver(receiver);
             order.setMessage(message);
             order.setSender(sender);
+            order.setUserdefinedId(userdefinedId);
             this.send(order);
             return (message);
         } catch (Throwable e) {

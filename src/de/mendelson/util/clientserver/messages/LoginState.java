@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/util/clientserver/messages/LoginState.java,v 1.1 2012/04/18 14:10:45 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/messages/LoginState.java,v 1.1 2015/01/06 11:07:55 heller Exp $
 package de.mendelson.util.clientserver.messages;
 
 import de.mendelson.util.clientserver.user.User;
@@ -13,19 +13,25 @@ import java.io.Serializable;
 
 /**
  * Msg for the client server protocol
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
-public class LoginState extends ClientServerMessage implements Serializable {
+public class LoginState extends ClientServerResponse implements Serializable {
 
-    /**Stores the users rights, this is returned by the server*/
-    private User user;
-    public static final int STATE_AUTHENTICATION_REQUIRED = 1;
-    public static final int STATE_AUTHENTICATION_FAILURE = 2;
-    public static final int STATE_AUTHENTICATION_FAILURE_PASSWORD_REQUIRED = 3;
-    public static final int STATE_INCOMPATIBLE_CLIENT = 4;
+    public static final int STATE_AUTHENTICATION_FAILURE = 1;
+    public static final int STATE_AUTHENTICATION_FAILURE_PASSWORD_REQUIRED = 2;
+    public static final int STATE_INCOMPATIBLE_CLIENT = 3;
     public static final int STATE_AUTHENTICATION_SUCCESS = 99;
+    /**
+     * Stores the users rights, this is returned by the server
+     */
+    private User user;
     private int state = STATE_AUTHENTICATION_FAILURE;
+
+    public LoginState(LoginRequest request) {
+        super(request);
+    }
 
     public int getState() {
         return state;
@@ -51,26 +57,24 @@ public class LoginState extends ClientServerMessage implements Serializable {
     }
 
     @Override
-    public String toString() {        
+    public String toString() {
         StringBuilder buffer = new StringBuilder();
-        if( this.user != null ){
+        if (this.user != null) {
             buffer.append("Login state for user ");
             buffer.append(this.user.getName());
             buffer.append(": ");
-        }else{
-            buffer.append( "Login state: ");
+        } else {
+            buffer.append("Login state: ");
         }
         if (this.state == STATE_AUTHENTICATION_FAILURE) {
             buffer.append("FAILURE");
         } else if (this.state == STATE_AUTHENTICATION_SUCCESS) {
             buffer.append("SUCCESS");
-        } else if (this.state == STATE_AUTHENTICATION_REQUIRED) {
-            buffer.append("AUTHENTICATION REQUIRED");
         } else if (this.state == STATE_AUTHENTICATION_FAILURE_PASSWORD_REQUIRED) {
             buffer.append("PASSWORD_REQUIRED");
         } else if (this.state == STATE_AUTHENTICATION_SUCCESS) {
             buffer.append("AUTHENTICATION SUCCESS");
-        }else if (this.state == STATE_INCOMPATIBLE_CLIENT) {
+        } else if (this.state == STATE_INCOMPATIBLE_CLIENT) {
             buffer.append("INCOMPATIBLE CLIENT");
         } else {
             buffer.append("UNKNOWN");

@@ -1,8 +1,7 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/send/DirPollManager.java,v 1.1 2012/04/18 14:10:35 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/send/DirPollManager.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.send;
 
 import de.mendelson.comm.as2.clientserver.message.RefreshClientMessageOverviewList;
-import de.mendelson.util.security.cert.CertificateManager;
 import de.mendelson.comm.as2.message.AS2Message;
 import de.mendelson.comm.as2.message.store.MessageStoreHandler;
 import de.mendelson.comm.as2.notification.Notification;
@@ -14,6 +13,7 @@ import de.mendelson.comm.as2.server.AS2Server;
 import de.mendelson.util.FileFilterRegexpMatch;
 import de.mendelson.util.MecResourceBundle;
 import de.mendelson.util.clientserver.ClientServer;
+import de.mendelson.util.security.cert.CertificateManager;
 import java.io.File;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -27,7 +27,6 @@ import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -86,11 +85,9 @@ public class DirPollManager {
      * stop now unued tasks and start other
      */
     public void partnerConfigurationChanged() {
-        Partner[] partner = null;
-        Partner[] localStations = null;
         PartnerAccessDB access = new PartnerAccessDB(this.configConnection, this.runtimeConnection);
-        partner = access.getPartner();
-        localStations = access.getLocalStations();
+        List<Partner> partner = access.getPartner();
+        List<Partner> localStations = access.getLocalStations();
         if (partner == null) {
             this.logger.severe("partnerConfigurationChanged: Unable to load partner");
             return;
@@ -249,6 +246,10 @@ public class DirPollManager {
                 List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
                 int fileCounter = 0;
                 for (File file : files) {
+                    //take a defined max number of files per poll process only
+                    if (fileCounter == this.receiver.getMaxPollFiles()) {
+                        break;
+                    }
                     if (file.isDirectory()) {
                         continue;
                     }
@@ -270,11 +271,7 @@ public class DirPollManager {
                         }
                     };
                     tasks.add(singleTask);
-                    fileCounter++;
-                    //take a defined max number of files per poll process only
-                    if (fileCounter == this.receiver.getMaxPollFiles()) {
-                        break;
-                    }
+                    fileCounter++;                    
                 }
                 //wait for all threads to be finished
                 try {

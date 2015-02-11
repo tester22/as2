@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/partner/gui/ListCellRendererPartner.java,v 1.1 2012/04/18 14:10:32 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/gui/ListCellRendererPartner.java,v 1.1 2015/01/06 11:07:44 heller Exp $
 package de.mendelson.comm.as2.partner.gui;
 
 import de.mendelson.comm.as2.partner.Partner;
@@ -13,21 +13,21 @@ import javax.swing.SwingConstants;
 
 /**
  * Renderer to render the workflows that could be selected
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
 public class ListCellRendererPartner extends JLabel implements ListCellRenderer {
 
-    public static final ImageIcon ICON_LOCALSTATION =
-            new ImageIcon(ListCellRendererPartner.class.getResource(
-            "/de/mendelson/comm/as2/partner/gui/localstation16x16.gif"));
-    public static final ImageIcon ICON_REMOTESTATION =
-            new ImageIcon(ListCellRendererPartner.class.getResource(
-            "/de/mendelson/comm/as2/partner/gui/singlepartner16x16.gif"));
+    public static final ImageIcon ICON_LOCALSTATION
+            = new ImageIcon(ListCellRendererPartner.class.getResource(
+                            "/de/mendelson/comm/as2/partner/gui/localstation16x16.gif"));
+    public static final ImageIcon ICON_REMOTESTATION
+            = new ImageIcon(ListCellRendererPartner.class.getResource(
+                            "/de/mendelson/comm/as2/partner/gui/singlepartner16x16.gif"));
 
     /**
-     * Constructs a default renderer object for an item
-     * in a list.
+     * Constructs a default renderer object for an item in a list.
      */
     public ListCellRendererPartner() {
         super();
@@ -35,8 +35,8 @@ public class ListCellRendererPartner extends JLabel implements ListCellRenderer 
     }
 
     /**
-     * Overridden for performance reasons.
-     * See the <a href="#override">Implementation Note</a>
+     * Overridden for performance reasons. See the
+     * <a href="#override">Implementation Note</a>
      * for more information.
      */
     @Override
@@ -44,8 +44,8 @@ public class ListCellRendererPartner extends JLabel implements ListCellRenderer 
     }
 
     /**
-     * Overridden for performance reasons.
-     * See the <a href="#override">Implementation Note</a>
+     * Overridden for performance reasons. See the
+     * <a href="#override">Implementation Note</a>
      * for more information.
      */
     @Override
@@ -53,8 +53,8 @@ public class ListCellRendererPartner extends JLabel implements ListCellRenderer 
     }
 
     /**
-     * Overridden for performance reasons.
-     * See the <a href="#override">Implementation Note</a>
+     * Overridden for performance reasons. See the
+     * <a href="#override">Implementation Note</a>
      * for more information.
      */
     @Override
@@ -62,8 +62,8 @@ public class ListCellRendererPartner extends JLabel implements ListCellRenderer 
     }
 
     /**
-     * Overridden for performance reasons.
-     * See the <a href="#override">Implementation Note</a>
+     * Overridden for performance reasons. See the
+     * <a href="#override">Implementation Note</a>
      * for more information.
      */
     @Override
@@ -71,8 +71,8 @@ public class ListCellRendererPartner extends JLabel implements ListCellRenderer 
     }
 
     /**
-     * Overridden for performance reasons.
-     * See the <a href="#override">Implementation Note</a>
+     * Overridden for performance reasons. See the
+     * <a href="#override">Implementation Note</a>
      * for more information.
      */
     @Override
@@ -84,8 +84,8 @@ public class ListCellRendererPartner extends JLabel implements ListCellRenderer 
     }
 
     /**
-     * Overridden for performance reasons.
-     * See the <a href="#override">Implementation Note</a>
+     * Overridden for performance reasons. See the
+     * <a href="#override">Implementation Note</a>
      * for more information.
      */
     @Override
@@ -93,8 +93,8 @@ public class ListCellRendererPartner extends JLabel implements ListCellRenderer 
     }
 
     /**
-     * Overridden for performance reasons.
-     * See the <a href="#override">Implementation Note</a>
+     * Overridden for performance reasons. See the
+     * <a href="#override">Implementation Note</a>
      * for more information.
      */
     @Override
@@ -102,8 +102,8 @@ public class ListCellRendererPartner extends JLabel implements ListCellRenderer 
     }
 
     /**
-     * Overridden for performance reasons.
-     * See the <a href="#override">Implementation Note</a>
+     * Overridden for performance reasons. See the
+     * <a href="#override">Implementation Note</a>
      * for more information.
      */
     @Override
@@ -111,8 +111,8 @@ public class ListCellRendererPartner extends JLabel implements ListCellRenderer 
     }
 
     /**
-     * Overridden for performance reasons.
-     * See the <a href="#override">Implementation Note</a>
+     * Overridden for performance reasons. See the
+     * <a href="#override">Implementation Note</a>
      * for more information.
      */
     @Override
@@ -120,8 +120,8 @@ public class ListCellRendererPartner extends JLabel implements ListCellRenderer 
     }
 
     /**
-     * Overridden for performance reasons.
-     * See the <a href="#override">Implementation Note</a>
+     * Overridden for performance reasons. See the
+     * <a href="#override">Implementation Note</a>
      * for more information.
      */
     @Override
@@ -129,8 +129,8 @@ public class ListCellRendererPartner extends JLabel implements ListCellRenderer 
     }
 
     /**
-     * Overridden for performance reasons.
-     * See the <a href="#override">Implementation Note</a>
+     * Overridden for performance reasons. See the
+     * <a href="#override">Implementation Note</a>
      * for more information.
      */
     @Override
@@ -138,8 +138,8 @@ public class ListCellRendererPartner extends JLabel implements ListCellRenderer 
     }
 
     /**
-     * Overridden for performance reasons.
-     * See the <a href="#override">Implementation Note</a>
+     * Overridden for performance reasons. See the
+     * <a href="#override">Implementation Note</a>
      * for more information.
      */
     @Override
@@ -147,8 +147,8 @@ public class ListCellRendererPartner extends JLabel implements ListCellRenderer 
     }
 
     /**
-     * Overridden for performance reasons.
-     * See the <a href="#override">Implementation Note</a>
+     * Overridden for performance reasons. See the
+     * <a href="#override">Implementation Note</a>
      * for more information.
      */
     @Override
@@ -157,18 +157,18 @@ public class ListCellRendererPartner extends JLabel implements ListCellRenderer 
 
     /**
      * A subclass of DefaultListCellRenderer that implements UIResource.
-     * DefaultListCellRenderer doesn't implement UIResource
-     * directly so that applications can safely override the
-     * cellRenderer property with DefaultListCellRenderer subclasses.
+     * DefaultListCellRenderer doesn't implement UIResource directly so that
+     * applications can safely override the cellRenderer property with
+     * DefaultListCellRenderer subclasses.
      * <p>
      * <strong>Warning:</strong>
-     * Serialized objects of this class will not be compatible with
-     * future Swing releases. The current serialization support is
-     * appropriate for short term storage or RMI between applications running
-     * the same version of Swing.  As of 1.4, support for long term storage
-     * of all JavaBeans<sup><font size="-2">TM</font></sup>
-     * has been added to the <code>java.beans</code> package.
-     * Please see {@link java.beans.XMLEncoder}.
+     * Serialized objects of this class will not be compatible with future Swing
+     * releases. The current serialization support is appropriate for short term
+     * storage or RMI between applications running the same version of Swing. As
+     * of 1.4, support for long term storage of all
+     * JavaBeans<sup><font size="-2">TM</font></sup>
+     * has been added to the <code>java.beans</code> package. Please see
+     * {@link java.beans.XMLEncoder}.
      */
     public static class UIResource extends DefaultListCellRenderer
             implements javax.swing.plaf.UIResource {
@@ -188,15 +188,21 @@ public class ListCellRendererPartner extends JLabel implements ListCellRenderer 
         }
         this.setFont(list.getFont());
         //Linux sets the value to null if nothing has been selected in the combobox
-        if (value != null && value instanceof Partner) {
-            Partner partner = (Partner) value;
-            if (partner.isLocalStation()) {
-                this.setIcon(ICON_LOCALSTATION);
-            } else {
-                this.setIcon(ICON_REMOTESTATION);
+        if (value != null) {
+            if (value instanceof Partner) {
+                Partner partner = (Partner) value;
+                if (partner.isLocalStation()) {
+                    this.setIcon(ICON_LOCALSTATION);
+                } else {
+                    this.setIcon(ICON_REMOTESTATION);
+                }
+                this.setEnabled(list.isEnabled());
+                this.setText(partner.toString());
+            } else if (value instanceof String) {
+                this.setEnabled(list.isEnabled());
+                this.setIcon(null);
+                this.setText(value.toString());
             }
-            this.setEnabled(list.isEnabled());
-            this.setText(partner.toString());
         }
         this.setHorizontalAlignment(SwingConstants.LEADING);
         this.setHorizontalTextPosition(SwingConstants.RIGHT);

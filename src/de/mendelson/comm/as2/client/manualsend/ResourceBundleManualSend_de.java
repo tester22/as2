@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/client/manualsend/ResourceBundleManualSend_de.java,v 1.1 2012/04/18 14:10:24 heller Exp $ 
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/manualsend/ResourceBundleManualSend_de.java,v 1.1 2015/01/06 11:07:39 heller Exp $ 
 package de.mendelson.comm.as2.client.manualsend;
 import de.mendelson.util.MecResourceBundle;
 /*

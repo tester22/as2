@@ -1,8 +1,9 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/util/security/DNUtil.java,v 1.1 2012/04/18 14:10:45 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/DNUtil.java,v 1.1 2015/01/06 11:07:56 heller Exp $
 package de.mendelson.util.security;
 
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
+import java.util.Map;
 import javax.security.auth.x500.X500Principal;
 
 /**
@@ -69,15 +70,15 @@ public class DNUtil {
             throw new IllegalArgumentException("DNUtil: Unsupported principal type " + type + ".");
         }
         String name = principal.getName(X500Principal.RFC1779);
-        HashMap<String, String> map = parseDN(name);
+        Map<String, String> map = parseDN(name);
         if (map.containsKey(target)) {
             return (map.get(target));
         }
         return (null);
     }
 
-    private static HashMap<String, String> parseDN(String dn) {
-        HashMap<String, String> map = new HashMap<String, String>();
+    private static Map<String, String> parseDN(String dn) {
+        Map<String, String> map = new HashMap<String, String>();
         StringBuilder buffer = new StringBuilder();
         boolean inString = false;
         for (int i = 0; i < dn.length(); i++) {

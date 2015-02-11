@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/notification/ResourceBundleNotification_de.java,v 1.1 2012/04/18 14:10:31 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/notification/ResourceBundleNotification_de.java,v 1.1 2015/01/06 11:07:42 heller Exp $
 package de.mendelson.comm.as2.notification;
 
 import de.mendelson.util.MecResourceBundle;
@@ -25,6 +25,7 @@ public class ResourceBundleNotification_de extends MecResourceBundle {
     static final Object[][] contents = {
         //dialog
         {"test.message.send", "Eine Testnachricht wurde geschickt an {0}."},
+        {"test.message.debug", "\nDer Mailversandprozess schlug fehlt, die folgenden Zusatzinformationen könnten Ihnen helfen, das Problem einzugrenzen:\n" },
         {"transaction.message.send", "{0}: {1} wurde über den Fehler in der Transaktion per eMail benachrichtigt."},
         {"transaction.message.send.error", "{0}: Das Senden einer Benachrichtigungsmail über einen Transaktionfehler an {1} schlug fehl: {2}."},
         {"misc.message.send", "Eine Benachrichtigungsmail wurde an {0} geschickt."},

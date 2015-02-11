@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/client/BrowserLinkedPanel.java,v 1.1 2012/04/18 14:10:23 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/BrowserLinkedPanel.java,v 1.1 2015/01/06 11:07:37 heller Exp $
 package de.mendelson.comm.as2.client;
 
 import java.awt.Cursor;

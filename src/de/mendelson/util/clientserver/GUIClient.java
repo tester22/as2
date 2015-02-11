@@ -1,10 +1,13 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/util/clientserver/GUIClient.java,v 1.1 2012/04/18 14:10:41 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/GUIClient.java,v 1.1 2015/01/06 11:07:53 heller Exp $
 package de.mendelson.util.clientserver;
 
-import de.mendelson.util.clientserver.connectionprogress.JDialogConnectionProgress;
 import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.clientserver.connectionprogress.JDialogConnectionProgress;
 import de.mendelson.util.clientserver.gui.JDialogLogin;
 import de.mendelson.util.clientserver.messages.ClientServerMessage;
+import de.mendelson.util.clientserver.messages.ClientServerResponse;
+import de.mendelson.util.clientserver.messages.LoginRequired;
+import de.mendelson.util.clientserver.messages.LoginState;
 import de.mendelson.util.clientserver.messages.ServerInfo;
 import de.mendelson.util.clientserver.user.User;
 import java.awt.Color;
@@ -31,6 +34,7 @@ import javax.swing.JOptionPane;
  */
 /**
  * GUI Client root implementation
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
@@ -66,7 +70,8 @@ public abstract class GUIClient extends JFrame implements ClientSessionHandlerCa
         }
     }
 
-    /**Logs something to the clients log
+    /**
+     * Logs something to the clients log
      */
     @Override
     public void log(Level logLevel, String message) {
@@ -101,20 +106,34 @@ public abstract class GUIClient extends JFrame implements ClientSessionHandlerCa
     public abstract Logger getLogger();
 
     public void performLogin(String user, char[] passwd, String clientId) {
-        this.getBaseClient().login(user, passwd, clientId);
+        LoginState state = this.getBaseClient().login(user, passwd, clientId);
+        if (this.getLogger() == null) {
+            throw new RuntimeException("GUIClient.loggedIn: No logger set.");
+        }
+        while (state.getState() != LoginState.STATE_AUTHENTICATION_SUCCESS) {
+            state = this.performLogin(user);
+        }
+        User returnedLoginUser = state.getUser();
+        //login successful: pass a user to the base client
+        this.getBaseClient().setUser(returnedLoginUser);
+        this.log(Level.CONFIG, this.rb.getResourceString("login.success", returnedLoginUser.getName()));
     }
 
-    /**Overwrite this to change the login dialogs color*/
+    /**
+     * Overwrite this to change the login dialogs color
+     */
     public Color getLoginDialogColorBackground() {
         return (Color.decode("#3F7017"));
     }
 
-    /**Overwrite this to change the login dialogs color*/
+    /**
+     * Overwrite this to change the login dialogs color
+     */
     public Color getLoginDialogColorForeground() {
         return (Color.WHITE);
     }
 
-    public void performLogin(String user) {
+    private LoginState performLogin(String user) {
         JDialogLogin dialog = new JDialogLogin(null, this.serverProductName);
         dialog.setColor(this.getLoginDialogColorBackground(), this.getLoginDialogColorForeground());
         dialog.setDefaultUser(user);
@@ -122,40 +141,57 @@ public abstract class GUIClient extends JFrame implements ClientSessionHandlerCa
         if (!dialog.isCanceled()) {
             char[] passwd = dialog.getPass();
             String loginUser = dialog.getUser();
-            this.performLogin(loginUser, passwd, this.serverProductName);
+            LoginState state = this.getBaseClient().login(loginUser, passwd, this.serverProductName);
+            if (state.getState() == LoginState.STATE_AUTHENTICATION_FAILURE_PASSWORD_REQUIRED) {
+                if (this.getLogger() == null) {
+                    throw new RuntimeException("GUIClient.loginFailureServerRequestsPassword: No logger set.");
+                }
+                this.log(Level.INFO, this.rb.getResourceString("password.required", user));
+                return (this.performLogin(loginUser));
+            } else if (state.getState() == LoginState.STATE_AUTHENTICATION_SUCCESS) {
+                //everything is fine: just return the state for further login processing
+                return (state);
+            } else if (state.getState() == LoginState.STATE_AUTHENTICATION_FAILURE) {
+                if (this.getLogger() == null) {
+                    throw new RuntimeException("GUIClient.loginFailure: No logger set.");
+                }
+                User returnedLoginUser = state.getUser();
+                this.log(Level.WARNING, this.rb.getResourceString("login.failure", returnedLoginUser.getName()));
+                return (this.performLogin(returnedLoginUser.getName()));
+            } else if (state.getState() == LoginState.STATE_INCOMPATIBLE_CLIENT) {
+                JOptionPane.showMessageDialog(GUIClient.this,
+                        this.rb.getResourceString("login.failed.client.incompatible.message"),
+                        this.rb.getResourceString("login.failed.client.incompatible.title"), JOptionPane.ERROR_MESSAGE);
+                System.exit(1);
+            }
         } else {
             //kill VM
             System.exit(1);
         }
+        //will NEVER happen
+        return (null);
     }
 
-    /**The server requests a password for the user
+    /**
+     * Sends a message async to the server
      */
-    @Override
-    public void loginFailureServerRequestsPassword(String user) {
-        if (this.getLogger() == null) {
-            throw new RuntimeException("GUIClient.loginFailureServerRequestsPassword: No logger set.");
-        }
-        this.log(Level.INFO, this.rb.getResourceString("password.required", user));
-        this.performLogin(user);
-    }
-
-    /**Sends a message async to the server*/
     public void sendAsync(ClientServerMessage message) {
         this.getBaseClient().sendAsync(message);
     }
 
-    /**Sends a message sync to the server and returns a response
-     * Will inform the ClientSessionHandler callback (syncRequestFailed)
-     * if the sync request fails
+    /**
+     * Sends a message sync to the server and returns a response Will inform the
+     * ClientSessionHandler callback (syncRequestFailed) if the sync request
+     * fails
      */
     public ClientServerMessage sendSync(ClientServerMessage request, long timeout) {
         return (this.getBaseClient().sendSync(request, timeout));
     }
 
-    /**Sends a message sync to the server and returns a response
-     * Will inform the ClientSessionHandler callback (syncRequestFailed)
-     * if the sync request fails
+    /**
+     * Sends a message sync to the server and returns a response Will inform the
+     * ClientSessionHandler callback (syncRequestFailed) if the sync request
+     * fails
      */
     public ClientServerMessage sendSync(ClientServerMessage request) {
         return (this.getBaseClient().sendSync(request));
@@ -168,27 +204,6 @@ public abstract class GUIClient extends JFrame implements ClientSessionHandlerCa
         }
         this.log(Level.INFO, this.rb.getResourceString("connection.success",
                 socketAddress.toString()));
-    }
-
-    /**Callback if the user has been logged in successfully
-     */
-    @Override
-    public void loggedIn(User user) {
-        if (this.getLogger() == null) {
-            throw new RuntimeException("GUIClient.loggedIn: No logger set.");
-        }
-        //login successful: pass a user to the base client
-        this.getBaseClient().setUser(user);
-        this.log(Level.CONFIG, this.rb.getResourceString("login.success", user.getName()));
-    }
-
-    @Override
-    public void loginFailure(String username) {
-        if (this.getLogger() == null) {
-            throw new RuntimeException("GUIClient.loginFailure: No logger set.");
-        }
-        this.log(Level.WARNING, this.rb.getResourceString("login.failure", username));
-        this.performLogin(username);
     }
 
     @Override
@@ -210,12 +225,19 @@ public abstract class GUIClient extends JFrame implements ClientSessionHandlerCa
         System.exit(1);
     }
 
-    /**Overwrite this in the client implementation for user defined processing
+    /**
+     * Overwrite this in the client implementation for user defined processing
      */
     @Override
     public void messageReceivedFromServer(ClientServerMessage message) {
         //there is no user defined processing for sync responses
-        if (message._isSyncRequest()) {
+        if (message._isSyncRequest() && message instanceof ClientServerResponse) {
+            synchronized (this.messageProcessorList) {
+                //let the message process by all registered client side processors            
+                for (ClientsideMessageProcessor processor : this.messageProcessorList) {
+                    processor.processSyncResponseFromServer((ClientServerResponse)message);
+                }
+            }
             return;
         }
         if (this.getLogger() == null) {
@@ -224,17 +246,20 @@ public abstract class GUIClient extends JFrame implements ClientSessionHandlerCa
         //catch the server information if its available
         if (message instanceof ServerInfo) {
             this.serverProductName = ((ServerInfo) message).getProductname();
-        }
-        boolean processed = false;
-        synchronized (this.messageProcessorList) {
-            //let the message process by all registered client side processors            
-            for (ClientsideMessageProcessor processor : this.messageProcessorList) {
-                processed |= processor.processMessageFromServer(message);
+        } else if (message instanceof LoginRequired) {
+            this.loginRequestedFromServer();
+        } else {
+            boolean processed = false;
+            synchronized (this.messageProcessorList) {
+                //let the message process by all registered client side processors            
+                for (ClientsideMessageProcessor processor : this.messageProcessorList) {
+                    processed |= processor.processMessageFromServer(message);
+                }
             }
-        }
-        if (!processed) {
-            this.log(Level.WARNING, this.rb.getResourceString("client.received.unprocessed.message",
-                    message.getClass().getName()));
+            if (!processed) {
+                this.log(Level.WARNING, this.rb.getResourceString("client.received.unprocessed.message",
+                        message.getClass().getName()));
+            }
         }
     }
 
@@ -246,7 +271,8 @@ public abstract class GUIClient extends JFrame implements ClientSessionHandlerCa
         this.log(Level.SEVERE, this.rb.getResourceString("error", message));
     }
 
-    /**Performs a logout, closes the actual session
+    /**
+     * Performs a logout, closes the actual session
      */
     public void logout() {
         this.getBaseClient().logout();
@@ -259,10 +285,12 @@ public abstract class GUIClient extends JFrame implements ClientSessionHandlerCa
         return client;
     }
 
-    /**Makes this a ClientSessionCallback*/
+    /**
+     * Makes this a ClientSessionCallback
+     */
     @Override
     public void syncRequestFailed(Throwable throwable) {
-        this.getLogger().severe(throwable.getMessage());
+        this.getLogger().warning(throwable.getMessage());
     }
 
     private class ProgressRun implements Runnable {

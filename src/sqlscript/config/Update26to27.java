@@ -1,4 +1,4 @@
-//$Header: /as2/sqlscript/config/Update26to27.java 4     11.11.11 11:54 Heller $
+//$Header: /as2/sqlscript/config/Update26to27.java 5     19.03.13 17:44 Heller $
 package sqlscript.config;
 
 import de.mendelson.comm.as2.database.IUpdater;
@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
@@ -19,7 +20,7 @@ import java.util.ArrayList;
  *
  * Update the database from version 26 to version 27
  * @author S.Heller
- * @version $Revision: 4 $
+ * @version $Revision: 5 $
  * @since build 128
  */
 public class Update26to27 implements IUpdater {
@@ -43,7 +44,7 @@ public class Update26to27 implements IUpdater {
         statement.execute("CREATE INDEX idx_mdn_messagedate ON mdn(messagedate)");
         //now move the mdns to the new table
         ResultSet result = statement.executeQuery("SELECT * FROM messages WHERE relatedmessageid IS NOT NULL");
-        ArrayList<String> relatedList = new ArrayList<String>();
+        List<String> relatedList = new ArrayList<String>();
         while (result.next()) {
             String relatedMessageId = result.getString("relatedmessageid");
             //check id this MDN is linked
@@ -70,7 +71,15 @@ public class Update26to27 implements IUpdater {
         }
         result.close();
         for (String messageId : relatedList) {
-            PreparedStatement deleteStatement = connection.prepareStatement("DELETE FROM messages WHERE relatedmessageid=?");
+            PreparedStatement deleteStatement = connection.prepareStatement("DELETE FROM messagelog WHERE messageid=?");
+            deleteStatement.setString(1, messageId);
+            deleteStatement.execute();
+            deleteStatement.close(); 
+            deleteStatement = connection.prepareStatement("DELETE FROM payload WHERE messageid=?");
+            deleteStatement.setString(1, messageId);
+            deleteStatement.execute();
+            deleteStatement.close(); 
+            deleteStatement = connection.prepareStatement("DELETE FROM messages WHERE relatedmessageid=?");
             deleteStatement.setString(1, messageId);
             deleteStatement.execute();
             deleteStatement.close();

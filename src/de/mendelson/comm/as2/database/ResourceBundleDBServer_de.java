@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/database/ResourceBundleDBServer_de.java,v 1.1 2012/04/18 14:10:29 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/database/ResourceBundleDBServer_de.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.database;
 import de.mendelson.util.MecResourceBundle;
 /*
@@ -29,7 +29,7 @@ public class ResourceBundleDBServer_de extends MecResourceBundle{
     {"update.versioninfo", "Automatisches Datenbankupdate: Die gefundene DB Version"
     + " ist {0}, die benoetigte ist {1}." },
     {"update.progress", "Inkrementelles Datenbankupdate gestartet..." },
-    {"update.progress.version.start", "Beginne Update der DB auf Version {0}..." },
+    {"update.progress.version.start", "Beginne Update der {1} DB auf Version {0}..." },
     {"update.progress.version.end", "Update der {1} DB auf Version {0} fertig." },
     {"update.error", "FATAL: Es ist unmoeglich, die DB von der Version {0} "
     + " zur Version {1} zu modifizieren.\n"

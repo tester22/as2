@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/importexport/ConfigurationImport.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/importexport/ConfigurationImport.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.importexport;
 
 import de.mendelson.util.security.cert.CertificateManager;
@@ -34,6 +34,7 @@ import org.xml.sax.InputSource;
  */
 /**
  * Exports configuration data to a file
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
@@ -45,7 +46,16 @@ public class ConfigurationImport {
     private CertificateManager certificateManager;
     private Logger logger = Logger.getLogger(AS2Server.SERVER_LOGGER_NAME);
 
-    /**@param connection database connection to use to write the config*/
+    /**
+     * @param connection database connection to use to write the config
+     */
+    public ConfigurationImport() {
+        this(null, null);
+    }
+
+    /**
+     * @param connection database connection to use to write the config
+     */
     public ConfigurationImport(Connection configConnection, Connection runtimeConnection) {
         this.configConnection = configConnection;
         this.runtimeConnection = runtimeConnection;
@@ -60,7 +70,9 @@ public class ConfigurationImport {
         }
     }
 
-    /**parses a xml stream and returns a DOM document*/
+    /**
+     * parses a xml stream and returns a DOM document
+     */
     public Document parseStream(InputStream inStream) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -69,7 +81,9 @@ public class ConfigurationImport {
         return (document);
     }
 
-    /**Finally performs the import of the data*/
+    /**
+     * Finally performs the import of the data
+     */
     public void importData(InputStream inStream, List<Partner> partnerListToImport, boolean importNotification, boolean importServerSettings) throws Exception {
         Element rootElement = this.getRootElement(inStream);
         if (importNotification) {
@@ -129,14 +143,18 @@ public class ConfigurationImport {
         }
     }
 
-    /**Parses the XML file and returns its root element*/
+    /**
+     * Parses the XML file and returns its root element
+     */
     private Element getRootElement(InputStream inStream) throws Exception {
         Document document = this.parseStream(inStream);
         Element rootElement = document.getDocumentElement();
         return (rootElement);
     }
 
-    /**Reads the notificatoin data from a partner, may return null*/
+    /**
+     * Reads the notificatoin data from a partner, may return null
+     */
     private NotificationData readNotificationData(Element parent) {
         NotificationData notification = null;
         NodeList notifcationList = parent.getElementsByTagName("notification");
@@ -147,14 +165,18 @@ public class ConfigurationImport {
         return (notification);
     }
 
-    /**Reads all partners of the import document*/
+    /**
+     * Reads all partners of the import document
+     */
     public List<Partner> readPartner(InputStream inStream) throws Exception {
         Element rootElement = this.getRootElement(inStream);
         List<Partner> partnerList = this.readPartner(rootElement);
         return (partnerList);
     }
 
-    /**Reads all partners of the import document*/
+    /**
+     * Reads all partners of the import document
+     */
     private List<Partner> readPartner(Element parent) {
         List<Partner> partnerList = new ArrayList<Partner>();
         NodeList partnerElementList = parent.getElementsByTagName("partner");

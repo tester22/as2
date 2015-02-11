@@ -1,61 +1,36 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/util/security/cert/KeystoreCertificate.java,v 1.1 2012/04/18 14:10:47 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/cert/KeystoreCertificate.java,v 1.1 2015/01/06 11:07:57 heller Exp $
 package de.mendelson.util.security.cert;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
-import java.security.cert.CertPath;
-import java.security.cert.CertPathBuilder;
-import java.security.cert.CertPathBuilderException;
-import java.security.cert.CertPathValidator;
-import java.security.cert.CertPathValidatorException;
-import java.security.cert.CertPathValidatorResult;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreParameters;
-import java.security.cert.CollectionCertStoreParameters;
-import java.security.cert.PKIXBuilderParameters;
-import java.security.cert.PKIXCertPathBuilderResult;
-import java.security.cert.PKIXCertPathValidatorResult;
-import java.security.cert.PKIXParameters;
-import java.security.cert.TrustAnchor;
-import java.security.cert.X509CertSelector;
-import java.security.cert.X509Certificate;
+import java.io.Serializable;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.cert.*;
 import java.security.interfaces.RSAPublicKey;
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import javax.security.auth.x500.X500Principal;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERString;
-import org.bouncycastle.asn1.x509.CRLDistPoint;
-import org.bouncycastle.asn1.x509.DistributionPoint;
-import org.bouncycastle.asn1.x509.DistributionPointName;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.asn1.ASN1String;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.x509.*;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *
  * This software is subject to the license agreement set forth in the license.
- * Please read and agree to all terms before using this software.
- * Other product and brand names are trademarks of their respective owners.
+ * Please read and agree to all terms before using this software. Other product
+ * and brand names are trademarks of their respective owners.
  */
 /**
  * Object that stores a single configuration certificate/key
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
-public class KeystoreCertificate implements Comparable {
+public class KeystoreCertificate implements Comparable, Serializable {
 
     private String alias = "";
     private X509Certificate certificate = null;
@@ -64,8 +39,9 @@ public class KeystoreCertificate implements Comparable {
     public KeystoreCertificate() {
     }
 
-    /**Returns the extension value "extended key usage", OID 2.5.29.37
-     * 
+    /**
+     * Returns the extension value "extended key usage", OID 2.5.29.37
+     *
      */
     public List<String> getExtendedKeyUsage() {
         HashMap<String, String> oidMap = new HashMap<String, String>();
@@ -107,10 +83,10 @@ public class KeystoreCertificate implements Comparable {
             return (extendedKeyUsage);
         }
         try {
-            byte[] octedBytes = ((ASN1OctetString) ASN1Object.fromByteArray(extensionValue)).getOctets();
-            ASN1Sequence asn1Sequence = (ASN1Sequence) ASN1Object.fromByteArray(octedBytes);
+            byte[] octedBytes = ((ASN1OctetString) ASN1Primitive.fromByteArray(extensionValue)).getOctets();
+            ASN1Sequence asn1Sequence = (ASN1Sequence) ASN1Primitive.fromByteArray(octedBytes);
             for (int i = 0; i < asn1Sequence.size(); i++) {
-                String oid = (asn1Sequence.getObjectAt(i).getDERObject().toString());
+                String oid = (asn1Sequence.getObjectAt(i).toASN1Primitive().toString());
                 if (oidMap.containsKey(oid)) {
                     extendedKeyUsage.add(oidMap.get(oid));
                 } else {
@@ -123,7 +99,53 @@ public class KeystoreCertificate implements Comparable {
         return (extendedKeyUsage);
     }
 
-    /**Returns the key usages of this cert, OID 2.5.29.15*/
+    public List<String> getAuthorityKeyIdentifier() {
+        List<String> authorityKeyIdentifierList = new ArrayList<String>();
+        byte[] extensionValue = this.certificate.getExtensionValue("2.5.29.35");
+        if (extensionValue == null) {
+            return (authorityKeyIdentifierList);
+        }
+        try {
+            byte[] octedBytes = ((ASN1OctetString) ASN1Primitive.fromByteArray(extensionValue)).getOctets();
+            ASN1Sequence asn1Sequence = (ASN1Sequence) ASN1Primitive.fromByteArray(octedBytes);
+            for (int i = 0, len = asn1Sequence.size(); i < len; i++) {
+                DERTaggedObject derTagObj = (DERTaggedObject) asn1Sequence.getObjectAt(i);
+                if (derTagObj.getTagNo() == 0) {
+                    DEROctetString octetStr = (DEROctetString) derTagObj.getObject();
+                    byte[] identifier = octetStr.getOctets();
+                    authorityKeyIdentifierList.add("[Key identifier] " + byteArrayToHexStr(identifier));
+                } else if (derTagObj.getTagNo() == 2) {
+                    DEROctetString octetStr = (DEROctetString) derTagObj.getObject();
+                    byte[] identifier = octetStr.getOctets();
+                    authorityKeyIdentifierList.add("[Serial] " + byteArrayToHexStr(identifier));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return (authorityKeyIdentifierList);
+    }
+
+    public List<String> getSubjectKeyIdentifier() {
+        List<String> subjectKeyIdentifierList = new ArrayList<String>();
+        byte[] extensionValue = this.certificate.getExtensionValue("2.5.29.14");
+        if (extensionValue == null) {
+            return (subjectKeyIdentifierList);
+        }
+        try {
+            byte[] octedBytes = ((ASN1OctetString) ASN1Primitive.fromByteArray(extensionValue)).getOctets();
+            DEROctetString octetStr = (DEROctetString) ASN1Primitive.fromByteArray(octedBytes);
+            byte[] identifier = octetStr.getOctets();
+            subjectKeyIdentifierList.add(byteArrayToHexStr(identifier));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return (subjectKeyIdentifierList);
+    }
+
+    /**
+     * Returns the key usages of this cert, OID 2.5.29.15
+     */
     public List<String> getKeyUsages() {
         List<String> keyUsages = new ArrayList<String>();
         byte[] extensionValue = this.certificate.getExtensionValue("2.5.29.15");
@@ -131,9 +153,9 @@ public class KeystoreCertificate implements Comparable {
             return (keyUsages);
         }
         try {
-            byte[] octedBytes = ((ASN1OctetString) ASN1Object.fromByteArray(extensionValue)).getOctets();
+            byte[] octedBytes = ((ASN1OctetString) ASN1Primitive.fromByteArray(extensionValue)).getOctets();
             //bit encoded values for the key usage
-            int val = KeyUsage.getInstance(ASN1Object.fromByteArray(octedBytes)).intValue();
+            int val = KeyUsage.getInstance(ASN1Primitive.fromByteArray(octedBytes)).getPadBits();
             //bit 0
             if ((val & KeyUsage.digitalSignature) == KeyUsage.digitalSignature) {
                 keyUsages.add("Digital signature");
@@ -176,7 +198,27 @@ public class KeystoreCertificate implements Comparable {
         return (keyUsages);
     }
 
-    /**Returns the subject alternative name of this cert, OID 2.5.29.17*/
+    public BigInteger getModulus() {
+        PublicKey key = this.certificate.getPublicKey();
+        if (key instanceof RSAPublicKey) {
+            RSAPublicKey rsaKey = (RSAPublicKey) key;
+            return (rsaKey.getModulus());
+        }
+        return (BigInteger.ZERO);
+    }
+
+    public BigInteger getPublicExponent() {
+        PublicKey key = this.certificate.getPublicKey();
+        if (key instanceof RSAPublicKey) {
+            RSAPublicKey rsaKey = (RSAPublicKey) key;
+            return (rsaKey.getPublicExponent());
+        }
+        return (BigInteger.ZERO);
+    }
+
+    /**
+     * Returns the subject alternative name of this cert, OID 2.5.29.17
+     */
     public List<String> getSubjectAlternativeNames() {
         List<String> alternativeNames = new ArrayList<String>();
         byte[] extensionValue = this.certificate.getExtensionValue("2.5.29.17");
@@ -184,18 +226,20 @@ public class KeystoreCertificate implements Comparable {
             return (alternativeNames);
         }
         try {
-            byte[] octedBytes = ((ASN1OctetString) ASN1Object.fromByteArray(extensionValue)).getOctets();
-            GeneralName[] names = (GeneralNames.getInstance(ASN1Object.fromByteArray(octedBytes))).getNames();
+            byte[] octedBytes = ((ASN1OctetString) ASN1Primitive.fromByteArray(extensionValue)).getOctets();
+            GeneralName[] names = (GeneralNames.getInstance(ASN1Primitive.fromByteArray(octedBytes))).getNames();
             for (GeneralName name : names) {
-                alternativeNames.add(((DERString) name.getName()).getString() + " (" + this.generalNameTagNoToString(name) + ")");
+                alternativeNames.add(((ASN1String) name.getName()).getString() + " (" + this.generalNameTagNoToString(name) + ")");
             }
         } catch (Exception e) {
-            //nop
+           e.printStackTrace();
         }
         return (alternativeNames);
     }
 
-    /**Converts the tag no of a general name to a human readable value*/
+    /**
+     * Converts the tag no of a general name to a human readable value
+     */
     private String generalNameTagNoToString(GeneralName name) {
         if (name.getTagNo() == GeneralName.dNSName) {
             return ("DNS name");
@@ -228,9 +272,9 @@ public class KeystoreCertificate implements Comparable {
     }
 
     /**
-     * Get extension values for CRL Distribution Points as a string list or an empty list if an exception occured or
-     * the extension doesnt exist
-     * OID 2.5.29.31
+     * Get extension values for CRL Distribution Points as a string list or an
+     * empty list if an exception occured or the extension doesnt exist OID
+     * 2.5.29.31
      */
     public List<String> getCrlDistributionURLs() {
         List<String> ulrList = new ArrayList<String>();
@@ -240,8 +284,8 @@ public class KeystoreCertificate implements Comparable {
             return (ulrList);
         }
         try {
-            byte[] octedBytes = ((ASN1OctetString) ASN1Object.fromByteArray(extensionValue)).getOctets();
-            CRLDistPoint distPoint = CRLDistPoint.getInstance(ASN1Object.fromByteArray(octedBytes));
+            byte[] octedBytes = ((ASN1OctetString) ASN1Primitive.fromByteArray(extensionValue)).getOctets();
+            CRLDistPoint distPoint = CRLDistPoint.getInstance(ASN1Primitive.fromByteArray(octedBytes));
             DistributionPoint[] points = distPoint.getDistributionPoints();
             for (DistributionPoint point : points) {
                 DistributionPointName distributionPointName = point.getDistributionPoint();
@@ -250,7 +294,7 @@ public class KeystoreCertificate implements Comparable {
                         GeneralNames generalNames = (GeneralNames) distributionPointName.getName();
                         for (GeneralName generalName : generalNames.getNames()) {
                             //generalName.getTagNo() is GeneralName.uniformResourceIdentifier in this case
-                            ulrList.add(((DERString) generalName.getName()).getString());
+                            ulrList.add(((ASN1String) generalName.getName()).getString());
                         }
                     }
                 }
@@ -261,7 +305,9 @@ public class KeystoreCertificate implements Comparable {
         return (ulrList);
     }
 
-    /**Returns the enwrapped certificate version*/
+    /**
+     * Returns the enwrapped certificate version
+     */
     public int getVersion() {
         return (this.certificate.getVersion());
     }
@@ -274,12 +320,16 @@ public class KeystoreCertificate implements Comparable {
         return (this.certificate.getPublicKey().getAlgorithm());
     }
 
-    /**Valid date start*/
+    /**
+     * Valid date start
+     */
     public Date getNotBefore() {
         return (this.certificate.getNotBefore());
     }
 
-    /**Valid date end*/
+    /**
+     * Valid date end
+     */
     public Date getNotAfter() {
         return (this.certificate.getNotAfter());
     }
@@ -292,12 +342,16 @@ public class KeystoreCertificate implements Comparable {
         return (this.certificate.getIssuerDN().toString());
     }
 
-    /**Returns the serial number as decimal*/
+    /**
+     * Returns the serial number as decimal
+     */
     public String getSerialNumberDEC() {
         return (this.certificate.getSerialNumber().toString());
     }
 
-    /**Returns the serial number as decimal*/
+    /**
+     * Returns the serial number as decimal
+     */
     public String getSerialNumberHEX() {
         return (this.certificate.getSerialNumber().toString(16).toUpperCase());
     }
@@ -329,10 +383,10 @@ public class KeystoreCertificate implements Comparable {
         return (this.isSelfSigned() && this.certificate.getBasicConstraints() != -1);
     }
 
-    public boolean isSelfSigned(){
+    public boolean isSelfSigned() {
         X500Principal subject = this.certificate.getSubjectX500Principal();
         X500Principal issuer = this.certificate.getIssuerX500Principal();
-        return( subject.equals(issuer));
+        return (subject.equals(issuer));
     }
 
     public String getAlias() {
@@ -364,14 +418,15 @@ public class KeystoreCertificate implements Comparable {
         return (this.getFingerPrint("MD5"));
     }
 
-    /**Deserializes a fingerprint string to a byte array
-     * It is assumed that the fingerprint string has the format hex:hex:hex
+    /**
+     * Deserializes a fingerprint string to a byte array It is assumed that the
+     * fingerprint string has the format hex:hex:hex
      */
     public static byte[] fingerprintStrToBytes(String fingerprintStr) {
         String[] token = fingerprintStr.split(":");
         byte[] bytes = new byte[token.length];
         for (int i = 0; i < token.length; i++) {
-            while( token[i].length() < 2){
+            while (token[i].length() < 2) {
                 token[i] = "0" + token[i];
             }
             bytes[i] = fromHexString(token[i])[0];
@@ -380,41 +435,47 @@ public class KeystoreCertificate implements Comparable {
     }
 
     private static byte[] fromHexString(final String encoded) {
-    if ((encoded.length() % 2) != 0)
-        throw new IllegalArgumentException("Input string must contain an even number of characters");
+        if ((encoded.length() % 2) != 0) {
+            throw new IllegalArgumentException("Input string must contain an even number of characters");
+        }
 
-    final byte result[] = new byte[encoded.length()/2];
-    final char enc[] = encoded.toCharArray();
-    for (int i = 0; i < enc.length; i += 2) {
-        StringBuilder curr = new StringBuilder(2);
-        curr.append(enc[i]).append(enc[i + 1]);
-        result[i/2] = (byte) Integer.parseInt(curr.toString(), 16);
+        final byte result[] = new byte[encoded.length() / 2];
+        final char enc[] = encoded.toCharArray();
+        for (int i = 0; i < enc.length; i += 2) {
+            StringBuilder curr = new StringBuilder(2);
+            curr.append(enc[i]).append(enc[i + 1]);
+            result[i / 2] = (byte) Integer.parseInt(curr.toString(), 16);
+        }
+        return result;
     }
-    return result;
-}
 
+    private static String byteArrayToHexStr(byte[] byteArray) {
+        StringBuilder hextStringBuffer = new StringBuilder();
+        for (int i = 0; i < byteArray.length; i++) {
+            if (i > 0) {
+                hextStringBuffer.append(":");
+            }
+            String singleByte = Integer.toHexString(byteArray[i] & 0xFF).toUpperCase();
+            if (singleByte.length() == 0) {
+                hextStringBuffer.append("00");
+            } else if (singleByte.length() == 1) {
+                hextStringBuffer.append("0");
+            }
+            hextStringBuffer.append(singleByte);
+        }
+        return hextStringBuffer.toString();
+    }
 
-     /**Serializes a fingerprint string from a byte array to a String
-     * It is assumed that the fingerprint string has the format hex:hex:hex
+    /**
+     * Serializes a fingerprint string from a byte array to a String It is
+     * assumed that the fingerprint string has the format hex:hex:hex
      */
     public static String fingerprintBytesToStr(byte[] fingerprintBytes) {
-        StringBuilder fingerprint = new StringBuilder();
-        for (int i = 0; i < fingerprintBytes.length; i++) {
-            if (i > 0) {
-                fingerprint.append(":");
-            }
-            String singleByte = Integer.toHexString(fingerprintBytes[i] & 0xFF).toUpperCase();
-            if (singleByte.length() == 0) {
-                fingerprint.append("00");
-            } else if (singleByte.length() == 1) {
-                fingerprint.append("0");
-            }
-            fingerprint.append(singleByte);
-        }
-        return fingerprint.toString();
+        return (byteArrayToHexStr(fingerprintBytes));
     }
 
-    /**@param digest to create the hash value, please use SHA1 or MD5 only
+    /**
+     * @param digest to create the hash value, please use SHA1 or MD5 only
      *
      */
     private byte[] getFingerPrintBytes(String digest) {
@@ -427,15 +488,19 @@ public class KeystoreCertificate implements Comparable {
     }
 
     /**
-     * Returns a fingerprint string that returns the fingerprint using the format n:n:n
+     * Returns a fingerprint string that returns the fingerprint using the
+     * format n:n:n
+     *
      * @param digest to create the hash value, please use SHA1 or MD5 only
-     * 
+     *
      */
     private String getFingerPrint(String digest) {
-        return( fingerprintBytesToStr(this.getFingerPrintBytes(digest)));
+        return (fingerprintBytesToStr(this.getFingerPrintBytes(digest)));
     }
 
-    /**Returns the cert path for this certificate as it exists in the keystore
+    /**
+     * Returns the cert path for this certificate as it exists in the keystore
+     *
      * @return null if no cert path could be found
      */
     public PKIXCertPathBuilderResult getPKIXCertPathBuilderResult(KeyStore keystore, List<X509Certificate> certificateList) {
@@ -463,9 +528,12 @@ public class KeystoreCertificate implements Comparable {
         return (null);
     }
 
-    /**Validates the certificate and returns the trust anchor certificate if the cert path is valid and the
-     * full path could be validated
-     * @return null if the certificate could not be trusted or an other failure like nosuchalg exception etc occurs
+    /**
+     * Validates the certificate and returns the trust anchor certificate if the
+     * cert path is valid and the full path could be validated
+     *
+     * @return null if the certificate could not be trusted or an other failure
+     * like nosuchalg exception etc occurs
      */
     public X509Certificate validateCertPath(KeyStore keystore, List<X509Certificate> certificateList) {
         CertPath certPath = this.getPKIXCertPathBuilderResult(keystore, certificateList).getCertPath();
@@ -509,7 +577,9 @@ public class KeystoreCertificate implements Comparable {
         return (this.alias.toUpperCase().compareTo(otherCert.alias.toUpperCase()));
     }
 
-    /**Returns a string that contains information about the certificate*/
+    /**
+     * Returns a string that contains information about the certificate
+     */
     public String getInfo() {
         DateFormat format = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT);
         StringBuilder infoText = new StringBuilder();
@@ -535,7 +605,9 @@ public class KeystoreCertificate implements Comparable {
         return (infoText.toString());
     }
 
-    /**Returns some information about the certificate extensions*/
+    /**
+     * Returns some information about the certificate extensions
+     */
     public String getInfoExtension() {
         StringBuilder extensionText = new StringBuilder();
         List<String> crl = this.getCrlDistributionURLs();
@@ -554,10 +626,20 @@ public class KeystoreCertificate implements Comparable {
         if (extkeyUsages.size() > 0) {
             extensionText.append("Extended key usage: ").append(this.convertListToString(extkeyUsages)).append("\n");
         }
+        List<String> authorityKeyIdentifier = this.getAuthorityKeyIdentifier();
+        if (authorityKeyIdentifier.size() > 0) {
+            extensionText.append("Authority key identifier: ").append(this.convertListToString(authorityKeyIdentifier)).append("\n");
+        }
+        List<String> subjectKeyIdentifier = this.getSubjectKeyIdentifier();
+        if (subjectKeyIdentifier.size() > 0) {
+            extensionText.append("Subject key identifier: ").append(this.convertListToString(subjectKeyIdentifier)).append("\n");
+        }
         return (extensionText.toString());
     }
 
-    /**Converts the arraylist content to a comma separated string*/
+    /**
+     * Converts the arraylist content to a comma separated string
+     */
     private String convertListToString(Collection<String> list) {
         StringBuilder builder = new StringBuilder();
         for (String value : list) {
@@ -569,8 +651,10 @@ public class KeystoreCertificate implements Comparable {
         return (builder.toString());
     }
 
-    /**Overwrite the equal method of object
-     *@param anObject object ot compare
+    /**
+     * Overwrite the equal method of object
+     *
+     * @param anObject object ot compare
      */
     @Override
     public boolean equals(Object anObject) {
@@ -603,9 +687,9 @@ public class KeystoreCertificate implements Comparable {
         hash = 97 * hash + (this.isKeyPair ? 1 : 0);
         return hash;
     }
-
-
-    /**'3D:A0:27:42:4D:92:6D:04:BB:74:66:1D:48:3E:61:6A:46:2A:05:B7'*/
+    /**
+     * '3D:A0:27:42:4D:92:6D:04:BB:74:66:1D:48:3E:61:6A:46:2A:05:B7'
+     */
 //    public static final void main(String[] args) {
 //        byte[] test = new byte[]{
 //            (byte) 0x00, (byte) 0x3D, (byte)0x04 , (byte) 0xA0, (byte) 0x92,

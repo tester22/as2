@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/util/security/cert/clientserver/UploadResponseKeystore.java,v 1.1 2012/04/18 14:10:47 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/cert/clientserver/UploadResponseKeystore.java,v 1.1 2015/01/06 11:07:58 heller Exp $
 package de.mendelson.util.security.cert.clientserver;
 
 import de.mendelson.util.clientserver.clients.datatransfer.UploadResponseFile;

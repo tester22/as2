@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/database/DBServer.java,v 1.1 2012/04/18 14:10:29 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/database/DBServer.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.database;
 
 import de.mendelson.comm.as2.AS2ServerVersion;
@@ -18,9 +18,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.MissingResourceException;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 import org.hsqldb.Server;
 import org.hsqldb.persist.HsqlProperties;
@@ -35,17 +38,24 @@ import org.hsqldb.server.ServerConstants;
 
 /**
  * Class to start a dedicated SQL database server
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  * @since build 70
  */
 public class DBServer {
 
-    /**Resourcebundle to localize messages of the DB server*/
+    /**
+     * Resourcebundle to localize messages of the DB server
+     */
     private static MecResourceBundle rb;
-    /**Log messages*/
+    /**
+     * Log messages
+     */
     private Logger logger = Logger.getLogger(AS2Server.SERVER_LOGGER_NAME);
-    /**Database object*/
+    /**
+     * Database object
+     */
     private Server server = null;
     private PreferencesAS2 preferences = new PreferencesAS2();
 
@@ -59,7 +69,8 @@ public class DBServer {
         }
     }
 
-    /**Start a dedicated database server
+    /**
+     * Start a dedicated database server
      */
     public DBServer() throws Exception {
         //split up database if its an older version with a single DB
@@ -73,7 +84,7 @@ public class DBServer {
         File propertiesFileRuntime = new File(DBDriverManager.getDBName(DBDriverManager.DB_RUNTIME) + ".properties");
         String versionConfig = "";
         String versionRuntime = "";
-        if (propertiesFileConfig.exists()) {            
+        if (propertiesFileConfig.exists()) {
             Properties dbProperties = new Properties();
             FileInputStream inStream = null;
             try {
@@ -98,14 +109,15 @@ public class DBServer {
                 }
             }
             versionRuntime = dbProperties.getProperty("version");
-        }        
+        }
         if (versionConfig.startsWith("1") || versionRuntime.startsWith("1")) {
             throw new UpgradeRequiredException(this.rb.getResourceString("upgrade.required"));
         }
     }
-    
-    
-    /**Starts an internal DB server with default parameter*/
+
+    /**
+     * Starts an internal DB server with default parameter
+     */
     private void startDBServer() throws Exception {
         this.server = new Server();
         //start an internal server
@@ -171,7 +183,9 @@ public class DBServer {
         DBDriverManager.setupConnectionPool();
     }
 
-    /**Performs a defragementation of the passed database. This is necessary to keep the database files small
+    /**
+     * Performs a defragementation of the passed database. This is necessary to
+     * keep the database files small
      *
      */
     public static void defragDB(final int DB_TYPE) throws Exception {
@@ -199,8 +213,8 @@ public class DBServer {
         }
     }
 
-    /**Check if db exists and create a new one
-     * if it doesnt exist
+    /**
+     * Check if db exists and create a new one if it doesnt exist
      */
     private void createCheck() {
         if (!this.databaseExists(DBDriverManager.DB_CONFIG)) {
@@ -213,7 +227,9 @@ public class DBServer {
         }
     }
 
-    /**Returns if the passed database type exists*/
+    /**
+     * Returns if the passed database type exists
+     */
     private boolean databaseExists(int databaseType) {
         String TABLE_NAME = "TABLE_NAME";
         String[] TABLE_TYPES = {"TABLE"};
@@ -278,9 +294,12 @@ public class DBServer {
         return (foundVersion);
     }
 
-    /**Update the database if this is necessary.
-     *@param connection connection to the database
-     *@param DB_TYPE of the database that should be created, as defined in this class MecDriverManager
+    /**
+     * Update the database if this is necessary.
+     *
+     * @param connection connection to the database
+     * @param DB_TYPE of the database that should be created, as defined in this
+     * class MecDriverManager
      */
     private void updateDB(Connection connection, final int DB_TYPE) {
         int requiredDBVersion = -1;
@@ -321,20 +340,22 @@ public class DBServer {
         }
     }
 
-    /**Sets the new DB version to the passed number if the update was
-     *successfully
-     *@param connection DB connection to use
-     *@param version new DB version the update has updated to
+    /**
+     * Sets the new DB version to the passed number if the update was
+     * successfully
+     *
+     * @param connection DB connection to use
+     * @param version new DB version the update has updated to
      */
     private void setNewDBVersion(Connection connection, int version) {
         try {
             //request all connections from the database to store them
             PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO version(actualVersion,updateDate,updateComment)VALUES(?,?,?)");
+                    "INSERT INTO version(actualversion,updatedate,updatecomment)VALUES(?,?,?)");
             statement.setEscapeProcessing(true);
             //fill in values
             statement.setInt(1, version);
-            statement.setDate(2, new java.sql.Date(System.currentTimeMillis()));
+            statement.setTimestamp(2, new Timestamp(System.currentTimeMillis()), Calendar.getInstance(TimeZone.getTimeZone("UTC")));
             statement.setString(3, "by " + AS2ServerVersion.getFullProductName() + " auto updater");
             statement.execute();
             statement.close();
@@ -343,7 +364,9 @@ public class DBServer {
         }
     }
 
-    /**Sends a shutdown signal to the DB*/
+    /**
+     * Sends a shutdown signal to the DB
+     */
     public void shutdown() {
         try {
             Connection configConnection = DBDriverManager.getConnectionWithoutErrorHandling(DBDriverManager.DB_CONFIG, "localhost");
@@ -378,16 +401,18 @@ public class DBServer {
         System.out.println(shutdownMessage);
     }
 
-    /**Start the DB update from the startVersion to the startVersion+1
-     *@param startVersion Start version
-     *@param connection Connection to use for the update
-     *@return true if the update was successful
-     *@param DB_TYPE of the database that should be created, as defined in this class MecDriverManager
+    /**
+     * Start the DB update from the startVersion to the startVersion+1
+     *
+     * @param startVersion Start version
+     * @param connection Connection to use for the update
+     * @return true if the update was successful
+     * @param DB_TYPE of the database that should be created, as defined in this
+     * class MecDriverManager
      */
     private boolean startDBUpdate(int startVersion, Connection connection, final int DB_TYPE) {
         boolean updatePerformed = false;
         String updateResource = null;
-
         if (DB_TYPE == DBDriverManager.DB_CONFIG) {
             updateResource = SQLScriptExecutor.SCRIPT_RESOURCE_CONFIG;
         } else if (DB_TYPE == DBDriverManager.DB_RUNTIME) {
@@ -437,8 +462,9 @@ public class DBServer {
         return (true);
     }
 
-    /**Split up the DB into a config and a runtime database if this is an AS version where only a single database
-     * exists (< end of 2011)
+    /**
+     * Split up the DB into a config and a runtime database if this is an AS
+     * version where only a single database exists (< end of 2011)
      */
     private void createDeprecatedCheck() throws Exception {
         File deprecatedFile = new File(DBDriverManager.getDBName(DBDriverManager.DB_DEPRICATED) + ".script");
@@ -454,8 +480,10 @@ public class DBServer {
         }
     }
 
-    /**Splits up the depricated database into 2 separate databases. The version of these splitted databases could be any from
-     *0 to 50.*/
+    /**
+     * Splits up the depricated database into 2 separate databases. The version
+     * of these splitted databases could be any from 0 to 50.
+     */
     private void copyDeprecatedDatabaseTo(String targetBase) throws IOException {
         String sourceBase = DBDriverManager.getDBName(DBDriverManager.DB_DEPRICATED);
         this.copyFile(sourceBase + ".backup", targetBase + ".backup");
@@ -464,7 +492,8 @@ public class DBServer {
         this.copyFile(sourceBase + ".script", targetBase + ".script");
     }
 
-    /**Copies the contents from one stream to the other
+    /**
+     * Copies the contents from one stream to the other
      */
     public void copyStreams(InputStream input, OutputStream output) throws IOException {
         byte[] buffer = new byte[4096];

@@ -1,8 +1,7 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/importexport/ConfigurationExport.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/importexport/ConfigurationExport.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.importexport;
 
 import de.mendelson.comm.as2.AS2ServerVersion;
-import de.mendelson.util.security.cert.CertificateManager;
 import de.mendelson.comm.as2.notification.NotificationAccessDB;
 import de.mendelson.comm.as2.notification.NotificationData;
 import de.mendelson.comm.as2.partner.Partner;
@@ -10,12 +9,14 @@ import de.mendelson.comm.as2.partner.PartnerAccessDB;
 import de.mendelson.comm.as2.preferences.PreferencesAS2;
 import de.mendelson.comm.as2.server.AS2Server;
 import de.mendelson.util.security.BCCryptoHelper;
+import de.mendelson.util.security.cert.CertificateManager;
 import de.mendelson.util.security.cert.KeystoreStorage;
 import de.mendelson.util.security.cert.KeystoreStorageImplFile;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.Connection;
+import java.util.List;
 import java.util.logging.Logger;
 
 /*
@@ -64,7 +65,7 @@ public class ConfigurationExport {
         this.exportConfiguration(writer);
         PartnerAccessDB partnerAccess 
                 = new PartnerAccessDB(this.configConnection, this.runtimeConnection);
-        Partner[] allPartner = partnerAccess.getPartner();
+        List<Partner> allPartner = partnerAccess.getPartner();
         for (Partner partner : allPartner) {
             writer.write(partner.toXML(this.certificateManager, 1));
         }

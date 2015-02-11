@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/client/ResourceBundleAS2StatusBar_fr.java,v 1.1 2012/04/18 14:10:23 heller Exp $ 
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/ResourceBundleAS2StatusBar_fr.java,v 1.1 2015/01/06 11:07:37 heller Exp $ 
 package de.mendelson.comm.as2.client;
 import de.mendelson.util.MecResourceBundle;
 /*
@@ -16,6 +16,7 @@ import de.mendelson.util.MecResourceBundle;
  */
 public class ResourceBundleAS2StatusBar_fr extends MecResourceBundle{
 
+  @Override
   public Object[][] getContents() {
     return contents;
   }
@@ -27,6 +28,8 @@ public class ResourceBundleAS2StatusBar_fr extends MecResourceBundle{
     {"count.pending", "Transactions attendant" },
     {"count.failure", "Transactions defectueuses" },
     {"count.selected", "Transactions choisies" },
+    {"configuration.issue.single", "{0} problème de configuration" },
+    {"configuration.issue.multiple", "{0} problèmes de configuration" },
   };		
   
 }

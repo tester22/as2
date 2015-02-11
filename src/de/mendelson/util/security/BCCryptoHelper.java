@@ -1,6 +1,7 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/util/security/BCCryptoHelper.java,v 1.1 2012/04/18 14:10:45 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/BCCryptoHelper.java,v 1.1 2015/01/06 11:07:56 heller Exp $
 package de.mendelson.util.security;
 
+import de.mendelson.util.security.cert.KeystoreCertificate;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -22,10 +23,9 @@ import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.SignatureException;
-import java.security.cert.CertStore;
 import java.security.cert.Certificate;
-import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
+import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -45,15 +45,23 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
 import org.bouncycastle.asn1.smime.SMIMECapability;
 import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cms.*;
+import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId;
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.bouncycastle.cms.jcajce.ZlibCompressor;
+import org.bouncycastle.cms.jcajce.ZlibExpanderProvider;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMEEnveloped;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
@@ -61,6 +69,11 @@ import org.bouncycastle.mail.smime.SMIMEException;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle.mail.smime.SMIMEUtil;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OutputEncryptor;
+import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.encoders.Base64;
 /*
@@ -73,6 +86,7 @@ import org.bouncycastle.util.encoders.Base64;
 
 /**
  * Utility class to handle bouncycastle cryptography
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
@@ -87,6 +101,10 @@ public class BCCryptoHelper {
     public static final String ALGORITHM_AES_256 = "aes256";
     public static final String ALGORITHM_MD5 = "md5";
     public static final String ALGORITHM_SHA1 = "sha1";
+    public static final String ALGORITHM_SHA224 = "sha-224";
+    public static final String ALGORITHM_SHA256 = "sha-256";
+    public static final String ALGORITHM_SHA384 = "sha-384";
+    public static final String ALGORITHM_SHA512 = "sha-512";
     public static final String ALGORITHM_IDEA = "idea";
     public static final String ALGORITHM_CAST5 = "cast5";
     public static final String KEYSTORE_PKCS12 = "PKCS12";
@@ -97,7 +115,7 @@ public class BCCryptoHelper {
 
     public boolean isEncrypted(MimeBodyPart part) throws MessagingException {
         if (part == null) {
-            throw new MessagingException("Part is null");
+            throw new MessagingException("Part is absent");
         }
         ContentType contentType = new ContentType(part.getContentType());
         String baseType = contentType.getBaseType().toLowerCase();
@@ -109,9 +127,12 @@ public class BCCryptoHelper {
         }
     }
 
-    /**Performs an encryption with a 192 bit key, this will fail if the unlimited strength policy files 
-     * have not been installed for the VM
-     * This method will throw an exception if there is a general security problem, e.g. the provider is not found
+    /**
+     * Performs an encryption with a 192 bit key, this will fail if the
+     * unlimited strength policy files have not been installed for the VM This
+     * method will throw an exception if there is a general security problem,
+     * e.g. the provider is not found
+     *
      * @return true if the VM is patched, false if the VM is not pached
      */
     public boolean performUnlimitedStrengthJurisdictionPolicyTest() {
@@ -132,14 +153,16 @@ public class BCCryptoHelper {
         return (true);
     }
 
-    /**Returns the signed part of this container if it exists, else null. If the container itself
-     *is signed it is returned. You could use this method if you are not sure if the main container
-     *of a message is the signed part or if there are some unused MIME wrappers around it
-     *that embedd the signed part
+    /**
+     * Returns the signed part of this container if it exists, else null. If the
+     * container itself is signed it is returned. You could use this method if
+     * you are not sure if the main container of a message is the signed part or
+     * if there are some unused MIME wrappers around it that embedd the signed
+     * part
      */
     public Part getSignedEmbeddedPart(Part part) throws MessagingException, IOException {
         if (part == null) {
-            throw new MessagingException("Part is null");
+            throw new MessagingException("Part is absent");
         }
         if (part.isMimeType("multipart/signed")) {
             return (part);
@@ -158,7 +181,8 @@ public class BCCryptoHelper {
         return (null);
     }
 
-    /**Checks if two mics in the format <base64>, <digest> are equal
+    /**
+     * Checks if two mics in the format <base64>, <digest> are equal
      *
      * @param mic1
      * @param mic2
@@ -209,7 +233,9 @@ public class BCCryptoHelper {
         }
     }
 
-    /**Copies all data from one stream to another*/
+    /**
+     * Copies all data from one stream to another
+     */
     private void copyStreams(InputStream in, OutputStream out) throws IOException {
         BufferedInputStream inStream = new BufferedInputStream(in);
         BufferedOutputStream outStream = new BufferedOutputStream(out);
@@ -227,7 +253,9 @@ public class BCCryptoHelper {
         outStream.flush();
     }
 
-    /**Displays a bundle of byte arrays as hex string, for debug purpose only*/
+    /**
+     * Displays a bundle of byte arrays as hex string, for debug purpose only
+     */
     private String toHexDisplay(byte[] data) {
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < data.length; i++) {
@@ -237,15 +265,18 @@ public class BCCryptoHelper {
         return result.toString();
     }
 
-    /**Calculates the hash value for a passed byte array, base 64 encoded
-     *@param digestAlgOID digest OID algorithm, e.g. "1.3.14.3.2.26"
+    /**
+     * Calculates the hash value for a passed byte array, base 64 encoded
+     *
+     * @param digestAlgOID digest OID algorithm, e.g. "1.3.14.3.2.26"
      */
-    public String calculateMIC(byte[] data, String digestAlgOID) throws GeneralSecurityException, MessagingException, IOException {
-        if (data == null) {
-            throw new GeneralSecurityException("calculateMIC: Data is null");
+    public String calculateMIC(InputStream dataStream, String digestAlgOID) throws GeneralSecurityException, MessagingException, IOException {
+        if (dataStream == null) {
+            throw new GeneralSecurityException("calculateMIC: Unable to calculate MIC - processed data is absent");
         }
         MessageDigest messageDigest = MessageDigest.getInstance(digestAlgOID, "BC");
-        DigestInputStream digestInputStream = new DigestInputStream(new ByteArrayInputStream(data), messageDigest);
+        DigestInputStream digestInputStream = new DigestInputStream(dataStream, messageDigest);
+        //perform filter operation
         for (byte buf[] = new byte[4096]; digestInputStream.read(buf) >= 0;) {
         }
         byte mic[] = digestInputStream.getMessageDigest().digest();
@@ -254,32 +285,36 @@ public class BCCryptoHelper {
         return (micString);
     }
 
-    /**Calculates the hash value for a passed body part, base 64 encoded
-     *@param digestAlgOID digest OID algorithm, e.g. "1.3.14.3.2.26"
+    /**
+     * Calculates the hash value for a passed body part, base 64 encoded
+     *
+     * @param digestAlgOID digest OID algorithm, e.g. "1.3.14.3.2.26"
      */
     public String calculateMIC(Part part, String digestAlgOID) throws GeneralSecurityException, MessagingException, IOException {
         if (part == null) {
-            throw new GeneralSecurityException("calculateMIC: Part is null");
+            throw new GeneralSecurityException("calculateMIC: Unable to calculate MIC - MIME part is absent");
         }
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         part.writeTo(bOut);
         bOut.flush();
         bOut.close();
         byte data[] = bOut.toByteArray();
-        return (this.calculateMIC(data, digestAlgOID));
+        return (this.calculateMIC(new ByteArrayInputStream(data), digestAlgOID));
     }
 
-    /**Used for mendelson rosettaNet*/
+    /**
+     * Used for mendelson rosettaNet
+     */
     public MimeBodyPart decrypt(MimeBodyPart part, Certificate cert, Key key) throws GeneralSecurityException, MessagingException, CMSException, IOException, SMIMEException {
         if (!this.isEncrypted(part)) {
-            throw new GeneralSecurityException("decrypt: Content-Type indicates data isn't encrypted");
+            throw new GeneralSecurityException("decrypt: Unable to decrypt - Content-Type indicates data isn't encrypted");
         }
         X509Certificate x509Cert = castCertificate(cert);
         SMIMEEnveloped envelope = new SMIMEEnveloped(part);
         RecipientId recipientId = new JceKeyTransRecipientId(x509Cert);
         RecipientInformation recipient = envelope.getRecipientInfos().get(recipientId);
         if (recipient == null) {
-            throw new GeneralSecurityException("decrypt: Wrong key used to decrypt the data.");
+            throw new GeneralSecurityException("decrypt: Unable to decrypt data - wrong key used to decrypt the data.");
         } else {
             MimeBodyPart bodyPart = SMIMEUtil.toMimeBodyPart(
                     recipient.getContentStream(new JceKeyTransEnvelopedRecipient(this.getPrivateKey(key)).setProvider("BC")));
@@ -290,33 +325,35 @@ public class BCCryptoHelper {
     public void deinitialize() {
     }
 
-    /**@param algorith a algorith alias name, e.g. "3des", wil be translated into the
-     *right IOD number internal
+    /**
+     * @param algorith a algorith alias name, e.g. "3des", wil be translated
+     * into the right IOD number internal
      */
-    public MimeBodyPart encrypt(MimeMessage part, Certificate cert, String algorithm) throws GeneralSecurityException, SMIMEException {
+    public MimeBodyPart encrypt(MimeMessage part, Certificate cert, String algorithm) throws Exception {
         X509Certificate x509Cert = castCertificate(cert);
-        String encAlg = this.convertAlgorithmNameToOID(algorithm);
+        String encAlgOID = this.convertAlgorithmNameToOID(algorithm);
         SMIMEEnvelopedGenerator generator = new SMIMEEnvelopedGenerator();
-        generator.addKeyTransRecipient(x509Cert);
+        generator.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(x509Cert).setProvider("BC"));
         if (part == null) {
-            throw new GeneralSecurityException("encrypt: Part is null");
+            throw new GeneralSecurityException("encrypt: Part is absent");
         }
-        MimeBodyPart encData = generator.generate(part, encAlg, "BC");
+        MimeBodyPart encData = generator.generate(part, new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier(encAlgOID)).setProvider("BC").build());
         return encData;
     }
 
-    /**@param algorith a algorith alias name, e.g. "3des", will be translated into the
-     *right IOD number internal
+    /**
+     * @param algorith a algorith alias name, e.g. "3des", will be translated
+     * into the right IOD number internal
      */
-    public MimeBodyPart encrypt(MimeBodyPart part, Certificate cert, String algorithm) throws GeneralSecurityException, SMIMEException {
+    public MimeBodyPart encrypt(MimeBodyPart part, Certificate cert, String algorithm) throws Exception {
         X509Certificate x509Cert = castCertificate(cert);
-        String encAlg = this.convertAlgorithmNameToOID(algorithm);
-        SMIMEEnvelopedGenerator gen = new SMIMEEnvelopedGenerator();
-        gen.addKeyTransRecipient(x509Cert);
+        String encAlgOID = this.convertAlgorithmNameToOID(algorithm);
+        SMIMEEnvelopedGenerator generator = new SMIMEEnvelopedGenerator();
+        generator.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(x509Cert).setProvider("BC"));
         if (part == null) {
-            throw new GeneralSecurityException("encrypt: Part is null");
+            throw new GeneralSecurityException("encrypt: Part is absent");
         }
-        MimeBodyPart encData = gen.generate(part, encAlg, "BC");
+        MimeBodyPart encData = generator.generate(part, new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier(encAlgOID)).setProvider("BC").build());
         return encData;
     }
 
@@ -335,16 +372,20 @@ public class BCCryptoHelper {
         System.setProperty("mail.mime.cachemultipart", "false");
     }
 
-    /**Create a pkcs7-signature of the passed content and returns it
-     *@param chain certificate chain, chain[0] is the signers certificate itself
-     * @param embeddOriginalData Indicates if the original data should be embedded in the signature
+    /**
+     * Create a pkcs7-signature of the passed content and returns it
+     *
+     * @param chain certificate chain, chain[0] is the signers certificate
+     * itself
+     * @param embeddOriginalData Indicates if the original data should be
+     * embedded in the signature
      *
      */
     public byte[] sign(byte[] content, Certificate[] chain, Key key, String digest,
             boolean embeddOriginalData) throws Exception {
         X509Certificate x509Cert = this.castCertificate(chain[0]);
         PrivateKey privKey = this.getPrivateKey(key);
-        CMSSignedDataGenerator generator = new CMSSignedDataGenerator();
+        CMSSignedDataGenerator signedDataGenerator = new CMSSignedDataGenerator();
         //add dont know
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector caps = new SMIMECapabilityVector();
@@ -353,43 +394,66 @@ public class BCCryptoHelper {
         caps.addCapability(SMIMECapability.dES_CBC);
         signedAttrs.add(new SMIMECapabilitiesAttribute(caps));
         if (digest.equalsIgnoreCase(ALGORITHM_SHA1)) {
-            generator.addSignerInfoGenerator(
+            signedDataGenerator.addSignerInfoGenerator(
                     new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
-                    new AttributeTable(signedAttrs)).build("SHA1withRSA", privKey, x509Cert));
+                            new AttributeTable(signedAttrs)).build("SHA1withRSA", privKey, x509Cert));
         } else if (digest.equalsIgnoreCase(ALGORITHM_MD5)) {
-            generator.addSignerInfoGenerator(
+            signedDataGenerator.addSignerInfoGenerator(
                     new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
-                    new AttributeTable(signedAttrs)).build("MD5withRSA", privKey, x509Cert));
+                            new AttributeTable(signedAttrs)).build("MD5withRSA", privKey, x509Cert));
+        } else if (digest.equalsIgnoreCase(ALGORITHM_SHA224)) {
+            signedDataGenerator.addSignerInfoGenerator(
+                    new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
+                            new AttributeTable(signedAttrs)).build("SHA224withRSA", privKey, x509Cert));
+        } else if (digest.equalsIgnoreCase(ALGORITHM_SHA256)) {
+            signedDataGenerator.addSignerInfoGenerator(
+                    new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
+                            new AttributeTable(signedAttrs)).build("SHA256withRSA", privKey, x509Cert));
+        } else if (digest.equalsIgnoreCase(ALGORITHM_SHA384)) {
+            signedDataGenerator.addSignerInfoGenerator(
+                    new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
+                            new AttributeTable(signedAttrs)).build("SHA384withRSA", privKey, x509Cert));
+        } else if (digest.equalsIgnoreCase(ALGORITHM_SHA512)) {
+            signedDataGenerator.addSignerInfoGenerator(
+                    new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
+                            new AttributeTable(signedAttrs)).build("SHA512withRSA", privKey, x509Cert));
         } else {
             throw new Exception("sign: Signing digest " + digest + " not supported.");
         }
         //add cert store
         List<Certificate> certList = Arrays.asList(chain);
-        CertStore certStore = CertStore.getInstance("Collection", new CollectionCertStoreParameters(certList), "BC");
-        generator.addCertificatesAndCRLs(certStore);
+        Store certStore = new JcaCertStore(certList);
+        signedDataGenerator.addCertificates(certStore);
         if (content == null) {
-            throw new Exception("sign: content is null");
+            throw new Exception("sign: content is absent");
         }
         CMSTypedData processable = new CMSProcessableByteArray(content);
-        CMSSignedData signatureData = generator.generate(processable, embeddOriginalData);
+        CMSSignedData signatureData = signedDataGenerator.generate(processable, embeddOriginalData);
         return (signatureData.getEncoded());
     }
-    
-    /**Create a pkcs7-signature of the passed content and returns it, without embedding the
-     * original data in the signature
-     *@param chain certificate chain, chain[0] is the signers certificate itself
+
+    /**
+     * Create a pkcs7-signature of the passed content and returns it, without
+     * embedding the original data in the signature
+     *
+     * @param chain certificate chain, chain[0] is the signers certificate
+     * itself
      *
      */
     public byte[] sign(byte[] content, Certificate[] chain, Key key, String digest) throws Exception {
-        return( this.sign(content, chain, key, digest, false));
+        return (this.sign(content, chain, key, digest, false));
     }
 
-    /**@param chain certificate chain, chain[0] is the signers certificate itself
+    /**
+     * @param chain certificate chain, chain[0] is the signers certificate
+     * itself Signs the data using S/MIME 3.1 - dont use if for S/MIME 3.2 or
+     * higher
      */
     public MimeMultipart sign(MimeBodyPart body, Certificate[] chain, Key key, String digest) throws Exception {
         X509Certificate x509Cert = this.castCertificate(chain[0]);
         PrivateKey privKey = this.getPrivateKey(key);
-        SMIMESignedGenerator generator = new SMIMESignedGenerator();
+        //call this generator with a S/MIME 3.1 compatible constructor as it defaults to RFC 5751 (other micalg values)
+        SMIMESignedGenerator signedGenerator = new SMIMESignedGenerator(SMIMESignedGenerator.RFC3851_MICALGS);
         //add dont know
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector caps = new SMIMECapabilityVector();
@@ -398,33 +462,52 @@ public class BCCryptoHelper {
         caps.addCapability(SMIMECapability.dES_CBC);
         signedAttrs.add(new SMIMECapabilitiesAttribute(caps));
         if (digest.equalsIgnoreCase(ALGORITHM_SHA1)) {
-            generator.addSignerInfoGenerator(
+            signedGenerator.addSignerInfoGenerator(
                     new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
-                    new AttributeTable(signedAttrs)).build("SHA1withRSA", privKey, x509Cert));
+                            new AttributeTable(signedAttrs)).build("SHA1withRSA", privKey, x509Cert));
+        } else if (digest.equalsIgnoreCase(ALGORITHM_SHA224)) {
+            signedGenerator.addSignerInfoGenerator(
+                    new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
+                            new AttributeTable(signedAttrs)).build("SHA224withRSA", privKey, x509Cert));
+        } else if (digest.equalsIgnoreCase(ALGORITHM_SHA256)) {
+            signedGenerator.addSignerInfoGenerator(
+                    new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
+                            new AttributeTable(signedAttrs)).build("SHA256withRSA", privKey, x509Cert));
+        } else if (digest.equalsIgnoreCase(ALGORITHM_SHA384)) {
+            signedGenerator.addSignerInfoGenerator(
+                    new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
+                            new AttributeTable(signedAttrs)).build("SHA384withRSA", privKey, x509Cert));
+        } else if (digest.equalsIgnoreCase(ALGORITHM_SHA512)) {
+            signedGenerator.addSignerInfoGenerator(
+                    new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
+                            new AttributeTable(signedAttrs)).build("SHA512withRSA", privKey, x509Cert));
         } else if (digest.equalsIgnoreCase(ALGORITHM_MD5)) {
-            generator.addSignerInfoGenerator(
+            signedGenerator.addSignerInfoGenerator(
                     new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
-                    new AttributeTable(signedAttrs)).build("MD5withRSA", privKey, x509Cert));
+                            new AttributeTable(signedAttrs)).build("MD5withRSA", privKey, x509Cert));
         } else {
             throw new Exception("sign: Signing digest " + digest + " not supported.");
         }
         //add cert store
         List<Certificate> certList = Arrays.asList(chain);
         Store certStore = new JcaCertStore(certList);
-        generator.addCertificates(certStore);
-        MimeMultipart signedPart = generator.generate(body, "BC");
+        signedGenerator.addCertificates(certStore);
+        MimeMultipart signedPart = signedGenerator.generate(body);
         return (signedPart);
     }
 
-    /**@param chain certificate chain, chain[0] is the signers certificate itself
+    /**
+     * @param chain certificate chain, chain[0] is the signers certificate
+     * itself Signs the data using S/MIME 3.1 - dont use if for S/MIME 3.2 or
+     * higher
      */
     public MimeMultipart sign(MimeMessage message, Certificate[] chain, Key key, String digest) throws Exception {
         if (message == null) {
-            throw new Exception("sign: message is null");
+            throw new Exception("sign: Message is absent");
         }
         X509Certificate x509Cert = this.castCertificate(chain[0]);
         PrivateKey privKey = this.getPrivateKey(key);
-        SMIMESignedGenerator generator = new SMIMESignedGenerator();
+        SMIMESignedGenerator signedGenerator = new SMIMESignedGenerator(SMIMESignedGenerator.RFC3851_MICALGS);
         //add dont know
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector caps = new SMIMECapabilityVector();
@@ -433,25 +516,43 @@ public class BCCryptoHelper {
         caps.addCapability(SMIMECapability.dES_CBC);
         signedAttrs.add(new SMIMECapabilitiesAttribute(caps));
         if (digest.equalsIgnoreCase(ALGORITHM_SHA1)) {
-            generator.addSignerInfoGenerator(
+            signedGenerator.addSignerInfoGenerator(
                     new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
-                    new AttributeTable(signedAttrs)).build("SHA1withRSA", privKey, x509Cert));
+                            new AttributeTable(signedAttrs)).build("SHA1withRSA", privKey, x509Cert));
+        } else if (digest.equalsIgnoreCase(ALGORITHM_SHA224)) {
+            signedGenerator.addSignerInfoGenerator(
+                    new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
+                            new AttributeTable(signedAttrs)).build("SHA224withRSA", privKey, x509Cert));
+        } else if (digest.equalsIgnoreCase(ALGORITHM_SHA256)) {
+            signedGenerator.addSignerInfoGenerator(
+                    new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
+                            new AttributeTable(signedAttrs)).build("SHA256withRSA", privKey, x509Cert));
+        } else if (digest.equalsIgnoreCase(ALGORITHM_SHA384)) {
+            signedGenerator.addSignerInfoGenerator(
+                    new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
+                            new AttributeTable(signedAttrs)).build("SHA384withRSA", privKey, x509Cert));
+        } else if (digest.equalsIgnoreCase(ALGORITHM_SHA512)) {
+            signedGenerator.addSignerInfoGenerator(
+                    new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
+                            new AttributeTable(signedAttrs)).build("SHA512withRSA", privKey, x509Cert));
         } else if (digest.equalsIgnoreCase(ALGORITHM_MD5)) {
-            generator.addSignerInfoGenerator(
+            signedGenerator.addSignerInfoGenerator(
                     new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(
-                    new AttributeTable(signedAttrs)).build("MD5withRSA", privKey, x509Cert));
+                            new AttributeTable(signedAttrs)).build("MD5withRSA", privKey, x509Cert));
         } else {
             throw new Exception("sign: Signing digest " + digest + " not supported.");
         }
         //add cert store
         List<Certificate> certList = Arrays.asList(chain);
         Store certStore = new JcaCertStore(certList);
-        generator.addCertificates(certStore);
-        MimeMultipart multipart = generator.generate(message, "BC");
+        signedGenerator.addCertificates(certStore);
+        MimeMultipart multipart = signedGenerator.generate(message);
         return (multipart);
     }
 
-    /**@param chain certificate chain, chain[0] is the signers certificate itself
+    /**
+     * @param chain certificate chain, chain[0] is the signers certificate
+     * itself
      */
     public MimeMessage signToMessage(MimeMessage message, Certificate[] chain, Key key, String digest) throws Exception {
         MimeMultipart multipart = this.sign(message, chain, key, digest);
@@ -461,12 +562,13 @@ public class BCCryptoHelper {
         return (signedMessage);
     }
 
-    /**Returns the digest OID algorithm from a signature that signes the passed message part
-     *The return value for sha1 is e.g. "1.3.14.3.2.26".
+    /**
+     * Returns the digest OID algorithm from a signature that signes the passed
+     * message part The return value for sha1 is e.g. "1.3.14.3.2.26".
      */
     public String getDigestAlgOIDFromSignature(Part part) throws Exception {
         if (part == null) {
-            throw new GeneralSecurityException("getDigestAlgOIDFromSignature: Part is null");
+            throw new GeneralSecurityException("getDigestAlgOIDFromSignature: Part is absent");
         }
         if (part.isMimeType("multipart/signed")) {
             MimeMultipart signedMultiPart = null;
@@ -488,12 +590,13 @@ public class BCCryptoHelper {
         throw new GeneralSecurityException("Content-Type indicates data isn't signed");
     }
 
-    /**Returns the digest OID algorithm from a pkcs7 signature
-     *The return value for sha1 is e.g. "1.3.14.3.2.26".
+    /**
+     * Returns the digest OID algorithm from a pkcs7 signature The return value
+     * for sha1 is e.g. "1.3.14.3.2.26".
      */
     public String getDigestAlgOIDFromSignature(byte[] signature) throws Exception {
         if (signature == null) {
-            throw new GeneralSecurityException("getDigestAlgOIDFromSignature: signature is null");
+            throw new GeneralSecurityException("getDigestAlgOIDFromSignature: Signature is absent");
         }
         CMSSignedData signedData = new CMSSignedData(signature);
         SignerInformationStore signers = signedData.getSignerInfos();
@@ -506,49 +609,83 @@ public class BCCryptoHelper {
         throw new GeneralSecurityException("getDigestAlgOIDFromSignature: Unable to identify signature algorithm.");
     }
 
-    /**Verifies a signature of a passed content against the passed certificate
+     /**
+     * Returns the digest OID algorithm from a signature. The return value
+     * for sha1 is e.g. "1.3.14.3.2.26".
+     */
+    public String getDigestAlgOIDFromSignature(InputStream signed, Certificate cert) throws Exception {
+        CMSSignedDataParser parser = new CMSSignedDataParser(signed);
+        parser.getSignedContent().drain();
+        SignerInformationStore signers = parser.getSignerInfos();
+        Collection signerCollection = signers.getSigners();
+        Iterator it = signerCollection.iterator();
+        boolean verified = false;
+        X509CertificateHolder certHolder = new X509CertificateHolder(cert.getEncoded());
+        SignerInformationVerifier verifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(certHolder);
+        while (it.hasNext()) {
+            SignerInformation signerInformation = (SignerInformation) it.next();
+            if (!verified) {
+                verified = signerInformation.verify(verifier);
+                if( verified ){
+                    return( signerInformation.getDigestAlgOID());
+                }
+            }
+        }
+        throw new GeneralSecurityException("getDigestAlgOIDFromSignature: Unable to identify signature algorithm.");
+    }
+    
+    /**
+     * Verifies a signature of a passed content against the passed certificate
      */
     public boolean verify(byte[] content, byte[] signature, Certificate cert) throws Exception {
         if (content == null) {
-            throw new GeneralSecurityException("verify: content is null");
+            throw new GeneralSecurityException("verify: Content is absent");
         }
         if (signature == null) {
-            throw new GeneralSecurityException("verify: signature is null");
+            throw new GeneralSecurityException("verify: Signature is absent");
         }
         if (signature.length == 0) {
-            throw new Exception("verify: signature length is 0");
+            throw new Exception("verify: Signature length is 0");
         }
-        X509Certificate x509 = this.castCertificate(cert);
         CMSTypedStream signedContent = new CMSTypedStream(new ByteArrayInputStream(content));
-        CMSSignedDataParser dataParser = new CMSSignedDataParser(
-                signedContent, new ByteArrayInputStream(signature));
+        CMSSignedDataParser dataParser = new CMSSignedDataParser(signedContent, new ByteArrayInputStream(signature));
         dataParser.getSignedContent().drain();
         SignerInformationStore signers = dataParser.getSignerInfos();
         Collection signerCollection = signers.getSigners();
         Iterator it = signerCollection.iterator();
+        X509CertificateHolder certHolder = new X509CertificateHolder(cert.getEncoded());
+        SignerInformationVerifier verifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(certHolder);
         boolean verified = false;
         while (it.hasNext()) {
-            SignerInformation signer = (SignerInformation) it.next();
+            SignerInformation signerInformation = (SignerInformation) it.next();
             if (!verified) {
-                verified = signer.verify(x509, "BC");
+                verified = signerInformation.verify(verifier);
+            }
+            if (verified) {
+                break;
             }
         }
         return (verified);
     }
 
-    /**Verifies a signature against the passed certificate
-     *@param encoding one of 7bit quoted-printable base64 8bit binary
+    /**
+     * Verifies a signature against the passed certificate
+     *
+     * @param encoding one of 7bit quoted-printable base64 8bit binary
      */
     public MimeBodyPart verify(Part part, Certificate cert) throws Exception {
         return (this.verify(part, null, cert));
     }
 
-    /**Verifies a signature against the passed certificate
-     *@param contentTransferEncoding one of 7bit quoted-printable base64 8bit binary
+    /**
+     * Verifies a signature against the passed certificate
+     *
+     * @param contentTransferEncoding one of 7bit quoted-printable base64 8bit
+     * binary
      */
     public MimeBodyPart verify(Part part, String contentTransferEncoding, Certificate cert) throws Exception {
         if (part == null) {
-            throw new GeneralSecurityException("verify: Mime part is null");
+            throw new GeneralSecurityException("Signature verification failed: Mime part is absent");
         }
         if (part.isMimeType("multipart/signed")) {
             MimeMultipart signedMultiPart = (MimeMultipart) part.getContent();
@@ -561,43 +698,57 @@ public class BCCryptoHelper {
                 signed = new SMIMESigned(signedMultiPart, contentTransferEncoding);
             }
             X509Certificate x509Cert = this.castCertificate(cert);
+            X509CertificateHolder certHolder = new X509CertificateHolder(cert.getEncoded());
+            SignerInformationVerifier verifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(certHolder);
             SignerInformationStore signerStore = signed.getSignerInfos();
             Iterator<SignerInformation> iterator = signerStore.getSigners().iterator();
             while (iterator.hasNext()) {
-                SignerInformation signerInfo = iterator.next();
-                if (!signerInfo.verify(x509Cert.getPublicKey(), "BC")) {
+                SignerInformation signerInfo = iterator.next();                                
+                if (!signerInfo.verify(verifier)) {
                     StringBuilder signatureCertInfo = new StringBuilder();
                     //try to gain more information about the problem
                     if (signerInfo.getSID() != null) {
                         if (signerInfo.getSID().getSerialNumber() != null) {
-                            signatureCertInfo.append("Serial number (dec): ");
+                            signatureCertInfo.append("Serial number (DEC): ");
                             signatureCertInfo.append(signerInfo.getSID().getSerialNumber());
                         }
-                        if (signerInfo.getSID().getIssuerAsString() != null) {
+                        if (signerInfo.getSID().getIssuer() != null) {
                             if (signatureCertInfo.length() > 0) {
                                 signatureCertInfo.append("\n");
                             }
                             signatureCertInfo.append("Issuer: ");
-                            signatureCertInfo.append(signerInfo.getSID().getIssuerAsString());
+                            signatureCertInfo.append(signerInfo.getSID().getIssuer().toString());
                         }
                     }
                     if (signatureCertInfo.length() > 0) {
                         signatureCertInfo.insert(0, "Signature certificate information:\n");
                     }
                     StringBuilder checkCertInfo = new StringBuilder();
+                    KeystoreCertificate certificate = new KeystoreCertificate();
+                    certificate.setCertificate(x509Cert);
                     checkCertInfo.append("Verification certificate information:\n");
-                    checkCertInfo.append("Serial number (dec): ");
-                    checkCertInfo.append(x509Cert.getSerialNumber());
+                    checkCertInfo.append("Serial number (DEC): ");
+                    checkCertInfo.append(certificate.getSerialNumberDEC());
+                    checkCertInfo.append("\n");
+                    checkCertInfo.append("Serial number (HEX): ");
+                    checkCertInfo.append(certificate.getSerialNumberHEX());
+                    checkCertInfo.append("\n");
+                    checkCertInfo.append("Finger print (SHA-1): ");
+                    checkCertInfo.append(certificate.getFingerPrintSHA1());
+                    checkCertInfo.append("\n");
+                    checkCertInfo.append("Valid from: ");                    
+                    checkCertInfo.append(DateFormat.getDateInstance(DateFormat.SHORT).format(certificate.getNotBefore()));
+                    checkCertInfo.append("\n");
+                    checkCertInfo.append("Valid to: ");                    
+                    checkCertInfo.append(DateFormat.getDateInstance(DateFormat.SHORT).format(certificate.getNotAfter()));
                     checkCertInfo.append("\n");
                     checkCertInfo.append("Issuer: ");
                     checkCertInfo.append(x509Cert.getIssuerX500Principal().toString());
                     StringBuilder message = new StringBuilder("Verification failed");
-                    if (signatureCertInfo != null) {
-                        message.append("\n\n");
-                        message.append(signatureCertInfo);
-                        message.append("\n\n");
-                        message.append(checkCertInfo);
-                    }
+                    message.append("\n\n");
+                    message.append(signatureCertInfo);
+                    message.append("\n\n");
+                    message.append(checkCertInfo);
                     throw new SignatureException(message.toString());
                 }
             }
@@ -609,7 +760,7 @@ public class BCCryptoHelper {
 
     private X509Certificate castCertificate(Certificate cert) throws GeneralSecurityException {
         if (cert == null) {
-            throw new GeneralSecurityException("castCertificate: Certificate is null");
+            throw new GeneralSecurityException("castCertificate: Certificate is absent");
         }
         if (!(cert instanceof X509Certificate)) {
             throw new GeneralSecurityException("castCertificate: Certificate must be an instance of X509Certificate");
@@ -620,7 +771,7 @@ public class BCCryptoHelper {
 
     private PrivateKey getPrivateKey(Key key) throws GeneralSecurityException {
         if (key == null) {
-            throw new GeneralSecurityException("getPrivateKey: Key is null");
+            throw new GeneralSecurityException("getPrivateKey: Key is absent");
         }
         if (!(key instanceof PrivateKey)) {
             throw new GeneralSecurityException("getPrivateKey: Key must implement PrivateKey interface");
@@ -629,14 +780,24 @@ public class BCCryptoHelper {
         }
     }
 
-    /**Converts the passed algorithm or OID*/
+    /**
+     * Converts the passed algorithm or OID
+     */
     public String convertAlgorithmNameToOID(String algorithm) throws NoSuchAlgorithmException {
         if (algorithm == null) {
-            throw new NoSuchAlgorithmException("convertAlgorithmNameToOID: Algorithm is null");
+            throw new NoSuchAlgorithmException("convertAlgorithmNameToOID: Unable to proceed - Algorithm is absent");
         } else if (algorithm.equalsIgnoreCase(ALGORITHM_MD5)) {
-            return ("1.2.840.113549.2.5");
+            return (CMSSignedGenerator.DIGEST_MD5);
         } else if (algorithm.equalsIgnoreCase(ALGORITHM_SHA1)) {
-            return ("1.3.14.3.2.26");
+            return (CMSSignedGenerator.DIGEST_SHA1);
+        } else if (algorithm.equalsIgnoreCase(ALGORITHM_SHA224) || algorithm.equalsIgnoreCase("sha224")) {
+            return (CMSSignedGenerator.DIGEST_SHA224);
+        } else if (algorithm.equalsIgnoreCase(ALGORITHM_SHA256) || algorithm.equalsIgnoreCase("sha256")) {
+            return (CMSSignedGenerator.DIGEST_SHA256);
+        } else if (algorithm.equalsIgnoreCase(ALGORITHM_SHA384) || algorithm.equalsIgnoreCase("sha384")) {
+            return (CMSSignedGenerator.DIGEST_SHA384);
+        } else if (algorithm.equalsIgnoreCase(ALGORITHM_SHA512) || algorithm.equalsIgnoreCase("sha512")) {
+            return (CMSSignedGenerator.DIGEST_SHA512);
         } else if (algorithm.equalsIgnoreCase(ALGORITHM_3DES)) {
             return ("1.2.840.113549.3.7");
         } else if (algorithm.equalsIgnoreCase(ALGORITHM_DES)) {
@@ -660,14 +821,24 @@ public class BCCryptoHelper {
         }
     }
 
-    /**Converts the passed algorithm or OID*/
+    /**
+     * Converts the passed algorithm or OID
+     */
     public String convertOIDToAlgorithmName(String oid) throws NoSuchAlgorithmException {
         if (oid == null) {
-            throw new NoSuchAlgorithmException("convertOIDToAlgorithmName: OID is null");
-        } else if (oid.equalsIgnoreCase("1.2.840.113549.2.5")) {
+            throw new NoSuchAlgorithmException("convertOIDToAlgorithmName: OID is absent");
+        } else if (oid.equalsIgnoreCase(CMSSignedGenerator.DIGEST_MD5)) {
             return (ALGORITHM_MD5);
-        } else if (oid.equalsIgnoreCase("1.3.14.3.2.26")) {
+        } else if (oid.equalsIgnoreCase(CMSSignedGenerator.DIGEST_SHA1)) {
             return (ALGORITHM_SHA1);
+        } else if (oid.equalsIgnoreCase(CMSSignedGenerator.DIGEST_SHA224)) {
+            return (ALGORITHM_SHA224);
+        } else if (oid.equalsIgnoreCase(CMSSignedGenerator.DIGEST_SHA256)) {
+            return (ALGORITHM_SHA256);
+        } else if (oid.equalsIgnoreCase(CMSSignedGenerator.DIGEST_SHA384)) {
+            return (ALGORITHM_SHA384);
+        } else if (oid.equalsIgnoreCase(CMSSignedGenerator.DIGEST_SHA512)) {
+            return (ALGORITHM_SHA512);
         } else if (oid.equalsIgnoreCase(CMSEnvelopedDataGenerator.CAST5_CBC)) {
             return (ALGORITHM_CAST5);
         } else if (oid.equalsIgnoreCase(CMSEnvelopedDataGenerator.DES_EDE3_CBC)) {
@@ -692,7 +863,7 @@ public class BCCryptoHelper {
     }
 
     /**
-     * 
+     *
      * @param type Keystore type which should be one of the class constants
      * @return
      * @throws java.security.KeyStoreException
@@ -706,7 +877,9 @@ public class BCCryptoHelper {
         }
     }
 
-    /**returns a CMS encrypted byte array*/
+    /**
+     * returns a CMS encrypted byte array
+     */
     public byte[] encryptCMS(byte[] data, final String ALGORITHM_NAME, Certificate cert) throws Exception {
         ByteArrayInputStream dataMem = new ByteArrayInputStream(data);
         ByteArrayOutputStream encryptedMem = new ByteArrayOutputStream();
@@ -716,37 +889,66 @@ public class BCCryptoHelper {
         return (encryptedMem.toByteArray());
     }
 
-    /**Encrypts data to a stream*/
+    /**
+     * Encrypts data to a stream
+     */
     public void encryptCMS(InputStream rawStream, OutputStream encryptedStream,
             final String ALGORITHM_NAME, Certificate cert, boolean inMemory) throws Exception {
         X509Certificate x509Cert = this.castCertificate(cert);
-        CMSEnvelopedDataStreamGenerator generator = new CMSEnvelopedDataStreamGenerator();
-        generator.addKeyTransRecipient(x509Cert);
+        CMSEnvelopedDataStreamGenerator dataStreamGenerator = new CMSEnvelopedDataStreamGenerator();
+        dataStreamGenerator.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(x509Cert).setProvider("BC"));
         String oid = this.convertAlgorithmNameToOID(ALGORITHM_NAME);
         if (inMemory) {
             ByteArrayOutputStream memBuffer = new ByteArrayOutputStream();
-            OutputStream cmsEnveloped = generator.open(memBuffer, oid, "BC");
-            this.copyStreams(rawStream, cmsEnveloped);
-            cmsEnveloped.flush();
-            cmsEnveloped.close();
+            OutputStream cmsEnveloped = null;
+            try {
+                ASN1ObjectIdentifier objectIdentifier = new ASN1ObjectIdentifier(oid);
+                OutputEncryptor outputEncryptor = new JceCMSContentEncryptorBuilder(objectIdentifier).build();
+                cmsEnveloped = dataStreamGenerator.open(memBuffer, outputEncryptor);
+                this.copyStreams(rawStream, cmsEnveloped);
+            } finally {
+                if (cmsEnveloped != null) {
+                    cmsEnveloped.flush();
+                    cmsEnveloped.close();
+                }
+            }
             encryptedStream.write(memBuffer.toByteArray());
         } else {
             File tempFile = File.createTempFile("encrypt", ".temp");
-            FileOutputStream fileBuffer = new FileOutputStream(tempFile);
-            OutputStream cmsEnveloped = generator.open(fileBuffer, oid, "BC");
-            this.copyStreams(rawStream, cmsEnveloped);
-            cmsEnveloped.flush();
-            cmsEnveloped.close();
-            fileBuffer.flush();
-            fileBuffer.close();
-            FileInputStream fileIn = new FileInputStream(tempFile);
-            this.copyStreams(fileIn, encryptedStream);
-            fileIn.close();
+            FileOutputStream fileBuffer = null;
+            OutputStream cmsEnveloped = null;
+            try {
+                fileBuffer = new FileOutputStream(tempFile);
+                ASN1ObjectIdentifier objectIdentifier = new ASN1ObjectIdentifier(oid);
+                OutputEncryptor outputEncryptor = new JceCMSContentEncryptorBuilder(objectIdentifier).build();
+                cmsEnveloped = dataStreamGenerator.open(fileBuffer, outputEncryptor);
+                this.copyStreams(rawStream, cmsEnveloped);
+            } finally {
+                if (cmsEnveloped != null) {
+                    cmsEnveloped.flush();
+                    cmsEnveloped.close();
+                }
+                if (fileBuffer != null) {
+                    fileBuffer.flush();
+                    fileBuffer.close();
+                }
+            }
+            FileInputStream fileIn = null;
+            try {
+                fileIn = new FileInputStream(tempFile);
+                this.copyStreams(fileIn, encryptedStream);
+            } finally {
+                if (fileIn != null) {
+                    fileIn.close();
+                }
+            }
             boolean deleted = tempFile.delete();
         }
     }
 
-    /**Decrypts a formerly encrypted byte array*/
+    /**
+     * Decrypts a formerly encrypted byte array
+     */
     public byte[] decryptCMS(byte[] encrypted, Certificate cert, Key key) throws Exception {
         ByteArrayInputStream encryptedMem = new ByteArrayInputStream(encrypted);
         ByteArrayOutputStream decryptedMem = new ByteArrayOutputStream();
@@ -756,7 +958,10 @@ public class BCCryptoHelper {
         return (decryptedMem.toByteArray());
     }
 
-    /**Decrypts a formerly encrypted stream. An exception will be thrown if decryption is not possible*/
+    /**
+     * Decrypts a formerly encrypted stream. An exception will be thrown if
+     * decryption is not possible
+     */
     public void decryptCMS(InputStream encrypted, OutputStream decrypted, Certificate cert, Key key) throws Exception {
         BufferedInputStream bufferedEncrypted = new BufferedInputStream(encrypted);
         BufferedOutputStream bufferedDecrypted = new BufferedOutputStream(decrypted);
@@ -775,47 +980,65 @@ public class BCCryptoHelper {
         }
     }
 
-    /**Uncompresses a data stream*/
+    /**
+     * Uncompresses a data stream
+     */
     public void uncompressCMS(InputStream compressed, OutputStream uncompressed) throws Exception {
         CMSCompressedDataParser compressedParser = new CMSCompressedDataParser(new BufferedInputStream(compressed));
-        this.copyStreams(compressedParser.getContent().getContentStream(), uncompressed);
+        this.copyStreams(compressedParser.getContent(new ZlibExpanderProvider()).getContentStream(), uncompressed);
         uncompressed.flush();
     }
 
-    /**Compress a data stream*/
+    /**
+     * Compress a data stream
+     */
     public void compressCMS(InputStream uncompressed, OutputStream compressed, boolean inMemory) throws Exception {
         //streamed compression does not work without a stream buffer in bc 1.45 and before
         CMSCompressedDataStreamGenerator generator = new CMSCompressedDataStreamGenerator();
         if (inMemory) {
             ByteArrayOutputStream memBuffer = new ByteArrayOutputStream();
-            OutputStream cOut = generator.open(memBuffer, CMSCompressedDataStreamGenerator.ZLIB);
+            OutputStream cOut = generator.open(memBuffer, new ZlibCompressor());
             this.copyStreams(uncompressed, cOut);
             cOut.flush();
             cOut.close();
             compressed.write(memBuffer.toByteArray());
         } else {
             File tempFile = File.createTempFile("compress", ".temp");
-            FileOutputStream fileBuffer = new FileOutputStream(tempFile);
-            OutputStream cOut = generator.open(fileBuffer, CMSCompressedDataStreamGenerator.ZLIB);
-            this.copyStreams(uncompressed, cOut);
-            cOut.flush();
-            cOut.close();
-            fileBuffer.flush();
-            fileBuffer.close();
-            FileInputStream fileIn = new FileInputStream(tempFile);
-            this.copyStreams(fileIn, compressed);
-            fileIn.close();
+            FileOutputStream fileBuffer = null;
+            try {
+                fileBuffer = new FileOutputStream(tempFile);
+                OutputStream cOut = generator.open(fileBuffer, new ZlibCompressor());
+                this.copyStreams(uncompressed, cOut);
+                cOut.flush();
+                cOut.close();
+            } finally {
+                if (fileBuffer != null) {
+                    fileBuffer.flush();
+                    fileBuffer.close();
+                }
+            }
+            FileInputStream fileIn = null;
+            try {
+                fileIn = new FileInputStream(tempFile);
+                this.copyStreams(fileIn, compressed);
+            } finally {
+                if (fileIn != null) {
+                    fileIn.close();
+                }
+            }
             boolean deleted = tempFile.delete();
         }
     }
 
-    public void signCMS(InputStream unsigned, OutputStream signed, final String ALGORITHM_NAME, Certificate cert, Key key,
+    public void signCMS(InputStream unsigned, OutputStream signed, final String ALGORITHM_NAME, Certificate signCert, Key signKey,
             boolean inMemory) throws Exception {
-        X509Certificate x509Cert = this.castCertificate(cert);
-        String oid = this.convertAlgorithmNameToOID(ALGORITHM_NAME);
         CMSSignedDataStreamGenerator generator = new CMSSignedDataStreamGenerator();
-        PrivateKey privKey = this.getPrivateKey(key);
-        generator.addSigner(privKey, x509Cert, oid, "BC");
+        PrivateKey signPrivKey = this.getPrivateKey(signKey);
+        ContentSigner contentSigner = new JcaContentSignerBuilder(ALGORITHM_NAME).setProvider("BC").build(signPrivKey);
+        generator.addSignerInfoGenerator(
+                new JcaSignerInfoGeneratorBuilder(
+                        new JcaDigestCalculatorProviderBuilder().setProvider("BC").build())
+                .build(contentSigner, new X509CertificateHolder(signCert.getEncoded())));
         if (inMemory) {
             ByteArrayOutputStream memBuffer = new ByteArrayOutputStream();
             OutputStream signedOut = generator.open(memBuffer, true);
@@ -825,16 +1048,31 @@ public class BCCryptoHelper {
             signed.write(memBuffer.toByteArray());
         } else {
             File tempFile = File.createTempFile("sign", ".temp");
-            FileOutputStream fileBuffer = new FileOutputStream(tempFile);
-            OutputStream signedOut = generator.open(fileBuffer, true);
-            this.copyStreams(unsigned, signedOut);
-            signedOut.flush();
-            signedOut.close();
-            fileBuffer.flush();
-            fileBuffer.close();
-            FileInputStream fileIn = new FileInputStream(tempFile);
-            this.copyStreams(fileIn, signed);
-            fileIn.close();
+            FileOutputStream fileBuffer = null;
+            OutputStream signedOut = null;
+            try {
+                fileBuffer = new FileOutputStream(tempFile);
+                signedOut = generator.open(fileBuffer, true);
+                this.copyStreams(unsigned, signedOut);
+            } finally {
+                if (signedOut != null) {
+                    signedOut.flush();
+                    signedOut.close();
+                }
+                if (fileBuffer != null) {
+                    fileBuffer.flush();
+                    fileBuffer.close();
+                }
+            }
+            FileInputStream fileIn = null;
+            try {
+                fileIn = new FileInputStream(tempFile);
+                this.copyStreams(fileIn, signed);
+            } finally {
+                if (fileIn != null) {
+                    fileIn.close();
+                }
+            }
             boolean deleted = tempFile.delete();
         }
     }
@@ -844,13 +1082,17 @@ public class BCCryptoHelper {
         parser.getSignedContent().drain();
         SignerInformationStore signers = parser.getSignerInfos();
         Collection signerCollection = signers.getSigners();
-        X509Certificate x509Cert = this.castCertificate(cert);
         Iterator it = signerCollection.iterator();
         boolean verified = false;
+        X509CertificateHolder certHolder = new X509CertificateHolder(cert.getEncoded());
+        SignerInformationVerifier verifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(certHolder);
         while (it.hasNext()) {
-            SignerInformation signer = (SignerInformation) it.next();
+            SignerInformation signerInformation = (SignerInformation) it.next();
             if (!verified) {
-                verified = signer.verify(x509Cert, "BC");
+                verified = signerInformation.verify(verifier);                
+            }
+            if (verified) {
+                break;
             }
         }
         return (verified);
@@ -863,7 +1105,9 @@ public class BCCryptoHelper {
         unsigned.flush();
     }
 
-    /**Generates a hash of a passed input stream*/
+    /**
+     * Generates a hash of a passed input stream
+     */
     public byte[] generateFileHash(MessageDigest digest, InputStream in) throws IOException {
         BufferedInputStream inStream = new BufferedInputStream(in);
         byte[] buffer = new byte[4096];
@@ -873,15 +1117,12 @@ public class BCCryptoHelper {
         }
         inStream.close();
         byte[] hash = null;
-        hash = new byte[digest.getDigestLength()];
         hash = digest.digest();
         return hash;
     }
+
 //    public static final void main( String[] args ){
 //        Security.addProvider(new BouncyCastleProvider());
-//        String mic1 = "kvIEoILs3pE05Xn2J31ICOdqeT4=, sha1";
-//        String mic2 = "kvIEoILs3pE05Xn2J31ICOdqeT4=,sha1";
-//        BCCryptoHelper helper = new BCCryptoHelper();
-//        System.out.println( helper.micIsEqual(mic1, mic2));
+//        System.out.println( CMSSignedGenerator.DIGEST_MD5);
 //    }
 }

@@ -1,15 +1,18 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/cem/gui/TableCellRendererCEMState.java,v 1.1 2012/04/18 14:10:20 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/cem/gui/TableCellRendererCEMState.java,v 1.1 2015/01/06 11:07:35 heller Exp $
 package de.mendelson.comm.as2.cem.gui;
 
 import de.mendelson.comm.as2.cem.CEMEntry;
 import de.mendelson.comm.as2.partner.Partner;
 import de.mendelson.comm.as2.partner.PartnerAccessDB;
-import java.awt.Component;
+import de.mendelson.comm.as2.partner.clientserver.PartnerListRequest;
+import de.mendelson.comm.as2.partner.clientserver.PartnerListResponse;
+import de.mendelson.util.clientserver.BaseClient;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Rectangle;
-import java.sql.Connection;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
@@ -26,15 +29,15 @@ public class TableCellRendererCEMState extends DefaultTableCellRenderer implemen
     private Color colorRejected = new Color(255, 145, 145);
     private Color colorPending = new Color(255, 255, 183);
 
-    private PartnerAccessDB partnerAccess;
+    private BaseClient baseClient;
 
     /**
      * Creates a default table cell renderer.
      */
-    public TableCellRendererCEMState( Connection configConnection, Connection runtimeConnection) {
+    public TableCellRendererCEMState(BaseClient baseClient) {
         super();
-        this.partnerAccess = new PartnerAccessDB( configConnection, runtimeConnection );
         this.setOpaque(true);
+        this.baseClient = baseClient;
     }
     // implements javax.swing.table.TableCellRenderer
 
@@ -66,14 +69,15 @@ public class TableCellRendererCEMState extends DefaultTableCellRenderer implemen
         this.setEnabled(table.isEnabled());
         this.setFont(table.getFont());
 
-
         if (value instanceof CEMEntry) {
             Color backgroundColor = table.getBackground();
             CEMEntry entry = (CEMEntry) value;
             String receiverName = entry.getReceiverAS2Id();
-            Partner receiver = this.partnerAccess.getPartner(receiverName);
-            if( receiver != null ){
-                receiverName = receiver.getName();
+            PartnerListRequest request = new PartnerListRequest(PartnerListRequest.LIST_BY_AS2_ID);
+            request.setAdditionalListOptionStr(receiverName);
+            List<Partner> partnerList = ((PartnerListResponse)this.baseClient.sendSync(request)).getList();
+            if( partnerList != null && partnerList.size() > 0 ){
+                receiverName = partnerList.get(0).getName();
             }
             int state = entry.getCemState();            
             if (state == CEMEntry.STATUS_ACCEPTED_INT) {

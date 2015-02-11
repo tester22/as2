@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/message/loggui/ResourceBundleMessageOverview_fr.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/loggui/ResourceBundleMessageOverview_fr.java,v 1.1 2015/01/06 11:07:41 heller Exp $
 package de.mendelson.comm.as2.message.loggui;
 import de.mendelson.util.MecResourceBundle;
 /*
@@ -30,7 +30,8 @@ public class ResourceBundleMessageOverview_fr extends MecResourceBundle{
         {"header.messageid", "Message id" },
         {"header.encryption", "Cryptage" },
         {"header.signature", "Signature" },
-        {"header.mdn", "MDN" },            
+        {"header.mdn", "MDN" },      
+        {"header.userdefinedid", "Id" },  
         {"header.payload", "Contenu" },
         {"number.of.attachments", "* {0} Pièces attachées *" },
     };

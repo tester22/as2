@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/notification/NotificationAccessDB.java,v 1.1 2012/04/18 14:10:31 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/notification/NotificationAccessDB.java,v 1.1 2015/01/06 11:07:42 heller Exp $
 package de.mendelson.comm.as2.notification;
 
 import de.mendelson.comm.as2.server.AS2Server;
@@ -60,10 +60,12 @@ public class NotificationAccessDB {
                 if (!result.wasNull()) {
                     data.setSmtpPass(smtpPass.toCharArray());
                 }
+                data.setConnectionSecurity(result.getInt("security"));
                 return (data);
             }
         } catch (Exception e) {
-            this.logger.severe("NotificationAccessDB.getNotificationData: " + e.getMessage());
+            this.logger.severe("NotificationAccessDB.getNotificationData: " + e.getClass().getName() + " " + e.getMessage());
+            e.printStackTrace();
             return (null);
         } finally {
             if (result != null) {
@@ -90,7 +92,7 @@ public class NotificationAccessDB {
         PreparedStatement statement = null;
         try {
             statement = this.configConnection.prepareStatement(
-                    "UPDATE notification SET mailhost=?,mailhostport=?,mailaccountname=?,mailaccountpass=?,notificationemailaddress=?,notifycertexpire=?,notifytransactionerror=?,notifycem=?,notifysystemfailure=?,replyto=?,usesmtpauth=?,smtpauthuser=?,smtpauthpass=?,notifyresend=?");
+                    "UPDATE notification SET mailhost=?,mailhostport=?,mailaccountname=?,mailaccountpass=?,notificationemailaddress=?,notifycertexpire=?,notifytransactionerror=?,notifycem=?,notifysystemfailure=?,replyto=?,usesmtpauth=?,smtpauthuser=?,smtpauthpass=?,notifyresend=?,security=?");
             statement.setEscapeProcessing(true);
             statement.setString(1, data.getMailServer());
             statement.setInt(2, data.getMailServerPort());
@@ -114,6 +116,7 @@ public class NotificationAccessDB {
                 statement.setNull(13, Types.VARCHAR);
             }
             statement.setInt(14, data.notifyResendDetected() ? 1 : 0);
+            statement.setInt(15, data.getConnectionSecurity());
             statement.execute();
         } catch (Exception e) {
             this.logger.severe("NotificationAccessDB.updateNotification: " + e.getMessage());

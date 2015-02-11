@@ -1,7 +1,8 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/message/MessageOverviewFilter.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/MessageOverviewFilter.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
 import de.mendelson.comm.as2.partner.Partner;
+import java.io.Serializable;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
@@ -15,7 +16,7 @@ import de.mendelson.comm.as2.partner.Partner;
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
-public class MessageOverviewFilter{
+public class MessageOverviewFilter implements Serializable{
 
     public static final int DIRECTION_ALL = 0;
     public static final int DIRECTION_IN = AS2MessageInfo.DIRECTION_IN;

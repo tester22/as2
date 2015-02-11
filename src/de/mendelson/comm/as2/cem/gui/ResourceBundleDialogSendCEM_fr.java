@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/cem/gui/ResourceBundleDialogSendCEM_fr.java,v 1.1 2012/04/18 14:10:20 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/cem/gui/ResourceBundleDialogSendCEM_fr.java,v 1.1 2015/01/06 11:07:35 heller Exp $
 package de.mendelson.comm.as2.cem.gui;
 import de.mendelson.util.MecResourceBundle;
 /*
@@ -33,6 +33,10 @@ public class ResourceBundleDialogSendCEM_fr extends MecResourceBundle{
         {"cem.request.failed", "L''échec de la demande CEM:\n{0}" },
         {"cem.request.success", "La demande CEM a été envoyée avec succès." },
         {"cem.request.title", "Échange de certificat via CEM" },
+        {"cem.informed", "Le système a tenté d''informer les partenaires suivants via CEM, s''il vous plaît jeter un oeil à la gestion CEM pour voir si cela a été un succès: {0}" },
+        {"cem.not.informed", "Les partenaires suivants n'ont pas été informés via CEM, veuillez envoyer le certificat en utilisant un autre canal, par exemple email: {0}" },
+        
+        
     };
     
 }

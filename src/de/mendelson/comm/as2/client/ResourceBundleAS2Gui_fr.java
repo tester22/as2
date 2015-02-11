@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/client/ResourceBundleAS2Gui_fr.java,v 1.1 2012/04/18 14:10:23 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/ResourceBundleAS2Gui_fr.java,v 1.1 2015/01/06 11:07:37 heller Exp $
 package de.mendelson.comm.as2.client;
 
 import de.mendelson.util.MecResourceBundle;
@@ -27,6 +27,7 @@ public class ResourceBundleAS2Gui_fr extends MecResourceBundle {
         {"menu.file", "Fichier"},
         {"menu.file.exit", "Fermer"},
         {"menu.file.partner", "Partenaire"},
+        {"menu.file.datasheet", "Créer une fiche de communication"},
         {"menu.file.certificates", "Certificats"},
         {"menu.file.certificate", "Certificats"},
         {"menu.file.certificate.signcrypt", "Certificats (signature, cryptage)"},
@@ -40,6 +41,7 @@ public class ResourceBundleAS2Gui_fr extends MecResourceBundle {
         {"menu.file.preferences", "Préférences"},
         {"menu.file.send", "Envoyer un fichier à un partenaire"},
         {"menu.file.resend", "Envoyer en tant que nouvelle transaction"},
+        {"menu.file.resend.multiple", "Envoyer en tant que nouvelles transactions"},
         {"menu.help", "Aide"},
         {"menu.help.about", "A propos"},
         {"menu.help.shop", "mendelson online shop"},
@@ -76,8 +78,9 @@ public class ResourceBundleAS2Gui_fr extends MecResourceBundle {
         {"login.failed.client.incompatible.title", "Login rejeté"},
         {"uploading.to.server", "Téléchargement sur le serveur"},
         {"refresh.overview", "Rafraîchissant"},
-        {"resend.performed", "Cette transaction a été renvoyer manuellement comme une nouvelle transaction." },
+        {"resend.performed", "Cette transaction a été renvoyer manuellement comme une nouvelle transaction ([{0}])." },
         {"dialog.resend.message", "Voulez-vous vraiment de renvoyer les données de la transaction sélectionnée?"},
+        {"dialog.resend.message.multiple", "Voulez-vous vraiment de renvoyer les données des {0} transactions sélectionnées?"},
         {"dialog.resend.title", "Transaction renvoyer"},        
     };
 }

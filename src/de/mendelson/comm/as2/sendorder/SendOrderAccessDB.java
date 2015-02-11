@@ -1,8 +1,9 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/sendorder/SendOrderAccessDB.java,v 1.1 2012/04/18 14:10:38 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/sendorder/SendOrderAccessDB.java,v 1.1 2015/01/06 11:07:49 heller Exp $
 package de.mendelson.comm.as2.sendorder;
 
 import de.mendelson.comm.as2.notification.Notification;
 import de.mendelson.comm.as2.server.AS2Server;
+import java.io.InvalidClassException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -183,10 +184,15 @@ public class SendOrderAccessDB {
             statement.setLong(2, System.currentTimeMillis());
             result = statement.executeQuery();
             while (result.next() && count < maxCount) {
-                Object orderObject = result.getObject("sendorder");
+                Object orderObject = null;
+                try {
+                    orderObject = result.getObject("sendorder");
+                } catch (Throwable invalidClassExeption) {
+                    //nop
+                }
                 SendOrder order = null;
                 if (orderObject != null && orderObject instanceof SendOrder) {
-                    order = (SendOrder) orderObject;
+                    order = (SendOrder) orderObject; 
                     int id = result.getInt("id");
                     order.setDbId(id);
                     //do not pick it up until it is processed
@@ -201,14 +207,14 @@ public class SendOrderAccessDB {
                 }
             }
         } catch (Exception e) {
-            this.logger.severe("SendOrderAccessDB.getNext: " +e.getMessage());
+            this.logger.severe("SendOrderAccessDB.getNext: " + e.getMessage());
             Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
         } finally {
             if (statement != null) {
                 try {
                     statement.close();
                 } catch (Exception e) {
-                    this.logger.severe("SendOrderAccessDB.getNext: " +e.getMessage());
+                    this.logger.severe("SendOrderAccessDB.getNext: " + e.getMessage());
                     Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
                 }
             }

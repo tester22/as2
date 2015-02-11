@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/partner/gui/ResourceBundlePartnerConfig.java,v 1.1 2012/04/18 14:10:32 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/gui/ResourceBundlePartnerConfig.java,v 1.1 2015/01/06 11:07:44 heller Exp $
 package de.mendelson.comm.as2.partner.gui;
 import de.mendelson.util.MecResourceBundle;
 /*
@@ -27,6 +27,7 @@ public class ResourceBundlePartnerConfig extends MecResourceBundle{
         {"button.ok", "Ok" },
         {"button.cancel", "Cancel" },
         {"button.new", "New" },
+        {"button.clone", "Clone" },
         {"button.delete", "Delete" },
         {"nolocalstation.message", "There has to be defined min one partner as local station." },
         {"nolocalstation.title", "No local station" },
@@ -43,6 +44,7 @@ public class ResourceBundlePartnerConfig extends MecResourceBundle{
         {"directory.delete.failure", "Unable to delete \"{0}\"." },
         {"directory.delete.success", "The directory \"{0}\" has been deleted." },
         {"saving", "Saving..." },
+        {"module.locked", "The partner management is locked by another client, you are not allowed to commit your changes!" },
     };
     
 }

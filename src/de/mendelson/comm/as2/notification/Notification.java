@@ -1,9 +1,7 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/notification/Notification.java,v 1.1 2012/04/18 14:10:31 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/notification/Notification.java,v 1.1 2015/01/06 11:07:42 heller Exp $
 package de.mendelson.comm.as2.notification;
 
 import de.mendelson.comm.as2.AS2ServerVersion;
-import de.mendelson.util.security.cert.CertificateManager;
-import de.mendelson.util.security.cert.KeystoreCertificate;
 import de.mendelson.comm.as2.log.LogAccessDB;
 import de.mendelson.comm.as2.log.LogEntry;
 import de.mendelson.comm.as2.message.AS2MessageInfo;
@@ -15,23 +13,25 @@ import de.mendelson.comm.as2.server.AS2Server;
 import de.mendelson.comm.as2.statistic.QuotaAccessDB;
 import de.mendelson.comm.as2.statistic.StatisticOverviewEntry;
 import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.database.DebuggablePreparedStatement;
+import de.mendelson.util.security.cert.CertificateManager;
+import de.mendelson.util.security.cert.KeystoreCertificate;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.PrintStream;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
-
-/*
- * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
- *
- * This software is subject to the license agreement set forth in the license.
- * Please read and agree to all terms before using this software.
- * Other product and brand names are trademarks of their respective owners.
- */
 import java.util.MissingResourceException;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Address;
@@ -44,24 +44,39 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+
+/*
+ * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
+ *
+ * This software is subject to the license agreement set forth in the license.
+ * Please read and agree to all terms before using this software. Other product
+ * and brand names are trademarks of their respective owners.
+ */
 /**
  * Performs the notification for an event
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
 public class Notification {
 
     private String templateDir = "notificationtemplates" + File.separator;
-    /**Stores the connection data and notification eMail*/
+    /**
+     * Stores the connection data and notification eMail
+     */
     private NotificationData data;
     private Logger logger = Logger.getLogger(AS2Server.SERVER_LOGGER_NAME);
-    /**localize your output*/
+    /**
+     * localize your output
+     */
     private MecResourceBundle rb = null;
     //DB connection
     private Connection configConnection;
     private Connection runtimeConnection;
 
-    /**Will not perform a lookup in the db but take the passed notification data object
+    /**
+     * Will not perform a lookup in the db but take the passed notification data
+     * object
      */
     public Notification(NotificationData data, Connection configConnection, Connection runtimeConnection) {
         this.configConnection = configConnection;
@@ -77,7 +92,17 @@ public class Notification {
         this.data = data;
     }
 
-    /**Constructure without notification data, will perform a lookup in the db*/
+    private String getHostname() {
+        try {
+            return (InetAddress.getLocalHost().getHostName());
+        } catch (UnknownHostException e) {
+            return ("Unknown");
+        }
+    }
+
+    /**
+     * Constructor without notification data, will perform a lookup in the db
+     */
     public Notification(Connection configConnection, Connection runtimeConnection) {
         this.configConnection = configConnection;
         this.runtimeConnection = runtimeConnection;
@@ -92,10 +117,13 @@ public class Notification {
         //figure out the notification data
         NotificationAccessDB access = new NotificationAccessDB(this.configConnection);
         this.data = access.getNotificationData();
+        if( data == null ){
+            throw new RuntimeException( "Unable to read the notification settings");
+        }
     }
 
     public void sendResendDetected(AS2MessageInfo newMessageInfo, AS2MessageInfo alreadyExistingMessageInfo,
-            Partner sender, Partner receiver) throws Exception{
+            Partner sender, Partner receiver) throws Exception {
         //do only notify if this is requested by the config
         if (!this.data.notifyResendDetected()) {
             return;
@@ -103,7 +131,7 @@ public class Notification {
         String filename = this.getLocalizedTemplateFilename("template_notification_resend_detected");
         Properties replacement = new Properties();
         replacement.setProperty("${PRODUCTNAME}", AS2ServerVersion.getProductName());
-        replacement.setProperty("${HOST}", InetAddress.getLocalHost().getHostName());
+        replacement.setProperty("${HOST}", this.getHostname());
         replacement.setProperty("${EXISTING_MESSAGE_INIT_TIME}", alreadyExistingMessageInfo.getInitDate().toString());
         replacement.setProperty("${MESSAGEID}", newMessageInfo.getMessageId());
         replacement.setProperty("${SENDER}", sender.getName());
@@ -113,10 +141,11 @@ public class Notification {
         this.sendMail(mail);
         this.logger.fine(this.rb.getResourceString("misc.message.send", this.data.getNotificationMail()));
     }
-    
-    
-    /**The system has imported a new certificate into the SSL keystore. The SSL connector
-     * has to be restarted before these changes are taken*/
+
+    /**
+     * The system has imported a new certificate into the SSL keystore. The SSL
+     * connector has to be restarted before these changes are taken
+     */
     public void sendSSLCertificateAddedByCEM(Partner partner, KeystoreCertificate cert) throws Exception {
         //do only notify if this is requested by the config
         if (!this.data.notifyCEM()) {
@@ -125,7 +154,7 @@ public class Notification {
         String filename = this.getLocalizedTemplateFilename("template_notification_cem_ssl_cert_added");
         Properties replacement = new Properties();
         replacement.setProperty("${PRODUCTNAME}", AS2ServerVersion.getProductName());
-        replacement.setProperty("${HOST}", InetAddress.getLocalHost().getHostName());
+        replacement.setProperty("${HOST}", this.getHostname());
         replacement.setProperty("${PARTNER}", partner.getName());
         StringBuilder techInfo = new StringBuilder();
         String alias = cert.getAlias();
@@ -143,21 +172,22 @@ public class Notification {
         this.logger.fine(this.rb.getResourceString("misc.message.send", this.data.getNotificationMail()));
     }
 
-    /**Sends a notification if the send quota has been exceeded
-     * 
+    /**
+     * Sends a notification if the send quota has been exceeded
+     *
      * @param partner
      */
     public void sendPartnerSendQuotaExceeded(Partner localStation, Partner partner) {
         StatisticOverviewEntry entry = null;
         try {
-            QuotaAccessDB access = new QuotaAccessDB(this.configConnection, this.runtimeConnection );
+            QuotaAccessDB access = new QuotaAccessDB(this.configConnection, this.runtimeConnection);
             entry = access.getStatisticOverview(
                     localStation.getAS2Identification(), partner.getAS2Identification());
             if (partner.isNotifySendEnabled() && partner.getNotifySend() == entry.getSendMessageCount()) {
                 String filename = this.getLocalizedTemplateFilename("template_notification_sendquota_exceeded");
                 Properties replacement = new Properties();
                 replacement.setProperty("${PRODUCTNAME}", AS2ServerVersion.getProductName());
-                replacement.setProperty("${HOST}", InetAddress.getLocalHost().getHostName());
+                replacement.setProperty("${HOST}", this.getHostname());
                 replacement.setProperty("${PARTNER}", partner.getName());
                 replacement.setProperty("${QUOTA}", String.valueOf(partner.getNotifySend()));
                 NotificationMail mail = new NotificationMail();
@@ -170,21 +200,22 @@ public class Notification {
         }
     }
 
-    /**Sends a notification if the receive quota has been exceeded
-     * 
+    /**
+     * Sends a notification if the receive quota has been exceeded
+     *
      * @param partner
      */
     public void sendPartnerReceiveQuotaExceeded(Partner localStation, Partner partner) {
         StatisticOverviewEntry entry = null;
         try {
-            QuotaAccessDB access = new QuotaAccessDB(this.configConnection, this.runtimeConnection );
+            QuotaAccessDB access = new QuotaAccessDB(this.configConnection, this.runtimeConnection);
             entry = access.getStatisticOverview(
                     localStation.getAS2Identification(), partner.getAS2Identification());
             if (partner.isNotifyReceiveEnabled() && partner.getNotifyReceive() == entry.getReceivedMessageCount()) {
                 String filename = this.getLocalizedTemplateFilename("template_notification_receivequota_exceeded");
                 Properties replacement = new Properties();
                 replacement.setProperty("${PRODUCTNAME}", AS2ServerVersion.getProductName());
-                replacement.setProperty("${HOST}", InetAddress.getLocalHost().getHostName());
+                replacement.setProperty("${HOST}", this.getHostname());
                 replacement.setProperty("${PARTNER}", partner.getName());
                 replacement.setProperty("${QUOTA}", String.valueOf(partner.getNotifyReceive()));
                 NotificationMail mail = new NotificationMail();
@@ -197,14 +228,29 @@ public class Notification {
         }
     }
 
-    /**Convinience method to send a notification to the administrator that something unexpected happened to the system*/
-    public static void systemFailure(Connection configConnection, Connection runtimeConnection, Throwable exception) {
+    /**
+     * Convinience method to send a notification to the administrator that
+     * something unexpected happened to the system. This is for a SQL related problem and will display additional information about
+     * SQL parameters of the query of a statement
+     */
+    public static void systemFailure(Connection configConnection, Connection runtimeConnection, Throwable exception, PreparedStatement statement) {
         Notification notification = new Notification(configConnection, runtimeConnection);
-        notification.sendSystemFailure(exception);
+        notification.sendSystemFailure(exception, statement);
+    }
+        
+    /**
+     * Convinience method to send a notification to the administrator that
+     * something unexpected happened to the system
+     */
+    public static void systemFailure(Connection configConnection, Connection runtimeConnection, Throwable exception) {
+       systemFailure(configConnection, runtimeConnection, exception, null);
     }
 
-    /**Sends a notification to the administrator that something unexpected happened to the system*/
-    public void sendSystemFailure(Throwable exception) {
+    /**
+     * Sends a notification to the administrator that something unexpected
+     * happened to the system
+     */
+    private void sendSystemFailure(Throwable exception, PreparedStatement statement) {
         //do only notify if this is requested by the config
         if (!this.data.notifySystemFailure()) {
             return;
@@ -213,14 +259,21 @@ public class Notification {
             String filename = this.getLocalizedTemplateFilename("template_notification_systemproblem");
             Properties replacement = new Properties();
             replacement.setProperty("${PRODUCTNAME}", AS2ServerVersion.getProductName());
-            replacement.setProperty("${HOST}", InetAddress.getLocalHost().getHostName());
-            replacement.setProperty("${MESSAGE}", exception.getClass().getName()
-                    + ": " + exception.getMessage());
+            replacement.setProperty("${HOST}", this.getHostname());
+            String exceptionCategory = exception.getClass().getName().substring( exception.getClass().getName().lastIndexOf(".")+1);
+            replacement.setProperty("${CATEGORY}", exceptionCategory);
+            replacement.setProperty("${MESSAGE}", exception.getMessage());
             StackTraceElement[] trace = exception.getStackTrace();
             StringBuilder builder = new StringBuilder();
             for (StackTraceElement element : trace) {
                 builder.append(element.toString());
                 builder.append("\n");
+            }
+            if( exception instanceof SQLException && statement != null && statement instanceof DebuggablePreparedStatement){
+                builder.append( "\n");
+                DebuggablePreparedStatement debug = (DebuggablePreparedStatement) statement;
+                builder.append( debug.getQueryWithParameter() );
+                builder.append( "\n");
             }
             replacement.setProperty("${DETAILS}", builder.toString());
             NotificationMail mail = new NotificationMail();
@@ -232,21 +285,22 @@ public class Notification {
         }
     }
 
-    /**Sends a notification if the receive quota has been exceeded
-     * 
+    /**
+     * Sends a notification if the receive quota has been exceeded
+     *
      * @param partner
      */
     public void sendPartnerSendReceiveQuotaExceeded(Partner localStation, Partner partner) {
         StatisticOverviewEntry entry = null;
         try {
-            QuotaAccessDB access = new QuotaAccessDB(this.configConnection, this.runtimeConnection );
+            QuotaAccessDB access = new QuotaAccessDB(this.configConnection, this.runtimeConnection);
             entry = access.getStatisticOverview(
                     localStation.getAS2Identification(), partner.getAS2Identification());
             if (partner.isNotifySendReceiveEnabled() && partner.getNotifySendReceive() == entry.getSendMessageCount() + entry.getReceivedMessageCount()) {
                 String filename = this.getLocalizedTemplateFilename("template_notification_sendreceivequota_exceeded");
                 Properties replacement = new Properties();
                 replacement.setProperty("${PRODUCTNAME}", AS2ServerVersion.getProductName());
-                replacement.setProperty("${HOST}", InetAddress.getLocalHost().getHostName());
+                replacement.setProperty("${HOST}", this.getHostname());
                 replacement.setProperty("${PARTNER}", partner.getName());
                 replacement.setProperty("${QUOTA}", String.valueOf(partner.getNotifyReceive()));
                 NotificationMail mail = new NotificationMail();
@@ -259,7 +313,9 @@ public class Notification {
         }
     }
 
-    /**Adds a _de _fr etc to the template name and returns it*/
+    /**
+     * Adds a _de _fr etc to the template name and returns it
+     */
     private String getLocalizedTemplateFilename(String templateName) {
         String language = Locale.getDefault().getLanguage();
         //select language specific template
@@ -271,22 +327,35 @@ public class Notification {
         return (templateName);
     }
 
-    /**Sends a test notification
-     * 
+    /**
+     * Sends a test notification
+     *
      */
     public void sendTest() throws Exception {
         String filename = this.getLocalizedTemplateFilename("template_notification_test");
         Properties replacement = new Properties();
         replacement.setProperty("${PRODUCTNAME}", AS2ServerVersion.getProductName());
-        replacement.setProperty("${HOST}", InetAddress.getLocalHost().getHostName());
+        replacement.setProperty("${HOST}", this.getHostname());
         replacement.setProperty("${USER}", System.getProperty("user.name"));
+        replacement.setProperty("${MAILHOST}", this.data.getMailServer());
+        replacement.setProperty("${MAILACCOUNT}", this.data.getAccountName());
+        replacement.setProperty("${MAILPORT}", String.valueOf(this.data.getMailServerPort()));
+        String connectionSecurity = "NONE";
+        if (this.data.getConnectionSecurity() == NotificationData.SECURITY_SSL) {
+            connectionSecurity = "SSL/TSL";
+        } else if (this.data.getConnectionSecurity() == NotificationData.SECURITY_START_SSL) {
+            connectionSecurity = "STARTSSL";
+        }
+        replacement.setProperty("${CONNECTIONSECURITY}", connectionSecurity);
         NotificationMail mail = new NotificationMail();
         mail.read(filename, replacement);
         this.sendMail(mail);
         this.logger.fine(this.rb.getResourceString("test.message.send", this.data.getNotificationMail()));
     }
 
-    /**Sends an email that a certification will expire*/
+    /**
+     * Sends an email that a certification will expire
+     */
     public void sendCertificateWillExpire(KeystoreCertificate certificate, int expireDuration) throws Exception {
         //do only notify if this is requested by the config
         if (!this.data.notifyCertExpire()) {
@@ -299,7 +368,7 @@ public class Notification {
         String filename = this.getLocalizedTemplateFilename(templateName);
         Properties replacement = new Properties();
         replacement.setProperty("${PRODUCTNAME}", AS2ServerVersion.getProductName());
-        replacement.setProperty("${HOST}", InetAddress.getLocalHost().getHostName());
+        replacement.setProperty("${HOST}", this.getHostname());
         if (expireDuration >= 0) {
             replacement.setProperty("${DURATION}", String.valueOf(expireDuration));
         }
@@ -313,7 +382,9 @@ public class Notification {
                 }));
     }
 
-    /**Sends an email that a CEM has been received*/
+    /**
+     * Sends an email that a CEM has been received
+     */
     public void sendCEMRequestReceived(Partner initiator) throws Exception {
         //do only notify if this is requested by the config
         if (!this.data.notifyCEM()) {
@@ -322,7 +393,7 @@ public class Notification {
         String filename = this.getLocalizedTemplateFilename("template_notification_cem_request_received");
         Properties replacement = new Properties();
         replacement.setProperty("${PRODUCTNAME}", AS2ServerVersion.getProductName());
-        replacement.setProperty("${HOST}", InetAddress.getLocalHost().getHostName());
+        replacement.setProperty("${HOST}", this.getHostname());
         replacement.setProperty("${PARTNER}", initiator.getName());
         NotificationMail mail = new NotificationMail();
         mail.read(filename, replacement);
@@ -331,7 +402,8 @@ public class Notification {
                 this.data.getNotificationMail()));
     }
 
-    /**Sends an email that a CEM has been received
+    /**
+     * Sends an email that a CEM has been received
      */
     public void sendCertificateChangedByCEM(CertificateManager manager, Partner partner, int category) throws Exception {
         //do only notify if this is requested by the config
@@ -341,7 +413,7 @@ public class Notification {
         String filename = this.getLocalizedTemplateFilename("template_notification_cem_cert_changed");
         Properties replacement = new Properties();
         replacement.setProperty("${PRODUCTNAME}", AS2ServerVersion.getProductName());
-        replacement.setProperty("${HOST}", InetAddress.getLocalHost().getHostName());
+        replacement.setProperty("${HOST}",this.getHostname());
         String description = partner.getPartnerCertificateInformationList().getCertificatePurposeDescription(
                 manager, partner, category);
         replacement.setProperty("${CERTIFICATEDESCRIPTION}", description);
@@ -382,10 +454,11 @@ public class Notification {
                 this.data.getNotificationMail()));
     }
 
-    /**Returns the message info object a a passed message id from the database*/
+    /**
+     * Returns the message info object a a passed message id from the database
+     */
     private AS2MessageInfo getMessageInfo(String messageId) throws Exception {
-        MessageAccessDB messageAccess 
-                = new MessageAccessDB(this.configConnection, this.runtimeConnection);
+        MessageAccessDB messageAccess = new MessageAccessDB(this.configConnection, this.runtimeConnection);
         AS2MessageInfo info = messageAccess.getLastMessageEntry(messageId);
         if (info == null) {
             throw new Exception("No message entry found for " + messageId);
@@ -393,7 +466,8 @@ public class Notification {
         return (info);
     }
 
-    /**Sends an email that an error occured in a transaction
+    /**
+     * Sends an email that an error occured in a transaction
      */
     public void sendTransactionError(String messageId) {
         //do only notify if this is requested by the config
@@ -422,7 +496,7 @@ public class Notification {
             }
             LogAccessDB logAccess = new LogAccessDB(this.configConnection, this.runtimeConnection);
             StringBuilder log = new StringBuilder();
-            LogEntry[] entries = logAccess.getLog(messageId);
+            List<LogEntry> entries = logAccess.getLog(messageId);
             DateFormat format = DateFormat.getDateTimeInstance();
             for (LogEntry entry : entries) {
                 if (log.length() > 0) {
@@ -434,14 +508,14 @@ public class Notification {
             String filename = this.getLocalizedTemplateFilename("template_notification_transaction_error");
             Properties replacement = new Properties();
             replacement.setProperty("${PRODUCTNAME}", AS2ServerVersion.getProductName());
-            replacement.setProperty("${HOST}", InetAddress.getLocalHost().getHostName());
+            replacement.setProperty("${HOST}", this.getHostname());
             replacement.setProperty("${MESSAGEID}", messageId);
             replacement.setProperty("${SENDER}", senderName);
             replacement.setProperty("${RECEIVER}", receiverName);
             replacement.setProperty("${LOG}", log.toString());
-            if( info.getSubject() != null ){
+            if (info.getSubject() != null) {
                 replacement.setProperty("${SUBJECT}", info.getSubject());
-            }else{
+            } else {
                 replacement.setProperty("${SUBJECT}", "");
             }
             NotificationMail mail = new NotificationMail();
@@ -471,13 +545,27 @@ public class Notification {
         }
     }
 
-    /**Returns the default session for the mail send process
+    /**
+     * Returns the default session for the mail send process
      */
     private Session getDefaultSession() {
+        String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
+
         Properties properties = new Properties();
-        properties.put("mail.smtp.host", this.data.getMailServer());
-        properties.put("mail.smtp.port", String.valueOf(this.data.getMailServerPort()));
-        properties.put("mail.transport.protocol", "smtp");
+        properties.setProperty("mail.smtp.host", this.data.getMailServer());
+        properties.setProperty("mail.smtp.port", String.valueOf(this.data.getMailServerPort()));
+        properties.setProperty("mail.transport.protocol", "smtp");
+        properties.setProperty("mail.smtp.connectiontimeout", String.valueOf(TimeUnit.SECONDS.toMillis(10)));
+        properties.setProperty("mail.smtp.timeout", String.valueOf(TimeUnit.SECONDS.toMillis(10)));
+        if (this.data.getConnectionSecurity() == NotificationData.SECURITY_START_SSL) {
+            properties.setProperty("mail.smtp.starttls.enable", "true");
+            properties.setProperty("mail.smtp.ssl.protocols", "SSLv3 TLSv1");
+        } else if (this.data.getConnectionSecurity() == NotificationData.SECURITY_SSL) {
+            properties.setProperty("mail.smtp.ssl.protocols", "SSLv3 TLSv1");
+            properties.setProperty("mail.smtp.socketFactory.class", SSL_FACTORY);
+            properties.setProperty("mail.smtp.socketFactory.fallback", "false");
+            properties.setProperty("mail.smtp.socketFactory.port", String.valueOf(this.data.getMailServerPort()));
+        }
         Session session = null;
         if (this.data.isUseSMTHAuth()) {
             properties.put("mail.smtp.auth", "true");
@@ -492,7 +580,16 @@ public class Notification {
 
     @SuppressWarnings("static-access")
     private void sendMail(NotificationMail mail) throws Exception {
+        boolean debug = false;
+        
         Session session = this.getDefaultSession();
+        ByteArrayOutputStream debugOut = new ByteArrayOutputStream();
+        PrintStream debugPrintStream = new PrintStream(debugOut);
+        if (debug) {
+            session.setDebug(true);
+            session.setDebugOut(debugPrintStream);
+        }
+
         // construct the message
         MimeMessage msg = new MimeMessage(session);
         msg.setFrom(new InternetAddress(data.getReplyTo()));
@@ -506,29 +603,46 @@ public class Notification {
         try {
             transport = session.getTransport("smtp");
             transport.send(msg);
-        } catch (SendFailedException sendFailedException) {
-            Address failedAddresses[] = sendFailedException.getInvalidAddresses();
-            StringBuilder errorMessage = new StringBuilder();
-            if (failedAddresses != null) {
-                errorMessage.append("The following mail addresses are invalid:").append("\n");
-                for (Address address : failedAddresses) {
-                    errorMessage.append(address.toString()).append("\n");
+        } catch (Exception e) {
+            if (e instanceof SendFailedException) {
+                SendFailedException sendFailedException = (SendFailedException) e;
+                Address failedAddresses[] = sendFailedException.getInvalidAddresses();
+                StringBuilder errorMessage = new StringBuilder();
+                if (failedAddresses != null) {
+                    errorMessage.append("The following mail addresses are invalid:").append("\n");
+                    for (Address address : failedAddresses) {
+                        errorMessage.append(address.toString()).append("\n");
+                    }
                 }
-            }
-            Address validUnsentAddresses[] = sendFailedException.getValidUnsentAddresses();
-            if (validUnsentAddresses != null) {
-                errorMessage.append("No mail has been sent to the following valid addresses:").append("\n");
-                for (Address address : validUnsentAddresses) {
-                    errorMessage.append(address.toString()).append("\n");
+                Address validUnsentAddresses[] = sendFailedException.getValidUnsentAddresses();
+                if (validUnsentAddresses != null) {
+                    errorMessage.append("No mail has been sent to the following valid addresses:").append("\n");
+                    for (Address address : validUnsentAddresses) {
+                        errorMessage.append(address.toString()).append("\n");
+                    }
                 }
+                this.logger.severe(sendFailedException.getMessage());
+                if (errorMessage.length() > 0) {
+                    this.logger.severe(sendFailedException.getMessage());
+                }
+            } else {
+                StringBuilder errorLog = new StringBuilder();
+                errorLog.append(this.rb.getResourceString("test.message.debug"));
+                errorLog.append(debugOut.toString());
+                this.logger.severe(errorLog.toString());
             }
-            throw (sendFailedException);
+            throw (e);
         } finally {
             transport.close();
+            if (debugOut != null) {
+                debugOut.close();
+            }
         }
     }
 
-    /**Used for the SMTP authentication, this is required by some mail servers*/
+    /**
+     * Used for the SMTP authentication, this is required by some mail servers
+     */
     private static class SendMailAuthenticator extends Authenticator {
 
         private String user;

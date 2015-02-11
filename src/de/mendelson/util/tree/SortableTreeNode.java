@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/util/tree/SortableTreeNode.java,v 1.1 2012/04/18 14:10:47 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/tree/SortableTreeNode.java,v 1.1 2015/01/06 11:08:02 heller Exp $
 package de.mendelson.util.tree;
 
 import javax.swing.tree.*;

@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/partner/Partner.java,v 1.1 2012/04/18 14:10:32 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/Partner.java,v 1.1 2015/01/06 11:07:43 heller Exp $
 package de.mendelson.comm.as2.partner;
 
 import de.mendelson.util.security.cert.CertificateManager;
@@ -9,6 +9,7 @@ import de.mendelson.util.security.cert.KeystoreCertificate;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 import org.w3c.dom.Element;
@@ -24,18 +25,23 @@ import org.w3c.dom.NodeList;
 
 /**
  * Stores all information about a business partner
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
-public class Partner implements Serializable, Comparable {
+public class Partner implements Serializable, Comparable, Cloneable {
 
-    /**Unique id in the database for this partner
+    /**
+     * Unique id in the database for this partner
      */
     private int dbId = -1;
     private boolean localStation = false;
-    /**Found identification in the message*/
+    /**
+     * Found identification in the message
+     */
     private String as2Identification;
-    /**Name of the partner, defined in the PIP server
+    /**
+     * Name of the partner, defined in the PIP server
      */
     private String name;
     private PartnerCertificateInformationList partnerCertificateList = new PartnerCertificateInformationList();
@@ -49,27 +55,42 @@ public class Partner implements Serializable, Comparable {
     private boolean syncMDN = true;
     private boolean keepFilenameOnReceipt = false;
     private String[] pollIgnoreList = null;
-    /**Direcrtory poll interval in seconds*/
+    /**
+     * Direcrtory poll interval in seconds
+     */
     private int pollInterval = 10;
-    /**Max number of files to pick up for a single poll process*/
+    /**
+     * Max number of files to pick up for a single poll process
+     */
     private int maxPollFiles = 100;
-    /**Compression type for this partner, used if you send messages to the partner*/
+    /**
+     * Compression type for this partner, used if you send messages to the
+     * partner
+     */
     private int compressionType = AS2Message.COMPRESSION_NONE;
-    /**MDNs to this partner should be signed?*/
+    /**
+     * MDNs to this partner should be signed?
+     */
     private boolean signedMDN = true;
-    /**Command that should be executed on message receipt for this partner
+    /**
+     * Command that should be executed on message receipt for this partner
      */
     private String commandOnReceipt = "c:/mendelson/mbi/SendToMBI.exe -file ${filename} -media as2";
-    /**Indicates if the command should be executed on receipt of a message
+    /**
+     * Indicates if the command should be executed on receipt of a message
      */
     private boolean useCommandOnReceipt = false;
-    /**Stores an async MDN HTTP authentication if requested
+    /**
+     * Stores an async MDN HTTP authentication if requested
      */
     private HTTPAuthentication authenticationAsyncMDN = new HTTPAuthentication();
-    /**Stores a send data HTTP authentication if requested
+    /**
+     * Stores a send data HTTP authentication if requested
      */
     private HTTPAuthentication authentication = new HTTPAuthentication();
-    /**Comment for a partner, this is not relevant for the as2 communication*/
+    /**
+     * Comment for a partner, this is not relevant for the as2 communication
+     */
     private String comment = null;
     private int notifySend = 0;
     private int notifyReceive = 0;
@@ -77,49 +98,71 @@ public class Partner implements Serializable, Comparable {
     private boolean notifySendEnabled = false;
     private boolean notifyReceiveEnabled = false;
     private boolean notifySendReceiveEnabled = false;
-    /**Command that should be executed on message send for this partner / error
+    private String contactCompany = null;
+    private String contactAS2 = null;
+    /**
+     * Command that should be executed on message send for this partner / error
      */
     private String commandOnSendError = "c:/mendelson/mbi/SendToLog.exe -tid ${filename} -title \"AS2 sending process failed\" -details \"The AS2 message has NOT been sent:\\n${log}\" -state ERROR";
-    /**Indicates if the command should be executed on send of a message / error
+    /**
+     * Indicates if the command should be executed on send of a message / error
      */
     private boolean useCommandOnSendError = false;
-    /**Command that should be executed on message send for this partner / success
+    /**
+     * Command that should be executed on message send for this partner /
+     * success
      */
     private String commandOnSendSuccess = "c:/mendelson/mbi/SendToLog.exe -tid ${filename} -title \"AS2 message sent\" -details \"Success.\\nThe AS2 message has been sent:\\n${log}\" -state SUCCESS";
-    /**Indicates if the command should be executed on send of a message / success
+    /**
+     * Indicates if the command should be executed on send of a message /
+     * success
      */
     private boolean useCommandOnSendSuccess = false;
     private int contentTransferEncoding = AS2Message.CONTENT_TRANSFER_ENCODING_BINARY;
-    /**Partner specific http headers*/
-    private List<PartnerHttpHeader> httpHeader = new ArrayList<PartnerHttpHeader>();
-    /**http protocol version for this partner
+    /**
+     * Partner specific http headers
+     */
+    private final List<PartnerHttpHeader> httpHeader = Collections.synchronizedList(new ArrayList<PartnerHttpHeader>());
+    /**
+     * http protocol version for this partner
      */
     private String httpProtocolVersion = HttpConnectionParameter.HTTP_1_1;
 
     public Partner() {
     }
 
-    /**Deletes http headers that contain only of a value but no key*/
+    /**
+     * Deletes http headers that contain only of a value but no key
+     */
     public void deleteEmptyHttpHeader() {
-        for (int i = this.httpHeader.size() - 1; i >= 0; i--) {
-            PartnerHttpHeader header = this.httpHeader.get(i);
-            if (header.getKey() == null || header.getKey().trim().length() == 0) {
-                this.httpHeader.remove(i);
+        synchronized (this.httpHeader) {
+            for (int i = this.httpHeader.size() - 1; i >= 0; i--) {
+                PartnerHttpHeader header = this.httpHeader.get(i);
+                if (header.getKey() == null || header.getKey().trim().length() == 0) {
+                    this.httpHeader.remove(i);
+                }
             }
         }
     }
 
-    /**Returns a list of file patterns that will be ignored by the dir poll manager*/
+    /**
+     * Returns a list of file patterns that will be ignored by the dir poll
+     * manager
+     */
     public String[] getPollIgnoreList() {
         return (this.pollIgnoreList);
     }
 
-    /**Pass the poll ignore list to the partner*/
+    /**
+     * Pass the poll ignore list to the partner
+     */
     public void setPollIgnoreList(String[] pollIgnoreList) {
         this.pollIgnoreList = pollIgnoreList;
     }
 
-    /**Expected is a comma separated list of poll ignores*/
+    /**
+     * Expected is a comma separated list of poll ignores
+     */
     public void setPollIgnoreListString(String pollIgnoreStr) {
         if (pollIgnoreStr == null) {
             this.pollIgnoreList = null;
@@ -132,7 +175,10 @@ public class Partner implements Serializable, Comparable {
         }
     }
 
-    /**Returns a String that contains a comma separated list of dir poll manager ignore patterns*/
+    /**
+     * Returns a String that contains a comma separated list of dir poll manager
+     * ignore patterns
+     */
     public String getPollIgnoreListAsString() {
         if (this.pollIgnoreList == null) {
             return (null);
@@ -147,13 +193,16 @@ public class Partner implements Serializable, Comparable {
         return (buffer.toString());
     }
 
-    /**Returns the default URL where to connect to
+    /**
+     * Returns the default URL where to connect to
      */
     public String getDefaultURL() {
         return ("http://as2.mendelson-e-c.com:8080/as2/HttpReceiver");
     }
 
-    /**Returns the path on the harddisk where the messages are stored in*/
+    /**
+     * Returns the path on the harddisk where the messages are stored in
+     */
     public String getMessagePath(String messageDir) {
         StringBuilder messagePath = new StringBuilder();
         messagePath.append(new File(messageDir).getAbsolutePath());
@@ -201,14 +250,18 @@ public class Partner implements Serializable, Comparable {
         return (this.partnerCertificateList.getPartnerCertificate(category, prio));
     }
 
-    /**Sets a single cert information to the partner, overwriting any existing with the same status, priority and type
+    /**
+     * Sets a single cert information to the partner, overwriting any existing
+     * with the same status, priority and type
      */
     public void setCertificateInformation(PartnerCertificateInformation information) {
         this.partnerCertificateList.setCertificateInformation(information);
     }
 
-    /**Sets a new sign cert to this partner. This is a convenience method to set a cert info of
-     * the category SIGN, overwriting prio 1 and set the new cert to accepted
+    /**
+     * Sets a new sign cert to this partner. This is a convenience method to set
+     * a cert info of the category SIGN, overwriting prio 1 and set the new cert
+     * to accepted
      */
     public void setSignFingerprintSHA1(String fingerprintSHA1) {
         PartnerCertificateInformation signInfo = new PartnerCertificateInformation(
@@ -217,8 +270,10 @@ public class Partner implements Serializable, Comparable {
         this.setCertificateInformation(signInfo);
     }
 
-    /**Sets a new encryption cert to this partner. This is a convenience method to set a cert info of
-     * the category CRYPT, overwriting prio 1 and set the new cert to accepted
+    /**
+     * Sets a new encryption cert to this partner. This is a convenience method
+     * to set a cert info of the category CRYPT, overwriting prio 1 and set the
+     * new cert to accepted
      */
     public void setCryptFingerprintSHA1(String fingerprintSHA1) {
         PartnerCertificateInformation cryptInfo = new PartnerCertificateInformation(
@@ -227,15 +282,17 @@ public class Partner implements Serializable, Comparable {
         this.setCertificateInformation(cryptInfo);
     }
 
-    /**Returns the alias used for signing messages. This returns the cert
-     * with prio 1, status accepted, category SIGN
+    /**
+     * Returns the alias used for signing messages. This returns the cert with
+     * prio 1, status accepted, category SIGN
      */
     public String getSignFingerprintSHA1() {
         return (this.getSignFingerprintSHA1(1));
     }
 
-    /**Returns the fingerprint (SHA1) used for signing messages. This returns the cert
-     * with prio "prio", status accepted, category SIGN
+    /**
+     * Returns the fingerprint (SHA1) used for signing messages. This returns
+     * the cert with prio "prio", status accepted, category SIGN
      */
     public String getSignFingerprintSHA1(int prio) {
         PartnerCertificateInformation signInfo = this.getCertificateInformation(PartnerCertificateInformation.CATEGORY_SIGN, prio);
@@ -246,15 +303,17 @@ public class Partner implements Serializable, Comparable {
         }
     }
 
-    /**Returns the cert used for signing messages. This returns the cert
-     * with prio 1, status accepted, category SIGN
+    /**
+     * Returns the cert used for signing messages. This returns the cert with
+     * prio 1, status accepted, category SIGN
      */
     public String getCryptFingerprintSHA1() {
         return (this.getCryptFingerprintSHA1(1));
     }
 
-    /**Returns the alias used for signing messages. This returns the cert
-     * with prio "prio", status accepted, category SIGN
+    /**
+     * Returns the alias used for signing messages. This returns the cert with
+     * prio "prio", status accepted, category SIGN
      */
     public String getCryptFingerprintSHA1(int prio) {
         PartnerCertificateInformation cryptInfo = this.getCertificateInformation(PartnerCertificateInformation.CATEGORY_CRYPT, prio);
@@ -265,12 +324,16 @@ public class Partner implements Serializable, Comparable {
         }
     }
 
-    /**Overwrite the existing cert list*/
+    /**
+     * Overwrite the existing cert list
+     */
     public void setPartnerCertificateInformationList(PartnerCertificateInformationList list) {
         this.partnerCertificateList = list;
     }
 
-    /**Returns the existing cert list*/
+    /**
+     * Returns the existing cert list
+     */
     public PartnerCertificateInformationList getPartnerCertificateInformationList() {
         return (this.partnerCertificateList);
     }
@@ -323,8 +386,10 @@ public class Partner implements Serializable, Comparable {
         return (this.as2Identification);
     }
 
-    /**Overwrite the equal method of object
-     *@param anObject object ot compare
+    /**
+     * Overwrite the equal method of object
+     *
+     * @param anObject object ot compare
      */
     @Override
     public boolean equals(Object anObject) {
@@ -570,7 +635,9 @@ public class Partner implements Serializable, Comparable {
         this.contentTransferEncoding = contentTransferEncoding;
     }
 
-    /**Serializes this partner to XML
+    /**
+     * Serializes this partner to XML
+     *
      * @param level level in the XML hierarchie for the xml beautifying
      */
     public String toXML(CertificateManager manager, int level) {
@@ -636,24 +703,30 @@ public class Partner implements Serializable, Comparable {
         if (this.authenticationAsyncMDN != null) {
             builder.append(this.authenticationAsyncMDN.toXML(level + 1, "asyncmdn"));
         }
-        if (this.httpHeader != null && this.httpHeader.size() > 0) {
-            for (PartnerHttpHeader singleHeader : this.httpHeader) {
-                builder.append("\t<httpheader>\n");
-                builder.append("\t\t<key>").append(this.toCDATA(singleHeader.getKey())).append("</key>\n");
-                builder.append("\t\t<value>").append(this.toCDATA(singleHeader.getValue())).append("</value>\n");
-                builder.append("\t</httpheader>\n");
+        synchronized (this.httpHeader) {
+            if (this.httpHeader != null && this.httpHeader.size() > 0) {
+                for (PartnerHttpHeader singleHeader : this.httpHeader) {
+                    builder.append("\t<httpheader>\n");
+                    builder.append("\t\t<key>").append(this.toCDATA(singleHeader.getKey())).append("</key>\n");
+                    builder.append("\t\t<value>").append(this.toCDATA(singleHeader.getValue())).append("</value>\n");
+                    builder.append("\t</httpheader>\n");
+                }
             }
         }
         builder.append(offset).append("</partner>\n");
         return (builder.toString());
     }
 
-    /**Adds a cdata indicator to xml data*/
+    /**
+     * Adds a cdata indicator to xml data
+     */
     private String toCDATA(String data) {
         return ("<![CDATA[" + data + "]]>");
     }
 
-    /**Deserializes a partner from an XML node*/
+    /**
+     * Deserializes a partner from an XML node
+     */
     public static Partner fromXML(CertificateManager manager, Element element) {
         Partner partner = new Partner();
         NodeList propertiesNodeList = element.getChildNodes();
@@ -774,26 +847,46 @@ public class Partner implements Serializable, Comparable {
     public PartnerHttpHeader getHttpHeader(String key) {
         PartnerHttpHeader searchHeader = new PartnerHttpHeader();
         searchHeader.setKey(key);
-        int index = this.httpHeader.indexOf(searchHeader);
-        if (index >= 0) {
-            return (this.httpHeader.get(index));
+        synchronized (this.httpHeader) {
+            int index = this.httpHeader.indexOf(searchHeader);
+            if (index >= 0) {
+                return (this.httpHeader.get(index));
+            }
         }
         return (null);
     }
 
-    /**Returns all http headers that are not listed in the passed list*/
+    /**
+     * Returns all http headers that are not listed in the passed list
+     */
     public List<PartnerHttpHeader> getAllNonListedHttpHeader(List<String> keyList) {
         List<PartnerHttpHeader> nonListedHeaders = new ArrayList<PartnerHttpHeader>();
-        for (PartnerHttpHeader testHeader : this.httpHeader) {
-            if (!keyList.contains(testHeader.getKey())) {
-                nonListedHeaders.add(testHeader);
+        synchronized (this.httpHeader) {
+            for (PartnerHttpHeader testHeader : this.httpHeader) {
+                if (!keyList.contains(testHeader.getKey())) {
+                    nonListedHeaders.add(testHeader);
+                }
             }
         }
         return (nonListedHeaders);
     }
 
-    /**Returns all http headers of this partner*/
+    public void setHttpHeader( List<PartnerHttpHeader> list){
+        synchronized (this.httpHeader) {
+            this.httpHeader.clear();
+            this.httpHeader.addAll(list);
+        }
+    }
+    
+    
+    /**
+     * Returns all http headers of this partner
+     */
     public List<PartnerHttpHeader> getHttpHeader() {
+        List<PartnerHttpHeader> list = new ArrayList<PartnerHttpHeader>();
+        synchronized (this.httpHeader) {
+            list.addAll(this.httpHeader);
+        }
         return (this.httpHeader);
     }
 
@@ -801,7 +894,9 @@ public class Partner implements Serializable, Comparable {
      * @param httpHeader the httpHeader to set
      */
     public void addHttpHeader(PartnerHttpHeader httpHeader) {
-        this.httpHeader.add(httpHeader);
+        synchronized (this.httpHeader) {
+            this.httpHeader.add(httpHeader);
+        }
     }
 
     /**
@@ -837,4 +932,47 @@ public class Partner implements Serializable, Comparable {
     public void setMaxPollFiles(int maxPollFiles) {
         this.maxPollFiles = maxPollFiles;
     }
+    
+    /**Clone this object
+   */
+    @Override
+  public Object clone(){
+      try {
+          Partner object = (Partner)super.clone();
+          return( object );
+      } catch (CloneNotSupportedException e ){
+          e.printStackTrace();
+          return( null );
+      }
+  }
+
+    /**
+     * @return the contactAS2
+     */
+    public String getContactAS2() {
+        return contactAS2;
+    }
+
+    /**
+     * @param contactAS2 the contactAS2 to set
+     */
+    public void setContactAS2(String contactAS2) {
+        this.contactAS2 = contactAS2;
+    }
+
+    /**
+     * @return the contactCompany
+     */
+    public String getContactCompany() {
+        return contactCompany;
+    }
+
+    /**
+     * @param contactCompany the contactCompany to set
+     */
+    public void setContactCompany(String contactCompany) {
+        this.contactCompany = contactCompany;
+    }
+   
+  
 }

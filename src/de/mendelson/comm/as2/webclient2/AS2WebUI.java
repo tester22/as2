@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/webclient2/AS2WebUI.java,v 1.1 2012/04/18 14:10:41 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/webclient2/AS2WebUI.java,v 1.1 2015/01/06 11:07:50 heller Exp $
 package de.mendelson.comm.as2.webclient2;
 
 import com.vaadin.Application;
@@ -21,7 +21,6 @@ import com.vaadin.ui.LoginForm.LoginListener;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.ProgressIndicator;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Window;
 import de.mendelson.comm.as2.AS2ServerVersion;
@@ -56,6 +55,7 @@ import java.util.logging.Logger;
  */
 /**
  * Main frame for the web interface
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
@@ -64,7 +64,9 @@ public class AS2WebUI extends Application {
     private Connection configConnection = null;
     private Connection runtimeConnection = null;
     private Button buttonDetails = null;
-    /**Format the date display*/
+    /**
+     * Format the date display
+     */
     private DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
     private Window mainWindow = new Window(AS2ServerVersion.getFullProductName());
     private Panel mainPanel = new Panel();
@@ -76,19 +78,25 @@ public class AS2WebUI extends Application {
     private ThemeResource ICON_FINISHED;
     private ThemeResource ICON_ALL;
     private MecResourceBundle rbMessage;
-    /**Stores information about the browser*/
+    /**
+     * Stores information about the browser
+     */
     private WebBrowser browser;
     private User user = null;
     private Label labelUsername = new Label();
     private Table overviewTable = null;
-    /**Footer*/
+    /**
+     * Footer
+     */
     private Label footerTransactionSum = new Label();
     private Label footerTransactionOkSum = new Label();
     private Label footerTransactionPendingSum = new Label();
     private Label footerTransactionErrorSum = new Label();
     private HorizontalLayout footerLayout;
 
-    /** This is the entry point of you application as denoted in your web.xml */
+    /**
+     * This is the entry point of you application as denoted in your web.xml
+     */
     public AS2WebUI() {
         //load resource bundle
         try {
@@ -141,7 +149,6 @@ public class AS2WebUI extends Application {
         this.mainWindow.addComponent(logoImage);
         LoginForm loginForm = new LoginForm();
         loginForm.addListener(new LoginListener() {
-
             @Override
             public void onLogin(LoginEvent event) {
                 try {
@@ -183,7 +190,7 @@ public class AS2WebUI extends Application {
         footerLayout.setSpacing(true);
         footerLayout.addComponent(this.footerTransactionSum);
         footerLayout.addComponent(this.footerTransactionOkSum);
-        footerLayout.addComponent(this.footerTransactionPendingSum);        
+        footerLayout.addComponent(this.footerTransactionPendingSum);
         footerLayout.addComponent(this.footerTransactionErrorSum);
         this.mainPanel.addComponent(footerLayout);
         this.setMainWindow(this.mainWindow);
@@ -204,7 +211,6 @@ public class AS2WebUI extends Application {
         buttonRefresh.setIcon(new ThemeResource("images/refresh16x16.gif"));
         buttonRefresh.setEnabled(true);
         buttonRefresh.addListener(new ClickListener() {
-
             @Override
             public void buttonClick(ClickEvent event) {
                 AS2WebUI.this.refreshOverviewTableData();
@@ -215,7 +221,6 @@ public class AS2WebUI extends Application {
         this.buttonDetails.setIcon(new ThemeResource("images/messagedetails16x16.gif"));
         this.buttonDetails.setEnabled(false);
         this.buttonDetails.addListener(new ClickListener() {
-
             @Override
             public void buttonClick(ClickEvent event) {
                 AS2WebUI.this.displayMessageDetailsOfSelectedRow();
@@ -240,14 +245,12 @@ public class AS2WebUI extends Application {
 
     private MenuBar createMenuBar() {
         MenuBar.Command logoutCommand = new MenuBar.Command() {
-
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 logout();
             }
         };
         MenuBar.Command stateCommand = new MenuBar.Command() {
-
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 OkDialog dialog = new StateDialog();
@@ -256,7 +259,6 @@ public class AS2WebUI extends Application {
             }
         };
         MenuBar.Command aboutCommand = new MenuBar.Command() {
-
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 OkDialog dialog = new AboutDialog();
@@ -286,7 +288,9 @@ public class AS2WebUI extends Application {
         return "";
     }
 
-    /**Connect to the database and load the data into a table*/
+    /**
+     * Connect to the database and load the data into a table
+     */
     private Table createOverviewTable() {
         Table table = new Table();
         table.setSelectable(true);
@@ -296,14 +300,12 @@ public class AS2WebUI extends Application {
         table.setNullSelectionAllowed(false);
         // Handle selection change.
         table.addListener(new Property.ValueChangeListener() {
-
             @Override
             public void valueChange(ValueChangeEvent event) {
                 AS2WebUI.this.buttonDetails.setEnabled(true);
             }
         });
         table.addListener(new ItemClickEvent.ItemClickListener() {
-
             @Override
             public void itemClick(ItemClickEvent event) {
                 if (event.isDoubleClick()) {
@@ -335,12 +337,14 @@ public class AS2WebUI extends Application {
             this.logout();
             return;
         }
-        /**Stores all partner ids and the corresponding partner objects*/
+        /**
+         * Stores all partner ids and the corresponding partner objects
+         */
         Map<String, Partner> partnerMap = new HashMap<String, Partner>();
         //load partner data
         try {
             PartnerAccessDB partnerAccess = new PartnerAccessDB(this.configConnection, this.runtimeConnection);
-            Partner[] partner = partnerAccess.getPartner();
+            List<Partner> partner = partnerAccess.getPartner();
             for (Partner singlePartner : partner) {
                 partnerMap.put(singlePartner.getAS2Identification(), singlePartner);
             }
@@ -419,7 +423,7 @@ public class AS2WebUI extends Application {
                         partnerStr = sender.getName();
                     } else {
                         partnerStr = id;
-                    }                    
+                    }
                 }
                 String payload = null;
                 if (message.getPayloadCount() == 0

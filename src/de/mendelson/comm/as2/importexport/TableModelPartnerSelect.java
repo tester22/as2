@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/importexport/TableModelPartnerSelect.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/importexport/TableModelPartnerSelect.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.importexport;
 
 import de.mendelson.comm.as2.partner.Partner;

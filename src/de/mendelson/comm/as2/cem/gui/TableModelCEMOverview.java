@@ -1,10 +1,10 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/cem/gui/TableModelCEMOverview.java,v 1.1 2012/04/18 14:10:20 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/cem/gui/TableModelCEMOverview.java,v 1.1 2015/01/06 11:07:35 heller Exp $
 package de.mendelson.comm.as2.cem.gui;
 
 import de.mendelson.comm.as2.cem.CEMEntry;
-import java.util.*;
 import de.mendelson.util.MecResourceBundle;
 import java.text.DateFormat;
+import java.util.*;
 import javax.swing.table.AbstractTableModel;
 
 
@@ -17,18 +17,24 @@ import javax.swing.table.AbstractTableModel;
  */
 /**
  * Model to display the message overview
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
 public class TableModelCEMOverview extends AbstractTableModel {
 
-    /**ResourceBundle to localize the headers*/
+    /**
+     * ResourceBundle to localize the headers
+     */
     private MecResourceBundle rb = null;
-    /**Data to display*/
-    private List<CEMEntry> data = new ArrayList<CEMEntry>();
+    /**
+     * Data to display
+     */
+    private final List<CEMEntry> data = Collections.synchronizedList(new ArrayList<CEMEntry>());
     private DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
 
-    /** Creates new LogTableModel
+    /**
+     * Creates new LogTableModel
      */
     public TableModelCEMOverview() {
         //load resource bundle
@@ -41,56 +47,76 @@ public class TableModelCEMOverview extends AbstractTableModel {
         }
     }
 
-    /**Passes data to the model and fires a table data update*/
+    /**
+     * Passes data to the model and fires a table data update
+     */
     public void passNewData(List<CEMEntry> newData) {
-        this.data = newData;
-        this.fireTableDataChanged();
+        if (newData != null) {
+            synchronized (this.data) {
+                this.data.clear();
+                this.data.addAll(newData);
+            }
+            this.fireTableDataChanged();
+        }
     }
 
-    /**Number of rows to display*/
+    /**
+     * Number of rows to display
+     */
     @Override
     public int getRowCount() {
-        return (this.data.size());
+        synchronized (this.data) {
+            return (this.data.size());
+        }
     }
 
-    /**Number of cols to display*/
+    /**
+     * Number of cols to display
+     */
     @Override
     public int getColumnCount() {
         return (7);
     }
 
-    /**Returns a row of the content*/
-    public CEMEntry getRowAt( int row ){
-        return( this.data.get(row));
+    /**
+     * Returns a row of the content
+     */
+    public CEMEntry getRowAt(int row) {
+        synchronized (this.data) {
+            return (this.data.get(row));
+        }
     }
 
-    /**Returns a value at a specific position in the grid
+    /**
+     * Returns a value at a specific position in the grid
      */
     @Override
     public Object getValueAt(int row, int col) {
-        CEMEntry entry = this.data.get(row);
-        switch (col) {
-            case 0:
-                return (new CEMSystemActivity(entry));
-            case 1:
-                return entry;
-            case 2:
-                return (this.format.format(new Date(entry.getRequestMessageOriginated())));
-            case 3:
-                return (entry.getInitiatorAS2Id());
-            case 4:
-                return (entry.getReceiverAS2Id());
-            case 5:
-                return (entry.getSerialId());
-            case 6:
-                return (CEMEntry.getCategoryLocalized(entry.getCategory()));
+        synchronized (this.data) {
+            CEMEntry entry = this.data.get(row);
+            switch (col) {
+                case 0:
+                    return (new CEMSystemActivity(entry));
+                case 1:
+                    return entry;
+                case 2:
+                    return (this.format.format(new Date(entry.getRequestMessageOriginated())));
+                case 3:
+                    return (entry.getInitiatorAS2Id());
+                case 4:
+                    return (entry.getReceiverAS2Id());
+                case 5:
+                    return (entry.getSerialId());
+                case 6:
+                    return (CEMEntry.getCategoryLocalized(entry.getCategory()));
+            }
+            return (null);
         }
-        return (null);
     }
 
-    
-
-    /**Returns the name of every column
+    /**
+     * Returns the name of every column
+     *
      * @param col Column to get the header name of
      */
     @Override
@@ -99,7 +125,7 @@ public class TableModelCEMOverview extends AbstractTableModel {
             case 0:
                 return (this.rb.getResourceString("header.activity"));
             case 1:
-                return (this.rb.getResourceString("header.state"));            
+                return (this.rb.getResourceString("header.state"));
             case 2:
                 return (this.rb.getResourceString("header.requestdate"));
             case 3:
@@ -114,7 +140,9 @@ public class TableModelCEMOverview extends AbstractTableModel {
         return (null);
     }
 
-    /**Set how to display the grid elements
+    /**
+     * Set how to display the grid elements
+     *
      * @param col requested column
      */
     @Override
@@ -127,7 +155,6 @@ public class TableModelCEMOverview extends AbstractTableModel {
                     String.class,
                     String.class,
                     String.class,
-                    String.class,
-                }[col]);
+                    String.class,}[col]);
     }
 }

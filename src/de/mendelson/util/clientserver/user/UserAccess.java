@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/util/clientserver/user/UserAccess.java,v 1.1 2012/04/18 14:10:45 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/user/UserAccess.java,v 1.1 2015/01/06 11:07:55 heller Exp $
 package de.mendelson.util.clientserver.user;
 
 import java.io.BufferedReader;
@@ -22,14 +22,12 @@ import java.util.logging.Logger;
  * @version $Revision: 1.1 $
  */
 public class UserAccess {
-	
+
+    private File passwdFile = new File("passwd");
     private Logger logger;
 
-    // TODO make system prop and fix so that default behavior fast fails if not found
-    private String passwdFile = "./resources/etc/passwd";
-       
-    public UserAccess(Logger logger) {    	
-        this.logger = logger;        
+    public UserAccess(Logger logger) {
+        this.logger = logger;
     }
 
     public User addUser(String userName, char[] password) throws Exception {

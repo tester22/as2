@@ -1,21 +1,22 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/cem/gui/DialogSendCEM.java,v 1.1 2012/04/18 14:10:20 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/cem/gui/DialogSendCEM.java,v 1.1 2015/01/06 11:07:35 heller Exp $
 package de.mendelson.comm.as2.cem.gui;
 
-import de.mendelson.comm.as2.cem.CEMInitiator;
-import de.mendelson.util.security.cert.CertificateManager;
-import de.mendelson.util.security.cert.KeystoreCertificate;
+import de.mendelson.comm.as2.cem.clientserver.CEMSendRequest;
+import de.mendelson.comm.as2.cem.clientserver.CEMSendResponse;
 import de.mendelson.comm.as2.partner.Partner;
-import de.mendelson.comm.as2.partner.PartnerAccessDB;
+import de.mendelson.comm.as2.partner.clientserver.PartnerListRequest;
+import de.mendelson.comm.as2.partner.clientserver.PartnerListResponse;
 import de.mendelson.comm.as2.partner.gui.ListCellRendererPartner;
 import de.mendelson.comm.as2.preferences.PreferencesAS2;
 import de.mendelson.util.MecResourceBundle;
 import de.mendelson.util.clientserver.BaseClient;
 import de.mendelson.util.clientserver.clients.preferences.PreferencesClient;
 import de.mendelson.util.security.BCCryptoHelper;
+import de.mendelson.util.security.cert.CertificateManager;
+import de.mendelson.util.security.cert.KeystoreCertificate;
 import de.mendelson.util.security.cert.KeystoreStorage;
 import de.mendelson.util.security.cert.ListCellRendererCertificates;
 import de.mendelson.util.security.cert.clientserver.KeystoreStorageImplClientServer;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -23,6 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -37,7 +39,9 @@ import javax.swing.SwingUtilities;
  * Other product and brand names are trademarks of their respective owners.
  */
 /**
- * Allows to select a partner and sends a certificate to him via your mail application
+ * Allows to select a partner and sends a certificate to him via your mail
+ * application
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
@@ -45,18 +49,17 @@ public class DialogSendCEM extends JDialog {
 
     private MecResourceBundle rb = null;
     private CertificateManager certificateManagerEncSign;
-    private Connection configConnection;
-    private Connection runtimeConnection;
     private Logger logger = Logger.getLogger("de.mendelson.as2.client");
+    private BaseClient baseClient;
 
-    public DialogSendCEM(JFrame parent, Connection configConnection, Connection runtimeConnection, BaseClient baseClient) {
-        this(parent, null, configConnection, runtimeConnection, baseClient);
+    public DialogSendCEM(JFrame parent, BaseClient baseClient) {
+        this(parent, null, baseClient);
     }
 
-    public DialogSendCEM(JFrame parent, CertificateManager certificateManager, Connection configConnection,
-            Connection runtimeConnection,
+    public DialogSendCEM(JFrame parent, CertificateManager certificateManager,
             BaseClient baseClient) {
         super(parent, true);
+        this.baseClient = baseClient;
         //load the certificates if they arent passed here
         if (certificateManager == null) {
             PreferencesClient client = new PreferencesClient(baseClient);
@@ -74,8 +77,6 @@ public class DialogSendCEM extends JDialog {
         } else {
             this.certificateManagerEncSign = certificateManager;
         }
-        this.configConnection = configConnection;
-        this.runtimeConnection = runtimeConnection;
         //load resource bundle
         try {
             this.rb = (MecResourceBundle) ResourceBundle.getBundle(
@@ -93,7 +94,6 @@ public class DialogSendCEM extends JDialog {
             }
         }
         Collections.sort(sortedCertificateList);
-        this.jComboBoxReceiver.removeAllItems();
         this.jComboBoxInitiator.removeAllItems();
         this.jComboBoxKeys.removeAllItems();
         this.jComboBoxKeys.setRenderer(new ListCellRendererCertificates());
@@ -101,16 +101,11 @@ public class DialogSendCEM extends JDialog {
             this.jComboBoxKeys.addItem(cert);
         }
         this.jComboBoxInitiator.setRenderer(new ListCellRendererPartner());
-        PartnerAccessDB partnerAccess = new PartnerAccessDB(this.configConnection, this.runtimeConnection);
-        Partner[] initiatorList = partnerAccess.getLocalStations();
+        PartnerListResponse response = (PartnerListResponse) baseClient.sendSync(new PartnerListRequest(PartnerListRequest.LIST_LOCALSTATION));
+        List<Partner> initiatorList = response.getList();
         for (Partner partner : initiatorList) {
             this.jComboBoxInitiator.addItem(partner);
-        }
-        this.jComboBoxReceiver.setRenderer(new ListCellRendererPartner());
-        Partner[] receiverList = partnerAccess.getNonLocalStations();
-        for (Partner partner : receiverList) {
-            this.jComboBoxReceiver.addItem(partner);
-        }
+        }       
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         calendar.add(Calendar.YEAR, 1);
@@ -122,10 +117,10 @@ public class DialogSendCEM extends JDialog {
         this.jDateChooser.setDate(thirtyDays);
     }
 
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -134,9 +129,7 @@ public class DialogSendCEM extends JDialog {
 
         jPanelMain = new javax.swing.JPanel();
         jComboBoxKeys = new javax.swing.JComboBox();
-        jComboBoxReceiver = new javax.swing.JComboBox();
         jDateChooser = new com.toedter.calendar.JDateChooser();
-        jLabelReceiver = new javax.swing.JLabel();
         jLabelKeys = new javax.swing.JLabel();
         jLabelActivationDate = new javax.swing.JLabel();
         jPanelSpace = new javax.swing.JPanel();
@@ -166,18 +159,6 @@ public class DialogSendCEM extends JDialog {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanelMain.add(jComboBoxKeys, gridBagConstraints);
-
-        jComboBoxReceiver.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.ipadx = 4;
-        gridBagConstraints.ipady = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanelMain.add(jComboBoxReceiver, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
@@ -185,14 +166,6 @@ public class DialogSendCEM extends JDialog {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanelMain.add(jDateChooser, gridBagConstraints);
-
-        jLabelReceiver.setText(this.rb.getResourceString( "label.receiver"));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanelMain.add(jLabelReceiver, gridBagConstraints);
 
         jLabelKeys.setText(this.rb.getResourceString( "label.certificate"));
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -274,7 +247,7 @@ public class DialogSendCEM extends JDialog {
         getContentPane().add(jPanelButton, gridBagConstraints);
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-433)/2, (screenSize.height-247)/2, 433, 247);
+        setBounds((screenSize.width-434)/2, (screenSize.height-212)/2, 434, 212);
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
@@ -284,27 +257,36 @@ public class DialogSendCEM extends JDialog {
 
     private void jButtonOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOkActionPerformed
         this.setVisible(false);
-        CEMInitiator cemInitiator = new CEMInitiator(this.configConnection, 
-                this.runtimeConnection, this.certificateManagerEncSign);
-        Partner receiver = (Partner) this.jComboBoxReceiver.getSelectedItem();
-        Partner initiator = (Partner) this.jComboBoxInitiator.getSelectedItem();
-        KeystoreCertificate certificate = (KeystoreCertificate) this.jComboBoxKeys.getSelectedItem();
-        Date activationDate = this.jDateChooser.getDate();
-        //set time to 0:01 of this day
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(activationDate);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 1);
-        calendar.set(Calendar.SECOND, 0);
+        CEMSendRequest request = new CEMSendRequest();
+        request.setActivationDate(this.jDateChooser.getDate());
+        request.setCertificate((KeystoreCertificate) this.jComboBoxKeys.getSelectedItem());
+        request.setInitiator((Partner) this.jComboBoxInitiator.getSelectedItem());
+        CEMSendResponse response = (CEMSendResponse)this.baseClient.sendSync(request);
         JFrame parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, this);
-        try {
-            cemInitiator.sendRequest(initiator, receiver,
-                    certificate, true, true, false, calendar.getTime());
+        if (response.getException() == null) {
             JOptionPane.showMessageDialog(parent,
                     this.rb.getResourceString("cem.request.success"),
                     this.rb.getResourceString("cem.request.title"),
                     JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception e) {
+            List<Partner> informedPartner = response.getInformedPartner();
+            StringBuilder informedBuilder = new StringBuilder();
+            for( Partner partner:informedPartner){
+                informedBuilder.append( "\n");
+                informedBuilder.append( partner.getName() );                
+            }
+            this.logger.log(Level.FINE, this.rb.getResourceString("cem.informed", informedBuilder ));
+            PartnerListResponse allPartnerResponse = (PartnerListResponse) this.baseClient.sendSync(new PartnerListRequest(PartnerListRequest.LIST_NON_LOCALSTATIONS));
+            List<Partner> allPartnerList = allPartnerResponse.getList();
+            StringBuilder notInformedBuilder = new StringBuilder();
+            for( Partner partner:allPartnerList){
+                if( !informedPartner.contains(partner)){
+                    notInformedBuilder.append( "\n");
+                    notInformedBuilder.append( partner.getName());                    
+                }                
+            }
+            this.logger.log(Level.FINE, this.rb.getResourceString("cem.not.informed", notInformedBuilder ));
+        } else {
+            Throwable e = response.getException();
             JOptionPane.showMessageDialog(parent,
                     this.rb.getResourceString("cem.request.failed", e.getMessage()),
                     this.rb.getResourceString("cem.request.title"),
@@ -318,12 +300,10 @@ public class DialogSendCEM extends JDialog {
     private javax.swing.JButton jButtonOk;
     private javax.swing.JComboBox jComboBoxInitiator;
     private javax.swing.JComboBox jComboBoxKeys;
-    private javax.swing.JComboBox jComboBoxReceiver;
     private com.toedter.calendar.JDateChooser jDateChooser;
     private javax.swing.JLabel jLabelActivationDate;
     private javax.swing.JLabel jLabelInitiator;
     private javax.swing.JLabel jLabelKeys;
-    private javax.swing.JLabel jLabelReceiver;
     private javax.swing.JPanel jPanelButton;
     private javax.swing.JPanel jPanelMain;
     private javax.swing.JPanel jPanelSpace;

@@ -1,16 +1,16 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/partner/gui/JTreePartner.java,v 1.1 2012/04/18 14:10:32 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/gui/JTreePartner.java,v 1.1 2015/01/06 11:07:44 heller Exp $
 package de.mendelson.comm.as2.partner.gui;
 
 import de.mendelson.util.security.cert.CertificateManager;
 import de.mendelson.util.security.cert.KeystoreCertificate;
 import de.mendelson.comm.as2.partner.Partner;
-import de.mendelson.comm.as2.partner.PartnerAccessDB;
 import de.mendelson.comm.as2.partner.PartnerCertificateInformation;
+import de.mendelson.comm.as2.partner.clientserver.PartnerListRequest;
+import de.mendelson.comm.as2.partner.clientserver.PartnerListResponse;
+import de.mendelson.util.clientserver.BaseClient;
 import de.mendelson.util.tree.SortableTreeNode;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 import javax.swing.tree.*;
 import javax.swing.*;
 /*
@@ -34,15 +34,12 @@ public class JTreePartner extends JTree {
     private int uniquePartnerIdCounter = -1;
     /**This is the root node*/
     private SortableTreeNode root = null;
-    //DB connection
-    private Connection configConnection;
-    private Connection runtimeConnection;
+    private BaseClient baseClient;
 
     /**Tree constructor*/
-    public JTreePartner(Connection configConnection, Connection runtimeConnection) {
+    public JTreePartner(BaseClient baseClient) {
         super(new SortableTreeNode());
-        this.configConnection = configConnection;
-        this.runtimeConnection = runtimeConnection;
+        this.baseClient = baseClient;
         this.setRootVisible(false);
         this.root = (SortableTreeNode) this.getModel().getRoot();
         this.setCellRenderer(new TreeCellRendererPartner());
@@ -50,7 +47,7 @@ public class JTreePartner extends JTree {
 
     /**Returns the partner that is the localstation or null if none exists
      */
-    public Partner[] getLocalStations() {
+    public List<Partner> getLocalStations() {
         List<Partner> localStationList = new ArrayList<Partner>();
         for (int i = 0; i < this.root.getChildCount(); i++) {
             SortableTreeNode child = (SortableTreeNode) root.getChildAt(i);
@@ -58,18 +55,16 @@ public class JTreePartner extends JTree {
             if (partner.isLocalStation()) {
                 localStationList.add(partner);
             }
-        }
-        Partner[] locals = new Partner[localStationList.size()];
-        localStationList.toArray(locals);
-        return (locals);
+        }        
+        return (localStationList);
     }
 
     /**Returns that a local station is set in the tree. The configuration should
      *always work, it should be impossible to create a configuration without local station
      */
     public boolean localStationIsSet() {
-        Partner[] localStations = this.getLocalStations();
-        return (localStations != null && localStations.length != 0);
+        List<Partner> localStations = this.getLocalStations();
+        return (localStations != null && !localStations.isEmpty());
     }
 
     /**Sets a partner as local station in the tree
@@ -86,14 +81,14 @@ public class JTreePartner extends JTree {
     }
 
     /**Builds up the tree*/
-    public Partner[] buildTree() throws Exception {
+    public List<Partner> buildTree() throws Exception {
         this.root.removeAllChildren();
-        PartnerAccessDB access = new PartnerAccessDB(this.configConnection, this.runtimeConnection);
-        Partner[] partner = access.getPartner();
+        PartnerListResponse response = (PartnerListResponse) this.baseClient.sendSync(new PartnerListRequest(PartnerListRequest.LIST_ALL));
+        List<Partner> partnerList = response.getList();
         SortableTreeNode nodePartner = null;
         SortableTreeNode firstNodePartner = null;
-        for (int i = 0; i < partner.length; i++) {
-            nodePartner = new SortableTreeNode(partner[i]);
+        for (int i = 0; i < partnerList.size(); i++) {
+            nodePartner = new SortableTreeNode(partnerList.get(i));
             this.root.add(nodePartner);
             if (firstNodePartner == null) {
                 firstNodePartner = nodePartner;
@@ -107,7 +102,7 @@ public class JTreePartner extends JTree {
         if (firstNodePartner != null) {
             this.setSelectionPath(new TreePath(firstNodePartner.getPath()));
         }
-        return (partner);
+        return (partnerList);
     }
 
     /**Returns the number specified partner from the tree*/
@@ -184,13 +179,18 @@ public class JTreePartner extends JTree {
                     PartnerCertificateInformation.CATEGORY_CRYPT);
             partner.setCertificateInformation(cryptInfo);
         }
+        this.addPartner( partner );
+        return( partner );
+    }
+
+    public void addPartner( Partner partner ){
         SortableTreeNode node = new SortableTreeNode(partner);
         this.root.add(node);
         ((DefaultTreeModel) this.getModel()).nodeStructureChanged(this.root);
         this.setSelectionPath(new TreePath(node.getPath()));
-        return (partner);
     }
-
+    
+    
     /**Returns the selected partner or null if no partner is selected*/
     public Partner getSelectedPartner() {
         SortableTreeNode selectedNode = this.getSelectedNode();

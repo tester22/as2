@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/client/ResourceBundleAS2StatusBar_de.java,v 1.1 2012/04/18 14:10:23 heller Exp $ 
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/ResourceBundleAS2StatusBar_de.java,v 1.1 2015/01/06 11:07:37 heller Exp $ 
 package de.mendelson.comm.as2.client;
 import de.mendelson.util.MecResourceBundle;
 /*
@@ -27,6 +27,8 @@ public class ResourceBundleAS2StatusBar_de extends MecResourceBundle{
     {"count.pending", "Wartende Transaktionen" },
     {"count.failure", "Fehlerhafte Transaktionen" },
     {"count.selected", "Selektierte Transaktionen" },
+    {"configuration.issue.single", "{0} Konfigurationsproblem" },
+    {"configuration.issue.multiple", "{0} Konfigurationsprobleme" },
   };		
   
 }

@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/client/manualsend/ManualSendRequest.java,v 1.1 2012/04/18 14:10:24 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/manualsend/ManualSendRequest.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.client.manualsend;
 
 import de.mendelson.comm.as2.partner.Partner;
@@ -22,6 +22,8 @@ public class ManualSendRequest extends UploadRequestFile implements Serializable
     private Partner sender;
     private Partner receiver;
     private String filename;
+    private String resendMessageId = null;
+    private String userdefinedId = null;
 
     @Override
     public String toString() {
@@ -68,6 +70,36 @@ public class ManualSendRequest extends UploadRequestFile implements Serializable
      */
     public void setFilename(String filename) {
         this.filename = filename;
+    }
+
+    /**
+     * @return the resendMessageId
+     */
+    public String getResendMessageId() {
+        return resendMessageId;
+    }
+
+    /**
+     * Set this message id if this is a resend of an existing message
+     * @param resendMessageId the resendMessageId to set
+     */
+    public void setResendMessageId(String resendMessageId) {
+        this.resendMessageId = resendMessageId;
+    }
+
+    /**
+     * @return the userdefinedId
+     */
+    public String getUserdefinedId() {
+        return userdefinedId;
+    }
+
+    /** Sets a user defined id to this transaction. If this is set the userdefined id could be
+     *  used later to track the progress of this send transmission.
+     * @param userdefinedId the userdefinedId to set
+     */
+    public void setUserdefinedId(String userdefinedId) {
+        this.userdefinedId = userdefinedId;
     }
 
 }

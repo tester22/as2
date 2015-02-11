@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/clientserver/message/PerformNotificationTestRequest.java,v 1.1 2012/04/18 14:10:27 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/clientserver/message/PerformNotificationTestRequest.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.clientserver.message;
 
 import de.mendelson.comm.as2.notification.NotificationData;

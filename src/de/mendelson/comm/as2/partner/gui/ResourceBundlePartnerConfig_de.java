@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/partner/gui/ResourceBundlePartnerConfig_de.java,v 1.1 2012/04/18 14:10:32 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/gui/ResourceBundlePartnerConfig_de.java,v 1.1 2015/01/06 11:07:44 heller Exp $
 package de.mendelson.comm.as2.partner.gui;
 import de.mendelson.util.MecResourceBundle;
 /*
@@ -16,6 +16,7 @@ import de.mendelson.util.MecResourceBundle;
  */
 public class ResourceBundlePartnerConfig_de extends MecResourceBundle{
     
+    @Override
     public Object[][] getContents() {
         return contents;
     }
@@ -26,6 +27,7 @@ public class ResourceBundlePartnerConfig_de extends MecResourceBundle{
         {"button.ok", "Ok" },
         {"button.cancel", "Abbrechen" },
         {"button.new", "Neu" },
+        {"button.clone", "Kopie" },
         {"button.delete", "Löschen" },
         {"nolocalstation.message", "Mindestens ein Partner muss als lokale Station definiert sein." },
         {"nolocalstation.title", "Keine lokale Station" },
@@ -42,6 +44,7 @@ public class ResourceBundlePartnerConfig_de extends MecResourceBundle{
         {"directory.delete.failure", "Das Verzeichnis \"{0}\" konnte nicht gelöscht werden." },
         {"directory.delete.success", "Das Verzeichnis \"{0}\" wurde gelöscht." },
         {"saving", "Speichern..." },
+        {"module.locked", "Die Partnerverwaltung ist exklusiv von einem anderen Client geöffnet, Sie können Ihre Änderungen nicht sichern!" },
     };
     
 }

@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/message/MessageAccessDB.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/MessageAccessDB.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
 import de.mendelson.comm.as2.notification.Notification;
@@ -12,8 +12,11 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.logging.Logger;
+import org.hsqldb.types.Types;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
@@ -39,6 +42,7 @@ public class MessageAccessDB {
      */
     private Connection runtimeConnection = null;
     private Connection configConnection = null;
+    private Calendar calendarUTC = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 
     /**
      * Creates new message I/O log and connects to localhost
@@ -51,25 +55,73 @@ public class MessageAccessDB {
     }
 
     /**
+     * Returns the number of transmissions in the system
+     */
+    public int getMessageCount() {
+        int counter = 0;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        try {
+            statement = this.runtimeConnection.prepareStatement("SELECT COUNT(1) AS messagecount FROM messages");
+            result = statement.executeQuery();
+            if (result.next()) {
+                counter = result.getInt("messagecount");
+            }
+        } catch (SQLException e) {
+            this.logger.severe("getMessageCount: " + e.getMessage());
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
+        } finally {
+            if (result != null) {
+                try {
+                    result.close();
+                } catch (Exception e) {
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (Exception e) {
+                }
+            }
+        }
+        return (counter);
+    }
+
+    /**
      * Returns the state of the latest passed message. Will return pending state
      * if the messageid does not exist
      */
     public int getMessageState(String messageId) {
         int state = AS2Message.STATE_PENDING;
+        PreparedStatement statement = null;
+        ResultSet result = null;
         try {
             //desc because the latest message should be first in resultset
-            PreparedStatement statement = this.runtimeConnection.prepareStatement(
-                    "SELECT state FROM messages WHERE messageid=? ORDER BY initdate DESC");
+            statement = this.runtimeConnection.prepareStatement(
+                    "SELECT state FROM messages WHERE messageid=? ORDER BY initdateutc DESC");
             statement.setString(1, messageId);
-            ResultSet result = statement.executeQuery();
+            result = statement.executeQuery();
             if (result.next()) {
                 state = result.getInt("state");
             }
-            result.close();
-            statement.close();
         } catch (Exception e) {
             this.logger.severe("getMessageState: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
+        } finally {
+            try {
+                if (result != null) {
+                    result.close();
+                }
+            } catch (Exception e) {
+                //nop
+            }
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (Exception e) {
+                //nop
+            }
         }
         return (state);
     }
@@ -92,7 +144,7 @@ public class MessageAccessDB {
             int rows = statement.executeUpdate();
         } catch (Exception e) {
             this.logger.severe("MessageAccessDB.setMessageState: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
         } finally {
             if (statement != null) {
                 try {
@@ -154,7 +206,7 @@ public class MessageAccessDB {
             }
         } catch (Exception e) {
             this.logger.severe("MessageAccessDB.getPayload: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
         } finally {
             if (result != null) {
                 try {
@@ -193,6 +245,46 @@ public class MessageAccessDB {
         return (info != null);
     }
 
+    public String getLastMessageIdByUserdefinedId( String userdefinedId ){
+        if( userdefinedId == null ){
+            return( null );
+        }
+        ResultSet result = null;
+        PreparedStatement statement = null;
+        try {
+            //desc because we need the latest
+            statement = this.runtimeConnection.prepareStatement("SELECT messageid FROM messages WHERE userdefinedid=? ORDER BY initdateutc DESC");
+            statement.setString(1, userdefinedId);
+            result = statement.executeQuery();
+            if (result.next()) {                
+                return( result.getString("messageid"));
+            }
+        } catch (Exception e) {
+            this.logger.severe("MessageAccessDB.getMessageIdByUserdefinedId: " + e.getMessage());
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
+            return (null);
+        } finally {
+            if (result != null) {
+                try {
+                    result.close();
+                } catch (Exception e) {
+                    this.logger.severe("MessageAccessDB.getMessageIdByUserdefinedId: " + e.getMessage());
+                    Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (Exception e) {
+                    this.logger.severe("MessageAccessDB.getMessageIdByUserdefinedId: " + e.getMessage());
+                    Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+                }
+            }
+        }
+        return (null);
+    }
+    
+    
     /**
      * Reads information about a specific messageid from the data base, returns
      * the latest message of this id
@@ -202,12 +294,12 @@ public class MessageAccessDB {
         PreparedStatement statement = null;
         try {
             //desc because we need the latest
-            statement = this.runtimeConnection.prepareStatement("SELECT * FROM messages WHERE messageid=? ORDER BY initdate DESC");
+            statement = this.runtimeConnection.prepareStatement("SELECT * FROM messages WHERE messageid=? ORDER BY initdateutc DESC");
             statement.setString(1, messageId);
             result = statement.executeQuery();
             if (result.next()) {
                 AS2MessageInfo info = new AS2MessageInfo();
-                info.setInitDate(result.getTimestamp("initdate"));
+                info.setInitDate(result.getTimestamp("initdateutc", this.calendarUTC));
                 info.setEncryptionType(result.getInt("encryption"));
                 info.setDirection(result.getInt("direction"));
                 info.setMessageType(result.getInt("messagetype"));
@@ -227,11 +319,12 @@ public class MessageAccessDB {
                 info.setAsyncMDNURL(result.getString("asyncmdnurl"));
                 info.setSubject(result.getString("subject"));
                 info.setResendCounter(result.getInt("resendcounter"));
+                info.setUserdefinedId(result.getString("userdefinedid"));
                 return (info);
             }
         } catch (Exception e) {
             this.logger.severe("MessageAccessDB.getLastMessageEntry: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
             return (null);
         } finally {
             if (result != null) {
@@ -262,12 +355,12 @@ public class MessageAccessDB {
         ResultSet result = null;
         PreparedStatement statement = null;
         try {
-            statement = this.runtimeConnection.prepareStatement("SELECT * FROM messages WHERE messageid=? ORDER BY initdate ASC");
+            statement = this.runtimeConnection.prepareStatement("SELECT * FROM messages WHERE messageid=? ORDER BY initdateutc ASC");
             statement.setString(1, messageId);
             result = statement.executeQuery();
             while (result.next()) {
                 AS2MessageInfo info = new AS2MessageInfo();
-                info.setInitDate(result.getTimestamp("initdate"));
+                info.setInitDate(result.getTimestamp("initdateutc", this.calendarUTC));
                 info.setEncryptionType(result.getInt("encryption"));
                 info.setDirection(result.getInt("direction"));
                 info.setMessageType(result.getInt("messagetype"));
@@ -287,11 +380,12 @@ public class MessageAccessDB {
                 info.setAsyncMDNURL(result.getString("asyncmdnurl"));
                 info.setSubject(result.getString("subject"));
                 info.setResendCounter(result.getInt("resendcounter"));
+                info.setUserdefinedId(result.getString("userdefinedid"));
                 messageList.add(info);
             }
         } catch (Exception e) {
             this.logger.severe("MessageAccessDB.getMessageOverview: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
             return (null);
         } finally {
             if (result != null) {
@@ -391,7 +485,7 @@ public class MessageAccessDB {
                 queryCondition.append(" messagetype=?");
                 parameterList.add(Integer.valueOf(filter.getShowMessageType()));
             }
-            String query = "SELECT * FROM messages" + queryCondition.toString() + " ORDER BY initdate ASC";
+            String query = "SELECT * FROM messages" + queryCondition.toString() + " ORDER BY initdateutc ASC";
             statement = this.runtimeConnection.prepareStatement(query);
             for (int i = 0; i < parameterList.size(); i++) {
                 if (parameterList.get(i) instanceof Integer) {
@@ -403,7 +497,7 @@ public class MessageAccessDB {
             result = statement.executeQuery();
             while (result.next()) {
                 AS2MessageInfo info = new AS2MessageInfo();
-                info.setInitDate(result.getTimestamp("initdate"));
+                info.setInitDate(result.getTimestamp("initdateutc", this.calendarUTC));
                 info.setEncryptionType(result.getInt("encryption"));
                 info.setDirection(result.getInt("direction"));
                 info.setMessageType(result.getInt("messagetype"));
@@ -423,11 +517,12 @@ public class MessageAccessDB {
                 info.setAsyncMDNURL(result.getString("asyncmdnurl"));
                 info.setSubject(result.getString("subject"));
                 info.setResendCounter(result.getInt("resendcounter"));
+                info.setUserdefinedId(result.getString("userdefinedid"));
                 messageList.add(info);
             }
         } catch (Exception e) {
             this.logger.severe("MessageAccessDB.getMessageOverview: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
         } finally {
             if (result != null) {
                 try {
@@ -451,8 +546,7 @@ public class MessageAccessDB {
 
     /**
      * Returns all file names of files that could be deleted for a passed
-     * message
-     *info
+     * message info
      */
     public List<String> getRawFilenamesToDelete(AS2MessageInfo info) {
         List<String> list = new ArrayList<String>();
@@ -479,7 +573,7 @@ public class MessageAccessDB {
             }
         } catch (Exception e) {
             this.logger.severe("MessageAccessDB.getRawFilenamesToDelete: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
         } finally {
             if (result != null) {
                 try {
@@ -528,9 +622,9 @@ public class MessageAccessDB {
                 statement = this.runtimeConnection.prepareStatement("DELETE FROM messages WHERE messageid IS NULL");
                 statement.execute();
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             this.logger.severe("MessageAccessDB.deleteMessage: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
         } finally {
             if (statement != null) {
                 try {
@@ -557,14 +651,14 @@ public class MessageAccessDB {
         PreparedStatement statement = null;
         try {
             statement = this.runtimeConnection.prepareStatement(
-                    "UPDATE messages SET senddate=? WHERE messageid=?");
-            statement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+                    "UPDATE messages SET senddateutc=? WHERE messageid=?");
+            statement.setTimestamp(1, new Timestamp(System.currentTimeMillis()), this.calendarUTC);
             //WHERE
             statement.setString(2, info.getMessageId());
             statement.executeUpdate();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             this.logger.severe("MessageAccessDB.setMessageSendDate: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
         } finally {
             if (statement != null) {
                 try {
@@ -590,9 +684,9 @@ public class MessageAccessDB {
             //WHERE
             statement.setString(4, info.getMessageId());
             statement.executeUpdate();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             this.logger.severe("MessageAccessDB.updateFilenames: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
         } finally {
             if (statement != null) {
                 try {
@@ -637,9 +731,9 @@ public class MessageAccessDB {
                 statement.close();
             }
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             this.logger.severe("MessageAccessDB.insertPayload: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
         } finally {
             if (statement != null) {
                 try {
@@ -674,11 +768,11 @@ public class MessageAccessDB {
         PreparedStatement statement = null;
         try {
             statement = this.runtimeConnection.prepareStatement(
-                    "INSERT INTO messages(initdate,encryption,direction,messageid,rawfilename,receiverid,senderid,"
+                    "INSERT INTO messages(initdateutc,encryption,direction,messageid,rawfilename,receiverid,senderid,"
                     + "signature,state,syncmdn,headerfilename,rawdecryptedfilename,senderhost,useragent,"
-                    + "contentmic,compression,messagetype,asyncmdnurl,subject)VALUES("
-                    + "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-            statement.setTimestamp(1, new java.sql.Timestamp(info.getInitDate().getTime()));
+                    + "contentmic,compression,messagetype,asyncmdnurl,subject,userdefinedid)VALUES("
+                    + "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            statement.setTimestamp(1, new java.sql.Timestamp(info.getInitDate().getTime()), this.calendarUTC);
             statement.setInt(2, info.getEncryptionType());
             statement.setInt(3, info.getDirection());
             statement.setString(4, info.getMessageId());
@@ -697,14 +791,19 @@ public class MessageAccessDB {
             statement.setInt(17, info.getMessageType());
             statement.setString(18, info.getAsyncMDNURL());
             statement.setString(19, info.getSubject());
+            if (info.getUserdefinedId() != null) {
+                statement.setString(20, info.getUserdefinedId());
+            } else {
+                statement.setNull(20, Types.VARCHAR);
+            }
             statement.executeUpdate();
             //insert payload and inc transaction counter
             AS2Message message = new AS2Message(info);
             this.insertPayload(info.getMessageId(), message.getPayloads());
             AS2Server.incTransactionCounter();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             this.logger.severe("MessageAccessDB.initializeMessage: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
         } finally {
             if (statement != null) {
                 try {
@@ -729,9 +828,9 @@ public class MessageAccessDB {
             //condition
             statement.setString(2, info.getMessageId());
             statement.executeUpdate();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             this.logger.severe("MessageAccessDB.updateSubject: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
         } finally {
             if (statement != null) {
                 try {
@@ -744,18 +843,18 @@ public class MessageAccessDB {
         }
     }
 
-    public void updateResendCounter(AS2MessageInfo info) {
+    public void incResendCounter(String messageId) {
         PreparedStatement statement = null;
         try {
             statement = this.runtimeConnection.prepareStatement(
-                    "UPDATE messages SET resendcounter=? WHERE messageid=?");
-            statement.setInt(1, info.getResendCounter());
+                    "UPDATE messages SET resendcounter=(1+(SELECT resendcounter FROM messages WHERE messageId=?)) WHERE messageid=?");
             //condition
-            statement.setString(2, info.getMessageId());
+            statement.setString(1, messageId);
+            statement.setString(2, messageId);
             statement.executeUpdate();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             this.logger.severe("MessageAccessDB.updateResendCounter: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
         } finally {
             if (statement != null) {
                 try {
@@ -778,7 +877,7 @@ public class MessageAccessDB {
                     "UPDATE messages SET encryption=?,direction=?,rawfilename=?,receiverid=?,"
                     + "senderid=?,signature=?,state=?,syncmdn=?,headerfilename=?,useragent=?,"
                     + "rawdecryptedfilename=?,senderhost=?,"
-                    + "contentmic=?,compression=?,messagetype=?,asyncmdnurl=?,subject=?"
+                    + "contentmic=?,compression=?,messagetype=?,asyncmdnurl=?,subject=?,userdefinedid=?"
                     + " WHERE messageid=?");
             statement.setInt(1, info.getEncryptionType());
             statement.setInt(2, info.getDirection());
@@ -797,17 +896,20 @@ public class MessageAccessDB {
             statement.setInt(15, info.getMessageType());
             statement.setString(16, info.getAsyncMDNURL());
             statement.setString(17, info.getSubject());
+            if (info.getUserdefinedId() != null) {
+                statement.setString(18, info.getUserdefinedId());
+            } else {
+                statement.setNull(18, Types.VARCHAR);
+            }
             //condition
-            statement.setString(18, info.getMessageId());
+            statement.setString(19, info.getMessageId());
             statement.executeUpdate();
             //insert payload and inc transaction counter
             AS2Message message = new AS2Message(info);
             this.insertPayload(info.getMessageId(), message.getPayloads());
-            AS2Server.incTransactionCounter();
-
-        } catch (SQLException e) {
+        } catch (Exception e) {
             this.logger.severe("MessageAccessDB.updateMessage: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
         } finally {
             if (statement != null) {
                 try {
@@ -831,14 +933,14 @@ public class MessageAccessDB {
         ResultSet result = null;
         PreparedStatement statement = null;
         try {
-            String query = "SELECT * FROM messages WHERE (senddate IS NOT NULL) AND senddate<? AND state=?";
+            String query = "SELECT * FROM messages WHERE (senddateutc IS NOT NULL) AND senddateutc<? AND state=?";
             statement = this.runtimeConnection.prepareStatement(query);
-            statement.setTimestamp(1, new java.sql.Timestamp(initTimestamp));
+            statement.setTimestamp(1, new java.sql.Timestamp(initTimestamp), this.calendarUTC);
             statement.setInt(2, AS2Message.STATE_PENDING);
             result = statement.executeQuery();
             while (result.next()) {
                 AS2MessageInfo info = new AS2MessageInfo();
-                info.setInitDate(result.getTimestamp("initdate"));
+                info.setInitDate(result.getTimestamp("initdateutc", this.calendarUTC));
                 info.setEncryptionType(result.getInt("encryption"));
                 info.setDirection(result.getInt("direction"));
                 info.setMessageType(result.getInt("messagetype"));
@@ -858,11 +960,12 @@ public class MessageAccessDB {
                 info.setAsyncMDNURL(result.getString("asyncmdnurl"));
                 info.setSubject(result.getString("subject"));
                 info.setResendCounter(result.getInt("resendcounter"));
+                info.setUserdefinedId(result.getString("userdefinedid"));
                 messageList.add(info);
             }
         } catch (Exception e) {
             this.logger.severe("MessageAccessDB.getMessagesSendOlderThan: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
         } finally {
             if (result != null) {
                 try {
@@ -895,16 +998,16 @@ public class MessageAccessDB {
         ResultSet result = null;
         PreparedStatement statement = null;
         try {
-            String query = "SELECT * FROM messages WHERE initdate < ?";
+            String query = "SELECT * FROM messages WHERE initdateutc < ?";
             if (state != -1) {
                 query = query + " AND state=" + state;
             }
             statement = this.runtimeConnection.prepareStatement(query);
-            statement.setTimestamp(1, new java.sql.Timestamp(initTimestamp));
+            statement.setTimestamp(1, new java.sql.Timestamp(initTimestamp), this.calendarUTC);
             result = statement.executeQuery();
             while (result.next()) {
                 AS2MessageInfo info = new AS2MessageInfo();
-                info.setInitDate(result.getTimestamp("initdate"));
+                info.setInitDate(result.getTimestamp("initdateutc"));
                 info.setEncryptionType(result.getInt("encryption"));
                 info.setDirection(result.getInt("direction"));
                 info.setMessageType(result.getInt("messagetype"));
@@ -924,12 +1027,12 @@ public class MessageAccessDB {
                 info.setAsyncMDNURL(result.getString("asyncmdnurl"));
                 info.setSubject(result.getString("subject"));
                 info.setResendCounter(result.getInt("resendcounter"));
+                info.setUserdefinedId(result.getString("userdefinedid"));
                 messageList.add(info);
             }
-            statement.close();
         } catch (Exception e) {
             this.logger.severe("MessageAccessDB.getMessagesOlderThan: " + e.getMessage());
-            Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
         } finally {
             if (result != null) {
                 try {
@@ -950,4 +1053,72 @@ public class MessageAccessDB {
         }
         return (messageList);
     }
+    
+    /**
+     * Returns a list of all messages that are younger than the passed timestamp
+     *
+     * @param state pass -1 for any state else only messages of the requested
+     * state are returned
+     */
+    public List<AS2MessageInfo> getMessagesYoungerThan(long initTimestamp, int state) {
+        List<AS2MessageInfo> messageList = new ArrayList<AS2MessageInfo>();
+        ResultSet result = null;
+        PreparedStatement statement = null;
+        try {
+            String query = "SELECT * FROM messages WHERE initdateutc > ?";
+            if (state != -1) {
+                query = query + " AND state=" + state;
+            }
+            statement = this.runtimeConnection.prepareStatement(query);
+            statement.setTimestamp(1, new java.sql.Timestamp(initTimestamp), this.calendarUTC);
+            result = statement.executeQuery();
+            while (result.next()) {
+                AS2MessageInfo info = new AS2MessageInfo();
+                info.setInitDate(result.getTimestamp("initdateutc"));
+                info.setEncryptionType(result.getInt("encryption"));
+                info.setDirection(result.getInt("direction"));
+                info.setMessageType(result.getInt("messagetype"));
+                info.setMessageId(result.getString("messageid"));
+                info.setRawFilename(result.getString("rawfilename"));
+                info.setReceiverId(result.getString("receiverid"));
+                info.setSenderId(result.getString("senderid"));
+                info.setSignType(result.getInt("signature"));
+                info.setState(result.getInt("state"));
+                info.setRequestsSyncMDN(result.getInt("syncmdn") == 1);
+                info.setHeaderFilename(result.getString("headerfilename"));
+                info.setRawFilenameDecrypted(result.getString("rawdecryptedfilename"));
+                info.setSenderHost(result.getString("senderhost"));
+                info.setUserAgent(result.getString("useragent"));
+                info.setReceivedContentMIC(result.getString("contentmic"));
+                info.setCompressionType(result.getInt("compression"));
+                info.setAsyncMDNURL(result.getString("asyncmdnurl"));
+                info.setSubject(result.getString("subject"));
+                info.setResendCounter(result.getInt("resendcounter"));
+                info.setUserdefinedId(result.getString("userdefinedid"));
+                messageList.add(info);
+            }
+        } catch (Exception e) {
+            this.logger.severe("MessageAccessDB.getMessagesOlderThan: " + e.getMessage());
+            Notification.systemFailure(this.configConnection, this.runtimeConnection, e, statement);
+        } finally {
+            if (result != null) {
+                try {
+                    result.close();
+                } catch (Exception e) {
+                    this.logger.severe("MessageAccessDB.getMessagesOlderThan: " + e.getMessage());
+                    Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (Exception e) {
+                    this.logger.severe("MessageAccessDB.getMessagesOlderThan: " + e.getMessage());
+                    Notification.systemFailure(this.configConnection, this.runtimeConnection, e);
+                }
+            }
+        }
+        return (messageList);
+    }
+    
 }

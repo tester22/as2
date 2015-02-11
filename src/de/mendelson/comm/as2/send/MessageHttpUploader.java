@@ -1,10 +1,9 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/send/MessageHttpUploader.java,v 1.1 2012/04/18 14:10:35 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/send/MessageHttpUploader.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.send;
 
-import de.mendelson.comm.as2.client.rmi.GenericClient;
-import de.mendelson.comm.as2.clientserver.ErrorObject;
+import de.mendelson.comm.as2.clientserver.message.IncomingMessageRequest;
+import de.mendelson.comm.as2.clientserver.message.IncomingMessageResponse;
 import de.mendelson.comm.as2.clientserver.message.RefreshClientMessageOverviewList;
-import de.mendelson.comm.as2.clientserver.serialize.CommandObjectIncomingMessage;
 import de.mendelson.comm.as2.message.AS2Info;
 import de.mendelson.comm.as2.message.AS2MDNInfo;
 import de.mendelson.comm.as2.message.AS2Message;
@@ -20,6 +19,7 @@ import de.mendelson.comm.as2.server.AS2Server;
 import de.mendelson.comm.as2.statistic.QuotaAccessDB;
 import de.mendelson.util.AS2Tools;
 import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.clientserver.AnonymousTextClient;
 import de.mendelson.util.clientserver.ClientServer;
 import de.mendelson.util.security.BCCryptoHelper;
 import de.mendelson.util.security.cert.KeystoreStorage;
@@ -49,6 +49,7 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
@@ -97,22 +98,33 @@ import org.apache.http.protocol.HttpContext;
  */
 /**
  * Class to allow HTTP multipart uploads
- * @author  S.Heller
+ *
+ * @author S.Heller
  * @version $Revision: 1.1 $
  */
 public class MessageHttpUploader {
 
     private Logger logger = null;
     private PreferencesAS2 preferences = new PreferencesAS2();
-    /**localisze the GUI*/
+    /**
+     * localisze the GUI
+     */
     private MecResourceBundle rb = null;
-    /**The header that has been built fro the request*/
+    /**
+     * The header that has been built fro the request
+     */
     private Properties requestHeader = new Properties();
-    /**remote answer*/
+    /**
+     * remote answer
+     */
     private byte[] responseData = null;
-    /**remote answer*/
+    /**
+     * remote answer
+     */
     private Header[] responseHeader = null;
-    /**remote answer*/
+    /**
+     * remote answer
+     */
     private StatusLine responseStatusLine = null;
     private ClientServer clientserver = null;
     //DB connection
@@ -121,10 +133,15 @@ public class MessageHttpUploader {
     //keystore data
     private KeystoreStorage certStore = null;
     private KeystoreStorage trustStore = null;
+    //EDIINT faetures
+    private String ediintFeatures = "multiple-attachments, CEM";
 
-    /** Creates new message uploader instance
+    /**
+     * Creates new message uploader instance
+     *
      * @param hostname Name of the host to connect to
-     * @param username Name of the user that will connect to the remote ftp server
+     * @param username Name of the user that will connect to the remote ftp
+     * server
      * @param password password to connect to the ftp server
      */
     public MessageHttpUploader() throws Exception {
@@ -138,8 +155,18 @@ public class MessageHttpUploader {
         }
     }
 
-    /**Sets keystore parameter for SSL sending. This is only necessary if HTTPS is the
-     * protocol used for the message POST
+    /**
+     * Sets the capabilities of the system, defaults to "multiple-attachments,
+     * CEM"
+     */
+    public void setEDIINTFeatures(String ediintFeatures) {
+        this.ediintFeatures = ediintFeatures;
+    }
+
+    /**
+     * Sets keystore parameter for SSL sending. This is only necessary if HTTPS
+     * is the protocol used for the message POST
+     *
      * @param truststore Truststore file
      * @param truststorePass Password for the truststore
      * @param certstore Keystore file
@@ -150,23 +177,32 @@ public class MessageHttpUploader {
         this.trustStore = trustStore;
     }
 
-    /**Passes a logger to this class for logging purpose*/
+    /**
+     * Passes a logger to this class for logging purpose
+     */
     public void setLogger(Logger logger) {
         this.logger = logger;
     }
 
-    /**Passes a server instance to this class to refresh messages automatically for logging purpose*/
+    /**
+     * Passes a server instance to this class to refresh messages automatically
+     * for logging purpose
+     */
     public void setAbstractServer(ClientServer clientserver) {
         this.clientserver = clientserver;
     }
 
-    /**Pass a DB connection to this class for loggin purpose*/
+    /**
+     * Pass a DB connection to this class for loggin purpose
+     */
     public void setDBConnection(Connection configConnection, Connection runtimeConnection) {
         this.configConnection = configConnection;
         this.runtimeConnection = runtimeConnection;
     }
 
-    /**Returns the created header for the sent data*/
+    /**
+     * Returns the created header for the sent data
+     */
     public Properties upload(HttpConnectionParameter connectionParameter, AS2Message message, Partner sender, Partner receiver) throws Exception {
         NumberFormat formatter = new DecimalFormat("0.00");
         AS2Info as2Info = message.getAS2Info();
@@ -193,28 +229,37 @@ public class MessageHttpUploader {
             if (this.logger != null) {
                 this.logger.log(Level.INFO,
                         this.rb.getResourceString("returncode.ok",
-                        new Object[]{
-                            as2Info.getMessageId(),
-                            String.valueOf(returnCode),
-                            AS2Tools.getDataSizeDisplay(size),
-                            AS2Tools.getTimeDisplay(transferTime),
-                            formatter.format(kbPerSec),}), as2Info);
+                                new Object[]{
+                                    as2Info.getMessageId(),
+                                    String.valueOf(returnCode),
+                                    AS2Tools.getDataSizeDisplay(size),
+                                    AS2Tools.getTimeDisplay(transferTime),
+                                    formatter.format(kbPerSec),}), as2Info);
             }
         } else if (returnCode == HttpServletResponse.SC_ACCEPTED || returnCode == HttpServletResponse.SC_CREATED || returnCode == HttpServletResponse.SC_NO_CONTENT || returnCode == HttpServletResponse.SC_RESET_CONTENT || returnCode == HttpServletResponse.SC_PARTIAL_CONTENT) {
             if (this.logger != null) {
                 this.logger.log(Level.INFO,
                         this.rb.getResourceString("returncode.accepted",
-                        new Object[]{
-                            as2Info.getMessageId(),
-                            String.valueOf(returnCode),
-                            AS2Tools.getDataSizeDisplay(size),
-                            AS2Tools.getTimeDisplay(transferTime),
-                            formatter.format(kbPerSec),}), as2Info);
+                                new Object[]{
+                                    as2Info.getMessageId(),
+                                    String.valueOf(returnCode),
+                                    AS2Tools.getDataSizeDisplay(size),
+                                    AS2Tools.getTimeDisplay(transferTime),
+                                    formatter.format(kbPerSec),}), as2Info);
             }
         } else {
             //the system was unable to connect the partner
             if (returnCode < 0) {
                 throw new NoConnectionException(this.rb.getResourceString("error.noconnection", as2Info.getMessageId()));
+            } else if (returnCode == HttpServletResponse.SC_BAD_GATEWAY) {
+                //HTTP 502                
+                throw new NoConnectionException(this.rb.getResourceString("error.http" + returnCode, as2Info.getMessageId()));
+            } else if (returnCode == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
+                //HTTP 503                
+                throw new NoConnectionException(this.rb.getResourceString("error.http" + returnCode, as2Info.getMessageId()));
+            } else if (returnCode == HttpServletResponse.SC_GATEWAY_TIMEOUT) {
+                //HTTP 504
+                throw new NoConnectionException(this.rb.getResourceString("error.http" + returnCode, as2Info.getMessageId()));
             }
             if (this.runtimeConnection != null) {
                 if (messageAccess == null) {
@@ -236,7 +281,7 @@ public class MessageHttpUploader {
         }
         if (this.configConnection != null) {
             MessageStoreHandler messageStoreHandler = new MessageStoreHandler(this.configConnection, this.runtimeConnection);
-            messageStoreHandler.storeSentMessage(message, sender, receiver, this.requestHeader);
+            messageStoreHandler.storeSentMessage(message, sender, receiver, this.getRequestHeader());
         }
         //inform the server of the result if a sync MDN has been requested
         if (!message.isMDN()) {
@@ -259,45 +304,69 @@ public class MessageHttpUploader {
                             new Object[]{as2Info.getMessageId(), "as2-to"}));
                 }
                 //send the data to the as2 server. It does not care if the MDN has been sync or async anymore
-                GenericClient client = new GenericClient();
-                CommandObjectIncomingMessage commandObject = new CommandObjectIncomingMessage();
-                //create temporary file to store the data
-                File tempFile = AS2Tools.createTempFile("SYNCMDN_received", ".bin");
-                FileOutputStream outStream = new FileOutputStream(tempFile);
-                ByteArrayInputStream memIn = new ByteArrayInputStream(this.responseData);
-                this.copyStreams(memIn, outStream);
-                memIn.close();
-                outStream.flush();
-                outStream.close();
-                commandObject.setMessageDataFilename(tempFile.getAbsolutePath());
-                for (int i = 0; i < this.getResponseHeader().length; i++) {
-                    String key = this.getResponseHeader()[i].getName();
-                    String value = this.getResponseHeader()[i].getValue();
-                    commandObject.addHeader(key.toLowerCase(), value);
-                    if (key.toLowerCase().equals("content-type")) {
-                        commandObject.setContentType(value);
+                AnonymousTextClient client = null;
+                File tempFile = null;
+                FileOutputStream outStream = null;
+                try {
+                    client = new AnonymousTextClient();
+                    client.setDisplayServerLogMessages(false);
+                    PreferencesAS2 preferences = new PreferencesAS2();
+                    client.connect("localhost", preferences.getInt(PreferencesAS2.CLIENTSERVER_COMM_PORT), 30000);
+                    IncomingMessageRequest messageRequest = new IncomingMessageRequest();
+                    //create temporary file to store the data
+                    tempFile = AS2Tools.createTempFile("SYNCMDN_received", ".bin");
+                    outStream = new FileOutputStream(tempFile);
+                    ByteArrayInputStream memIn = new ByteArrayInputStream(this.responseData);
+                    this.copyStreams(memIn, outStream);
+                    memIn.close();
+                    messageRequest.setMessageDataFilename(tempFile.getAbsolutePath());
+                    for (int i = 0; i < this.getResponseHeader().length; i++) {
+                        String key = this.getResponseHeader()[i].getName();
+                        String value = this.getResponseHeader()[i].getValue();
+                        messageRequest.addHeader(key.toLowerCase(), value);
+                        if (key.toLowerCase().equals("content-type")) {
+                            messageRequest.setContentType(value);
+                        }
+                    }
+                    //compatibility issue: some AS2 systems do not send a as2-from in the sync case, even if
+                    //this if _NOT_ RFC conform
+                    //see RFC 4130, section 6.2: The AS2-To and AS2-From header fields MUST be
+                    //present in all AS2 messages and AS2 MDNs whether asynchronous or synchronous in nature,
+                    //except for asynchronous MDNs, which are sent using SMTP.
+                    if (!as2FromExists) {
+                        messageRequest.addHeader("as2-from", AS2Message.escapeFromToHeader(receiver.getAS2Identification()));
+                    }
+                    IncomingMessageResponse response = (IncomingMessageResponse) client.sendSyncWaitInfinite(messageRequest);
+                    if (response.getException() != null) {
+                        throw (response.getException());
+                    }
+                } catch (Throwable e) {
+                    if (this.logger != null) {
+                        this.logger.log(Level.SEVERE,e.getMessage(), as2Info);
+                    }
+                    messageAccess.setMessageState(as2Info.getMessageId(), AS2Message.STATE_STOPPED);
+                } finally {
+                    if (client != null && client.isConnected()) {
+                        client.disconnect();
+                    }
+                    if (outStream != null) {
+                        outStream.flush();
+                        outStream.close();
                     }
                 }
-                //compatibility issue: some AS2 systems do not send a as2-from in the sync case, even if
-                //this if _NOT_ RFC conform
-                //see RFC 4130, section 6.2: The AS2-To and AS2-From header fields MUST be
-                //present in all AS2 messages and AS2 MDNs whether asynchronous or synchronous in nature,
-                //except for asynchronous MDNs, which are sent using SMTP.
-                if (!as2FromExists) {
-                    commandObject.addHeader("as2-from", AS2Message.escapeFromToHeader(receiver.getAS2Identification()));
+                if (tempFile != null) {
+                    tempFile.delete();
                 }
-                ErrorObject errorObject = client.send(commandObject);
-                if (errorObject.getErrors() > 0) {
-                    messageAccess.setMessageState(as2Info.getMessageId(), AS2Message.STATE_STOPPED);
-                }
-                tempFile.delete();
             }
         }
-        return (this.requestHeader);
+        return (this.getRequestHeader());
     }
 
-    /**Sets necessary HTTP authentication for this partner, depending on if it is an asny MDN that will be sent or an AS2 message.
-     *If the partner is not configured to use HTTP authentication in any kind nothing will happen in here
+    /**
+     * Sets necessary HTTP authentication for this partner, depending on if it
+     * is an asny MDN that will be sent or an AS2 message. If the partner is not
+     * configured to use HTTP authentication in any kind nothing will happen in
+     * here
      */
     private void setHTTPAuthentication(DefaultHttpClient client, Partner receiver, boolean isMDN) {
         HTTPAuthentication authentication = null;
@@ -319,7 +388,10 @@ public class MessageHttpUploader {
         }
     }
 
-    /**Builds a proxy object from the actual preferences, returns null if no proxy is requested*/
+    /**
+     * Builds a proxy object from the actual preferences, returns null if no
+     * proxy is requested
+     */
     public ProxyObject createProxyObjectFromPreferences() {
         if (!this.preferences.getBoolean(PreferencesAS2.PROXY_USE)) {
             //return empty proxy object, is not used
@@ -335,7 +407,9 @@ public class MessageHttpUploader {
         return (proxy);
     }
 
-    /**Sets the proxy authentification for the client*/
+    /**
+     * Sets the proxy authentification for the client
+     */
     private void setProxyToConnection(DefaultHttpClient client, AS2Message message, ProxyObject proxy) {
         //is a proxy requested?
         if (proxy.getHost() == null) {
@@ -353,20 +427,23 @@ public class MessageHttpUploader {
         if (this.logger != null) {
             this.logger.log(Level.INFO,
                     this.rb.getResourceString("using.proxy",
-                    new Object[]{
-                        message.getAS2Info().getMessageId(),
-                        proxy.getHost(), String.valueOf(proxy.getPort()),}), message.getAS2Info());
+                            new Object[]{
+                                message.getAS2Info().getMessageId(),
+                                proxy.getHost(), String.valueOf(proxy.getPort()),}), message.getAS2Info());
         }
     }
 
-    /**Uploads the data, returns the HTTP result code*/
+    /**
+     * Uploads the data, returns the HTTP result code
+     */
     public int performUpload(HttpConnectionParameter connectionParameter, AS2Message message, Partner sender, Partner receiver) {
         return (this.performUpload(connectionParameter, message, sender, receiver, null));
     }
 
-    /**Uploads the data, returns the HTTP result code*/
+    /**
+     * Uploads the data, returns the HTTP result code
+     */
     public int performUpload(HttpConnectionParameter connectionParameter, AS2Message message, Partner sender, Partner receiver, URL receiptURL) {
-        String ediintFeatures = "multiple-attachments, CEM";
         //set the http connection/routing/protocol parameter
         HttpParams httpParams = new BasicHttpParams();
         if (connectionParameter.getConnectionTimeoutMillis() != -1) {
@@ -461,10 +538,10 @@ public class MessageHttpUploader {
                 if (this.logger != null) {
                     this.logger.log(Level.INFO,
                             this.rb.getResourceString("sending.mdn.async",
-                            new Object[]{
-                                message.getAS2Info().getMessageId(),
-                                receiptURL
-                            }), message.getAS2Info());
+                                    new Object[]{
+                                        message.getAS2Info().getMessageId(),
+                                        receiptURL
+                                    }), message.getAS2Info());
                 }
                 filePost.addHeader("server", message.getAS2Info().getUserAgent());
             } else {
@@ -475,17 +552,17 @@ public class MessageHttpUploader {
                         if (messageInfo.getMessageType() == AS2Message.MESSAGETYPE_CEM) {
                             this.logger.log(Level.INFO,
                                     this.rb.getResourceString("sending.cem.sync",
-                                    new Object[]{
-                                        messageInfo.getMessageId(),
-                                        receiver.getURL()
-                                    }), messageInfo);
+                                            new Object[]{
+                                                messageInfo.getMessageId(),
+                                                receiver.getURL()
+                                            }), messageInfo);
                         } else if (messageInfo.getMessageType() == AS2Message.MESSAGETYPE_AS2) {
                             this.logger.log(Level.INFO,
                                     this.rb.getResourceString("sending.msg.sync",
-                                    new Object[]{
-                                        messageInfo.getMessageId(),
-                                        receiver.getURL()
-                                    }), messageInfo);
+                                            new Object[]{
+                                                messageInfo.getMessageId(),
+                                                receiver.getURL()
+                                            }), messageInfo);
                         }
                     }
                 } else {
@@ -494,19 +571,19 @@ public class MessageHttpUploader {
                         if (messageInfo.getMessageType() == AS2Message.MESSAGETYPE_CEM) {
                             this.logger.log(Level.INFO,
                                     this.rb.getResourceString("sending.cem.async",
-                                    new Object[]{
-                                        messageInfo.getMessageId(),
-                                        receiver.getURL(),
-                                        sender.getMdnURL()
-                                    }), messageInfo);
+                                            new Object[]{
+                                                messageInfo.getMessageId(),
+                                                receiver.getURL(),
+                                                sender.getMdnURL()
+                                            }), messageInfo);
                         } else if (messageInfo.getMessageType() == AS2Message.MESSAGETYPE_AS2) {
                             this.logger.log(Level.INFO,
                                     this.rb.getResourceString("sending.msg.async",
-                                    new Object[]{
-                                        messageInfo.getMessageId(),
-                                        receiver.getURL(),
-                                        sender.getMdnURL()
-                                    }), messageInfo);
+                                            new Object[]{
+                                                messageInfo.getMessageId(),
+                                                receiver.getURL(),
+                                                sender.getMdnURL()
+                                            }), messageInfo);
                         }
                     }
                     //The following header indicates that this requests an asnc MDN.
@@ -562,7 +639,7 @@ public class MessageHttpUploader {
             }
             for (Header singleHeader : filePost.getAllHeaders()) {
                 if (singleHeader.getValue() != null) {
-                    this.requestHeader.setProperty(singleHeader.getName(), singleHeader.getValue());
+                    this.getRequestHeader().setProperty(singleHeader.getName(), singleHeader.getValue());
                 }
             }
             //accept all 2xx answers
@@ -577,9 +654,9 @@ public class MessageHttpUploader {
                 if (this.logger != null) {
                     this.logger.severe(
                             this.rb.getResourceString("error.httpupload",
-                            new Object[]{message.getAS2Info().getMessageId(),
-                                URLDecoder.decode(this.responseStatusLine == null ? "" : this.responseStatusLine.getReasonPhrase(), "UTF-8")
-                            }));
+                                    new Object[]{message.getAS2Info().getMessageId(),
+                                        URLDecoder.decode(this.responseStatusLine == null ? "" : this.responseStatusLine.getReasonPhrase(), "UTF-8")
+                                    }));
                 }
             }
         } catch (Exception ex) {
@@ -590,6 +667,9 @@ public class MessageHttpUploader {
                 errorMessage.append("]");
                 if (ex.getMessage() != null) {
                     errorMessage.append(": ").append(ex.getMessage());
+                }
+                if (ex instanceof SSLPeerUnverifiedException) {
+                    errorMessage.append("\n").append(this.rb.getResourceString("hint.SSLPeerUnverifiedException"));
                 }
                 this.logger.log(Level.SEVERE, errorMessage.toString(), message.getAS2Info());
             }
@@ -631,7 +711,10 @@ public class MessageHttpUploader {
         return (new Scheme("https", socketFactory, 443));
     }
 
-    /**Updates the passed post HTTP headers with the headers defined for the sender*/
+    /**
+     * Updates the passed post HTTP headers with the headers defined for the
+     * sender
+     */
     private void updateUploadHttpHeader(HttpPost post, Partner receiver) {
         List<String> usedHeaderKeys = new ArrayList<String>();
         for (Header singleHeader : post.getAllHeaders()) {
@@ -657,7 +740,9 @@ public class MessageHttpUploader {
         }
     }
 
-    /** Replaces the string tag by the string replacement in the sourceString
+    /**
+     * Replaces the string tag by the string replacement in the sourceString
+     *
      * @param source Source string
      * @param tag	String that will be replaced
      * @param replacement String that will replace the tag
@@ -680,14 +765,18 @@ public class MessageHttpUploader {
         }
     }
 
-    /**Returns the version of this class*/
+    /**
+     * Returns the version of this class
+     */
     public static String getVersion() {
         String revision = "$Revision: 1.1 $";
         return (revision.substring(revision.indexOf(":") + 1,
                 revision.lastIndexOf("$")).trim());
     }
 
-    /**Copies all data from one stream to another*/
+    /**
+     * Copies all data from one stream to another
+     */
     private void copyStreams(InputStream in, OutputStream out)
             throws IOException {
         BufferedInputStream inStream = new BufferedInputStream(in);
@@ -706,12 +795,16 @@ public class MessageHttpUploader {
         outStream.flush();
     }
 
-    /**Returns the response data as byte array*/
+    /**
+     * Returns the response data as byte array
+     */
     public byte[] getResponseData() {
         return (this.responseData);
     }
 
-    /**Reads the data of a HTTP response entity*/
+    /**
+     * Reads the data of a HTTP response entity
+     */
     public byte[] readEntityData(HttpResponse httpResponse) throws Exception {
         if (httpResponse == null) {
             return (null);
@@ -726,7 +819,10 @@ public class MessageHttpUploader {
         return (outStream.toByteArray());
     }
 
-    /**Returns the array of response headers after the upload process has been performed
+    /**
+     * Returns the array of response headers after the upload process has been
+     * performed
+     *
      * @return the responseHeader
      */
     public Header[] getResponseHeader() {
@@ -734,6 +830,14 @@ public class MessageHttpUploader {
             return (new Header[0]);
         }
         return (this.responseHeader);
+    }
+
+    /**
+     * @return the requestHeader, this is is only valid if the send process has
+     * been already performed
+     */
+    public Properties getRequestHeader() {
+        return requestHeader;
     }
 
     static class PreemptiveAuth implements HttpRequestInterceptor {
@@ -756,8 +860,8 @@ public class MessageHttpUploader {
                 if (authScheme != null) {
                     Credentials creds = credsProvider.getCredentials(
                             new AuthScope(
-                            targetHost.getHostName(),
-                            targetHost.getPort()));
+                                    targetHost.getHostName(),
+                                    targetHost.getPort()));
                     if (creds == null) {
                         throw new HttpException("No credentials for preemptive authentication");
                     }

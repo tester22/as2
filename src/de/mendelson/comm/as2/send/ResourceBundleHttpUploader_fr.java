@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/send/ResourceBundleHttpUploader_fr.java,v 1.1 2012/04/18 14:10:35 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/send/ResourceBundleHttpUploader_fr.java,v 1.1 2015/01/06 11:07:46 heller Exp $
 package de.mendelson.comm.as2.send;
 import de.mendelson.util.MecResourceBundle;
 
@@ -26,8 +26,12 @@ public class ResourceBundleHttpUploader_fr extends MecResourceBundle{
         {"sending.mdn.async", "{0}: Envoi d''un MDN asynchrone vers {1}." },
         {"error.httpupload", "{0}: La transmission a echouée, le serveur AS2 distant signale \"{1}\"." },
         {"error.noconnection", "{0}: Problème de connexion, données non transmises." },
+        {"error.http502", "{0}: Problème de connexion, données non transmises. (HTTP 502 - BAD GATEWAY)" },
+        {"error.http503", "{0}: Problème de connexion, données non transmises. (HTTP 503 - SERVICE UNAVAILABLE)" },
+        {"error.http504", "{0}: Problème de connexion, données non transmises. (HTTP 504 - GATEWAY TIMEOUT)" },
         {"using.proxy", "{0}: Utilisation d''un serveur mandataire (proxy) {1}:{2}." },
         {"answer.no.sync.mdn", "{0}: Le MDN synchrone reçu semble avoir un format incorrect. Valeur d'entête manquante \"{1}\"." },
+        {"hint.SSLPeerUnverifiedException", "Astuce:\nCette est un problème qui est survenue au cours de la négociation SSL. Le système a été incapable d''établir une connexion sécurisée avec votre partenaire, ce problème n''est pas lié protocole AS2.\nVeuillez vérifier les points suivants à corriger cette question:\n* Avez-vous importé toutes vos partenaires certificats SSL dans votre magasin de clés SSL (certificats root/intermédiaires)\n*Votre partenaire importé tous vos certificats SSL dans son magasin de clés (Les certificats root/intermédiaire)? "},
     };
     
 }

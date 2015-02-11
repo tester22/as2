@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/Copyright.java,v 1.1 2012/04/18 14:10:15 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/Copyright.java,v 1.1 2015/01/06 11:07:29 heller Exp $
 package de.mendelson;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
@@ -17,7 +17,7 @@ public class Copyright{
 
     /**Gets the copyright message for all products*/
     public static String getCopyrightMessage(){
-        return( "(c) 2000-2012 mendelson-e-commerce GmbH Berlin, Germany" );
+        return( "(c) 2000-2015 mendelson-e-commerce GmbH Berlin, Germany" );
     }
     
 }

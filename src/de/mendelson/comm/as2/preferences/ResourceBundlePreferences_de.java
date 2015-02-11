@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/preferences/ResourceBundlePreferences_de.java,v 1.1 2012/04/18 14:10:35 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/preferences/ResourceBundlePreferences_de.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.preferences;
 import de.mendelson.util.MecResourceBundle;
 /*
@@ -25,7 +25,6 @@ public class ResourceBundlePreferences_de extends MecResourceBundle{
     static final Object[][] contents = {
         //preferences localized
         { PreferencesAS2.SERVER_HOST, "Server host" },
-        { PreferencesAS2.SERVER_RMI_PORT, "Server RMI port" },
         { PreferencesAS2.DIR_MSG, "Nachrichtenverzeichnis" },
                 
         {"button.ok", "Ok" },
@@ -51,7 +50,7 @@ public class ResourceBundlePreferences_de extends MecResourceBundle{
         {"label.keystore.https.pass", "Keystore Passwort (zum Senden via Https):" },
         {"label.keystore.pass", "Keystore Password (Verschlüsselung/digitale Signatur):" },        
         {"label.keystore.https", "Keystore (zum Senden via Https):" },
-        {"label.keystore.encryptionsign", "Keystore( Veschl., Signatur):" },
+        {"label.keystore.encryptionsign", "Keystore( Verschl., Signatur):" },
         {"label.proxy.url", "Proxy URL:" },
         {"label.proxy.user", "Proxy Login Benutzer:" },
         {"label.proxy.pass", "Proxy Login Passwort:" },
@@ -77,7 +76,7 @@ public class ResourceBundlePreferences_de extends MecResourceBundle{
         {"checkbox.notifyfailure", "Nach Systemproblemen"},
         {"checkbox.notifyresend", "Nach abgewiesenen Resends"},
         {"button.testmail","Sende Test Mail"},
-        {"label.mailhost", "Mailserver:" },
+        {"label.mailhost", "Mailserver (SMTP):" },
         {"label.mailport", "Port:" },
         {"label.mailaccount", "Mailserver Account:" },
         {"label.mailpass", "Mailserver Passwort:" },
@@ -86,9 +85,11 @@ public class ResourceBundlePreferences_de extends MecResourceBundle{
         {"label.smtpauthentication", "SMTP Authentifizierung benutzen" },
         {"label.smtpauthentication.user", "Benutzername:" },
         {"label.smtpauthentication.pass", "Passwort:" },
+        {"label.security", "Verbindungssicherheit:" },
         {"testmail.message.success", "Eine Test-eMail wurde erfolgreich versandt." },
         {"testmail.message.error", "Fehler beim Senden der Test-eMail:\n{0}" },
         {"testmail.title", "Senden einer Test-eMail" },
+        {"testmail", "Test Mail"},
         //interface
         {"label.showhttpheader", "Anzeige der HTTP Header Konfiguration bei den Partnereinstellungen" },
         {"label.showquota", "Anzeige der Benachrichtigungskonfiguration bei den Partnereinstellungen" },
@@ -96,6 +97,11 @@ public class ResourceBundlePreferences_de extends MecResourceBundle{
         {"label.outboundstatusfiles", "Statusdateien für ausgehende Transaktionen schreiben"},
         {"info.restart.client", "Sie müssen den Client neu starten, damit diese Änderungen gültig werden!" },
         {"remotedir.select", "Verzeichnis auf dem Server wählen" },
+        //retry
+        {"label.retry.max", "Max Anzahl der Versuche zum Verbindungsaufbau" },
+        {"label.retry.waittime", "Wartezeit zwischen Verbindungsaufbauversuchen" },
+        {"label.sec", "seconds" },
+        {"keystore.hint", "Achtung:\nBitte ändern Sie diese Parameter nur, wenn Sie externe Keystores einbinden möchten oder Sie über ein externes Programm die Passwörter der unterliegenden Keystore Dateien modifiziert haben (was nicht empfehlenswert ist!). Wenn Sie diese Einstellungen ändern, werden nicht automatisch die Pfade der unterliegenden Keystores oder deren Passwörter angepasst."},
     };
     
 }

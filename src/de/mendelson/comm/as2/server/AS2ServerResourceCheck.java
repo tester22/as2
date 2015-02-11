@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/server/AS2ServerResourceCheck.java,v 1.1 2012/04/18 14:10:39 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/server/AS2ServerResourceCheck.java,v 1.1 2015/01/06 11:07:49 heller Exp $
 package de.mendelson.comm.as2.server;
 
 import de.mendelson.comm.as2.preferences.PreferencesAS2;
@@ -43,7 +43,6 @@ public class AS2ServerResourceCheck {
             preferences.getInt(PreferencesAS2.JNDI_PORT),
             preferences.getInt(PreferencesAS2.MQ_PROXY_PORT),
             preferences.getInt(PreferencesAS2.SERVER_DB_PORT),
-            preferences.getInt(PreferencesAS2.SERVER_RMI_PORT)
         };
         for (int port : ports) {
             this.checkPort(port);

@@ -1,12 +1,14 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/partner/gui/TableCellRendererPartner.java,v 1.1 2012/04/18 14:10:32 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/gui/TableCellRendererPartner.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.partner.gui;
 
 import de.mendelson.comm.as2.partner.Partner;
-import de.mendelson.comm.as2.partner.PartnerAccessDB;
-import java.awt.Component;
+import de.mendelson.comm.as2.partner.clientserver.PartnerListRequest;
+import de.mendelson.comm.as2.partner.clientserver.PartnerListResponse;
+import de.mendelson.util.clientserver.BaseClient;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Rectangle;
-import java.sql.Connection;
+import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -25,14 +27,14 @@ public class TableCellRendererPartner extends DefaultTableCellRenderer implement
     private final ImageIcon ICON_LOCAL =
             new ImageIcon(Partner.class.getResource(
             "/de/mendelson/comm/as2/partner/gui/localstation16x16.gif"));
-    private PartnerAccessDB partnerAccess;
+    private BaseClient baseClient;
 
     /**
      * Creates a default table cell renderer.
      */
-    public TableCellRendererPartner(Connection configConnection, Connection runtimeConnection) {
+    public TableCellRendererPartner(BaseClient baseClient) {
         super();
-        this.partnerAccess = new PartnerAccessDB(configConnection, runtimeConnection);
+        this.baseClient = baseClient;
         this.setOpaque(true);
     }
     // implements javax.swing.table.TableCellRenderer
@@ -69,14 +71,16 @@ public class TableCellRendererPartner extends DefaultTableCellRenderer implement
             this.renderPartner(partner);
         } else if (value instanceof String) {
             //expecting AS2 id
-            Partner partner = this.partnerAccess.getPartner((String) value);
-            if (partner != null) {
-                this.renderPartner(partner);
-            } else {
+            PartnerListRequest request = new PartnerListRequest(PartnerListRequest.LIST_BY_AS2_ID);
+            request.setAdditionalListOptionStr((String) value);
+            List<Partner> partnerList = ((PartnerListResponse)this.baseClient.sendSync(request)).getList();
+            if( partnerList != null && partnerList.size() > 0 ){
+                this.renderPartner(partnerList.get(0));
+            }else {
                 //partner does not exist: just display the AS2 id
                 this.setIcon(this.ICON_LOCAL);
                 this.setText((String) value);
-            }
+            }            
         }
         return (this);
     }

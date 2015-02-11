@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/server/ClientServerSessionHandlerLocalhost.java,v 1.1 2012/04/18 14:10:39 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/server/ClientServerSessionHandlerLocalhost.java,v 1.1 2015/01/06 11:07:49 heller Exp $
 package de.mendelson.comm.as2.server;
 
 import de.mendelson.util.MecResourceBundle;
@@ -20,6 +20,7 @@ import org.apache.mina.core.session.IoSession;
  */
 /**
  * Session handler for the server implemetation
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
@@ -39,13 +40,13 @@ public class ClientServerSessionHandlerLocalhost extends ClientServerSessionHand
             throw new RuntimeException("Oops..resource bundle " + e.getClassName() + " not found.");
         }
         this.allowAllClients = allowAllClients;
-        if (allowAllClients) {
-            System.out.println(this.rb.getResourceString("allowallclients." + String.valueOf(allowAllClients)));
-        }
+        System.out.println(this.rb.getResourceString("allowallclients." + String.valueOf(allowAllClients)));
     }
 
     @Override
-    /**The session has been opened: send a server info object*/
+    /**
+     * The session has been opened: send a server info object
+     */
     public void sessionOpened(IoSession session) {
         try {
             InetSocketAddress localAddress = (InetSocketAddress) session.getLocalAddress();

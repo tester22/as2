@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/preferences/PreferencesAS2.java,v 1.1 2012/04/18 14:10:35 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/preferences/PreferencesAS2.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.preferences;
 
 import de.mendelson.comm.as2.AS2ServerVersion;
@@ -76,6 +76,10 @@ public class PreferencesAS2 {
     public static final String CEM = "cem";
     public static final String COMMUNITY_EDITION = "commed";
     public static final String WRITE_OUTBOUND_STATUS_FILE = "outboundstatusfile";
+    public static final String MAX_CONNECTION_RETRY_COUNT = "retrycount";
+    public static final String CONNECTION_RETRY_WAIT_TIME_IN_S = "retrywaittime";
+    public static final String DATASHEET_RECEIPT_URL = "datasheetreceipturl";
+    
     /**Settings stored for the user*/
     private Preferences preferences = null;
 
@@ -178,7 +182,7 @@ public class PreferencesAS2 {
             return (new File(System.getProperty("user.dir")).getAbsolutePath() + File.separator + "log");
         }
         if (KEY.equals(PreferencesAS2.KEYSTORE_HTTPS_SEND)) {
-            return ("jetty/etc/keystore");
+            return ("jetty9/etc/keystore");
         }
         if (KEY.equals(PreferencesAS2.KEYSTORE_HTTPS_SEND_PASS)) {
             return ("test");
@@ -247,6 +251,15 @@ public class PreferencesAS2 {
         }
         if (KEY.equals(WRITE_OUTBOUND_STATUS_FILE)) {
             return ("FALSE");
+        }
+        if (KEY.equals(MAX_CONNECTION_RETRY_COUNT)) {
+            return ("10");
+        }
+        if (KEY.equals(CONNECTION_RETRY_WAIT_TIME_IN_S)) {
+            return ("30");
+        }
+        if (KEY.equals(DATASHEET_RECEIPT_URL)) {
+            return ("http://as2.mendelson-e-c.com:8080/as2/HttpReceiver");
         }
         throw new IllegalArgumentException("No defaults defined for prefs key " + KEY + " in " + this.getClass().getName());
     }

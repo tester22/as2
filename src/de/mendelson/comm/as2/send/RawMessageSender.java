@@ -1,15 +1,15 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/send/RawMessageSender.java,v 1.1 2012/04/18 14:10:35 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/send/RawMessageSender.java,v 1.1 2015/01/06 11:07:46 heller Exp $
 package de.mendelson.comm.as2.send;
 
 import de.mendelson.comm.as2.AS2ServerVersion;
-import de.mendelson.comm.as2.client.rmi.GenericClient;
-import de.mendelson.comm.as2.clientserver.ErrorObject;
-import de.mendelson.comm.as2.clientserver.serialize.CommandObjectIncomingMessage;
+import de.mendelson.comm.as2.clientserver.message.IncomingMessageRequest;
+import de.mendelson.comm.as2.clientserver.message.IncomingMessageResponse;
+import de.mendelson.comm.as2.preferences.PreferencesAS2;
 import de.mendelson.comm.as2.server.AS2Server;
+import de.mendelson.util.clientserver.AnonymousTextClient;
 import de.mendelson.util.security.BCCryptoHelper;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -21,46 +21,45 @@ import java.util.logging.Logger;
  * Other product and brand names are trademarks of their respective owners.
  */
 /**
- * Raw data uploader, mainly for test purpose. Sends a already fully prepared AS2 message to a specified sender
- * @author  S.Heller
+ * Raw data uploader, mainly for test purpose. Sends a already fully prepared
+ * AS2 message to a specified sender
+ *
+ * @author S.Heller
  * @version $Revision: 1.1 $
  */
 public class RawMessageSender {
 
     private Logger logger = Logger.getLogger(AS2Server.SERVER_LOGGER_NAME);
 
-    /** Creates new raw message sender
+    /**
+     * Creates new raw message sender
      */
     public RawMessageSender() {
     }
 
-    private CommandObjectIncomingMessage send(File rawDataFile, File headerFile) throws Exception {
+    private IncomingMessageResponse send(File rawDataFile, File headerFile) throws Throwable {
         Properties header = new Properties();
         FileInputStream headerStream = new FileInputStream(headerFile);
         header.load(headerStream);
         headerStream.close();
-        GenericClient client = new GenericClient();
-        CommandObjectIncomingMessage commandObject = new CommandObjectIncomingMessage();
-        commandObject.setMessageDataFilename(rawDataFile.getAbsolutePath());
-        commandObject.setHeader(header);
-        commandObject.setContentType(header.getProperty("content-type"));
-        commandObject.setRemoteHost("localhost");
-        ErrorObject errorObject = client.send(commandObject);
-        if (errorObject.getErrors() > 0) {
-            StringBuilder exceptionBuffer = new StringBuilder();
-            ArrayList log = commandObject.getLog();
-            for (int i = 0; i < log.size(); i++) {
-                if (log.get(i) != null) {
-                    this.logger.severe(log.get(i).toString());
-                    exceptionBuffer.append(log.get(i).toString()).append("\n");
-                }
-            }
-            throw new Exception(exceptionBuffer.toString());
+        AnonymousTextClient client = null;
+        client = new AnonymousTextClient();
+        PreferencesAS2 preferences = new PreferencesAS2();
+        client.connect("localhost", preferences.getInt(PreferencesAS2.CLIENTSERVER_COMM_PORT), 30000);
+        IncomingMessageRequest messageRequest = new IncomingMessageRequest();
+        messageRequest.setMessageDataFilename(rawDataFile.getAbsolutePath());
+        messageRequest.setHeader(header);
+        messageRequest.setContentType(header.getProperty("content-type"));
+        messageRequest.setRemoteHost("localhost");
+        IncomingMessageResponse response = (IncomingMessageResponse) client.sendSyncWaitInfinite(messageRequest);
+        if (response.getException() != null) {
+            throw (response.getException());
         }
-        return ((CommandObjectIncomingMessage) client.getCommandObject());
+        return (response);
     }
 
-    /**Displays a usage of how to use this class
+    /**
+     * Displays a usage of how to use this class
      */
     public static void printUsage() {
         System.out.println("java " + RawMessageSender.class.getName() + " <options>");
@@ -92,10 +91,12 @@ public class RawMessageSender {
         }
         if (file == null) {
             System.err.println("Parameter missing: " + "datafile");
+            printUsage();
             System.exit(1);
         }
         if (header == null) {
             System.err.println("Parameter missing: " + "headerfile");
+            printUsage();
             System.exit(1);
         }
         RawMessageSender sender = new RawMessageSender();
@@ -105,11 +106,11 @@ public class RawMessageSender {
             //initialize the security provider
             BCCryptoHelper helper = new BCCryptoHelper();
             helper.initialize();
-            CommandObjectIncomingMessage command = sender.send(new File(file), new File(header));
-            if (command.getMDNData() != null) {
-                Logger.getLogger(AS2Server.SERVER_LOGGER_NAME).info(new String(command.getMDNData()));
+            IncomingMessageResponse response = sender.send(new File(file), new File(header));
+            if (response.getMDNData() != null) {
+                Logger.getLogger(AS2Server.SERVER_LOGGER_NAME).info(new String(response.getMDNData()));
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
     }

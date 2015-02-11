@@ -5,7 +5,6 @@
 
 package de.mendelson.comm.as2.preferences;
 
-import java.sql.Connection;
 import javax.swing.JPanel;
 
 /*
@@ -23,7 +22,7 @@ import javax.swing.JPanel;
 public abstract class PreferencesPanel extends JPanel{
 
     /**Initializes the panel: loads all preferences*/
-    public abstract void loadPreferences(Connection configConnection, Connection runtimeConnection);
+    public abstract void loadPreferences();
 
     /**Stores the new preference settings*/
     public abstract void savePreferences();

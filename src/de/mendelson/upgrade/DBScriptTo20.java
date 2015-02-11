@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/upgrade/DBScriptTo20.java,v 1.1 2012/04/18 14:10:41 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/upgrade/DBScriptTo20.java,v 1.1 2015/01/06 11:07:51 heller Exp $
 package de.mendelson.upgrade;
 
 import de.mendelson.comm.as2.database.DBDriverManager;
@@ -77,6 +77,7 @@ public class DBScriptTo20 {
         server.start();
         Connection connection = createConnection("localhost", dbName);
         if (connection != null) {
+            this.deleteStatisticDetails(connection);
             this.readObjects(connection, dbName);
             Statement statement = connection.createStatement();
             statement.execute("ALTER USER SA SET PASSWORD 'as2dbadmin'");
@@ -117,6 +118,27 @@ public class DBScriptTo20 {
         }
     }
 
+    /**
+     * Deletes entries that are older than a given date and returns the number
+     * of deleted rows
+     */
+    public void deleteStatisticDetails(Connection connection) throws Exception {
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement("TRUNCATE TABLE statisticdetails AND COMMIT");
+            int affectedRows = statement.executeUpdate();
+        } finally {
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (Exception e) {
+                    //nop
+                }
+            }
+        }
+    }
+    
+    
     private void readObjects(Connection connection, String dbName) throws Exception {
         File objectsFile = new File(dbName + ".objects");
         ConsoleProgressBar.print(1);
@@ -163,7 +185,7 @@ public class DBScriptTo20 {
                         //it is no serialized object, its a byte array
                         statement.setBytes(1, data);
                     }
-                    statement.setString(2, token[2]);
+                    statement.setString(2, new String(Base64.decode(token[2])));
                     statement.executeUpdate();
                     statement.close();
                 }

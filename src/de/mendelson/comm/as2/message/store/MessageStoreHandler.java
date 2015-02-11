@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/message/store/MessageStoreHandler.java,v 1.1 2012/04/18 14:10:31 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/store/MessageStoreHandler.java,v 1.1 2015/01/06 11:07:41 heller Exp $
 package de.mendelson.comm.as2.message.store;
 
 import de.mendelson.comm.as2.AS2ServerVersion;
@@ -41,15 +41,20 @@ import java.util.logging.Logger;
  */
 /**
  * Stores messages in specified directories
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
 public class MessageStoreHandler {
 
-    /**products preferences*/
+    /**
+     * products preferences
+     */
     private PreferencesAS2 preferences = new PreferencesAS2();
     private Logger logger = Logger.getLogger(AS2Server.SERVER_LOGGER_NAME);
-    /**localize the output*/
+    /**
+     * localize the output
+     */
     private MecResourceBundle rb = null;
     private final String CRLF = new String(new byte[]{0x0d, 0x0a});
     private Connection configConnection;
@@ -68,8 +73,9 @@ public class MessageStoreHandler {
         }
     }
 
-    /**Stores incoming data for the server without analyzing it, raw
-     *Returns the raw filename and the header filename
+    /**
+     * Stores incoming data for the server without analyzing it, raw Returns the
+     * raw filename and the header filename
      */
     public String[] storeRawIncomingData(byte[] data, Properties header, String remoteHost) throws IOException {
         String[] filenames = new String[2];
@@ -84,14 +90,15 @@ public class MessageStoreHandler {
         }
         DateFormat format = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         StringBuilder rawFileName = new StringBuilder();
-        rawFileName.append(inRawDir.getAbsolutePath()).append(File.separator).append(format.format(new Date())).append("_");
+        rawFileName.append(format.format(new Date())).append("_");
         if (remoteHost != null) {
             rawFileName.append(remoteHost);
         } else {
             rawFileName.append("unknownhost");
         }
-        rawFileName.append(".as2");
-        File rawDataFile = new File(rawFileName.toString());
+        rawFileName.append("_");
+        //create unique filename
+        File rawDataFile = File.createTempFile(rawFileName.toString(), ".as2", inRawDir);
         //write raw data
         FileOutputStream outStream = new FileOutputStream(rawDataFile);
         ByteArrayInputStream inStream = new ByteArrayInputStream(data);
@@ -114,7 +121,9 @@ public class MessageStoreHandler {
         return (filenames);
     }
 
-    /**Copies all data from one stream to another*/
+    /**
+     * Copies all data from one stream to another
+     */
     private void copyStreams(InputStream in, OutputStream out) throws IOException {
         BufferedInputStream inStream = new BufferedInputStream(in);
         BufferedOutputStream outStream = new BufferedOutputStream(out);
@@ -132,7 +141,10 @@ public class MessageStoreHandler {
         outStream.flush();
     }
 
-    /**If a message state is OK the payload has to be moved to the right directory
+    /**
+     * If a message state is OK the payload has to be moved to the right
+     * directory
+     *
      * @param messageType could be a normal EDI message or a CEM
      */
     public void movePayloadToInbox(int messageType, String messageId, Partner localstation, Partner senderstation) throws Exception {
@@ -204,8 +216,10 @@ public class MessageStoreHandler {
         }
     }
 
-    /**Stores an incoming message payload to the right partners mailbox, the decrypted message to the raw directory
-     *The filenames of the files where the data has been stored in is written to the message object
+    /**
+     * Stores an incoming message payload to the right partners mailbox, the
+     * decrypted message to the raw directory The filenames of the files where
+     * the data has been stored in is written to the message object
      */
     public void storeParsedIncomingMessage(AS2Message message, Partner localstation) throws Exception {
         //do not store signals payload in pending dir
@@ -249,17 +263,28 @@ public class MessageStoreHandler {
             MessageAccessDB messageAccess = new MessageAccessDB(this.configConnection, this.runtimeConnection);
             messageAccess.insertPayload(message.getAS2Info().getMessageId(), message.getPayloads());
             File decryptedRawFile = new File(message.getAS2Info().getRawFilename() + ".decrypted");
-            FileOutputStream outStream = new FileOutputStream(decryptedRawFile);
-            ByteArrayInputStream inStream = new ByteArrayInputStream(message.getDecryptedRawData());
-            this.copyStreams(inStream, outStream);
-            outStream.flush();
-            outStream.close();
+            FileOutputStream outStream = null;
+            InputStream inStream = null;
+            try {
+                outStream = new FileOutputStream(decryptedRawFile);
+                inStream = message.getDecryptedRawDataInputStream();
+                this.copyStreams(inStream, outStream);
+            } finally {
+                if (outStream != null) {
+                    outStream.flush();
+                    outStream.close();
+                }
+                if (inStream != null) {
+                    inStream.close();
+                }
+            }
             ((AS2MessageInfo) message.getAS2Info()).setRawFilenameDecrypted(decryptedRawFile.getAbsolutePath());
         }
     }
 
-    /**Stores the message if an error occured during creation
-     *or sending the message
+    /**
+     * Stores the message if an error occured during creation or sending the
+     * message
      */
     public void storeSentErrorMessage(AS2Message message, Partner localstation, Partner receiver) throws Exception {
         DateFormat format = new SimpleDateFormat("yyyyMMdd");
@@ -316,7 +341,8 @@ public class MessageStoreHandler {
         messageAccess.insertPayload(message.getAS2Info().getMessageId(), message.getPayloads());
     }
 
-    /**Stores an outgoing message in a sent directory
+    /**
+     * Stores an outgoing message in a sent directory
      */
     public void storeSentMessage(AS2Message message, Partner localstation, Partner receiver, Properties header) throws Exception {
         DateFormat format = new SimpleDateFormat("yyyyMMdd");
@@ -360,25 +386,41 @@ public class MessageStoreHandler {
         outStream.flush();
         as2Info.setHeaderFilename(headerFile.getAbsolutePath());
         File rawFile = new File(rawFilename.toString());
-        outStream = new FileOutputStream(rawFile);
-        ByteArrayInputStream inStream = new ByteArrayInputStream(message.getDecryptedRawData());
-        this.copyStreams(inStream, outStream);
-        inStream.close();
-        outStream.flush();
-        outStream.close();
-        byte[] contentSource = null;
-        if (as2Info.isMDN()) {
-            contentSource = message.getRawData();
-        } else {
-            contentSource = message.getDecryptedRawData();
+        InputStream inStream = message.getDecryptedRawDataInputStream();
+        outStream = null;
+        try {
+            outStream = new FileOutputStream(rawFile);
+            inStream = message.getDecryptedRawDataInputStream();
+            this.copyStreams(inStream, outStream);
+        } finally {
+            if (inStream != null) {
+                inStream.close();
+            }
+            if (outStream != null) {
+                outStream.flush();
+                outStream.close();
+            }
         }
+        outStream = null;
         File rawFileDecrypted = new File(rawFilename.toString() + ".decrypted");
-        outStream = new FileOutputStream(rawFileDecrypted);
-        inStream = new ByteArrayInputStream(contentSource);
-        this.copyStreams(inStream, outStream);
-        inStream.close();
-        outStream.flush();
-        outStream.close();
+        InputStream contentSourceStream = null;
+        try {
+            if (as2Info.isMDN()) {
+                contentSourceStream = message.getRawDataInputStream();
+            } else {
+                contentSourceStream = message.getDecryptedRawDataInputStream();
+            }
+            outStream = new FileOutputStream(rawFileDecrypted);
+            this.copyStreams(contentSourceStream, outStream);
+        } finally {
+            if( contentSourceStream != null ){
+                contentSourceStream.close();
+            }
+            if( outStream != null ){
+                outStream.flush();
+                outStream.close();
+            }
+        }
         for (int i = 0; i < message.getPayloadCount(); i++) {
             StringBuilder payloadFilename = new StringBuilder();
             payloadFilename.append(sentDir.getAbsolutePath()).append(File.separator);
@@ -405,8 +447,9 @@ public class MessageStoreHandler {
         messageAccess.insertPayload(message.getAS2Info().getMessageId(), message.getPayloads());
     }
 
-    /**Converts a suggested filename to a valid filename. This may be necessary if as2 ids contain chars that are not allowed in
-     *the current file system
+    /**
+     * Converts a suggested filename to a valid filename. This may be necessary
+     * if as2 ids contain chars that are not allowed in the current file system
      */
     public static String convertToValidFilename(String filename) {
         File file = new File(filename);
@@ -428,7 +471,9 @@ public class MessageStoreHandler {
         return (buffer.toString());
     }
 
-    /**Stores the status information for outbound transactions in a file*/
+    /**
+     * Stores the status information for outbound transactions in a file
+     */
     public void writeOutboundStatusFile(AS2MessageInfo messageInfo) throws Exception {
         //ignore the write process if this is not requested in the preferences
         if (!this.preferences.getBoolean(PreferencesAS2.WRITE_OUTBOUND_STATUS_FILE)) {

@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/preferences/PreferencesPanelProxy.java,v 1.1 2012/04/18 14:10:35 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/preferences/PreferencesPanelProxy.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.preferences;
 import java.util.*;
 import de.mendelson.util.*;
@@ -59,7 +59,7 @@ public class PreferencesPanelProxy extends PreferencesPanel {
     /**Sets new preferences to this panel to changes/modify
      */
     @Override
-    public void loadPreferences(Connection connection, Connection runtimeConnection){
+    public void loadPreferences(){
         this.jTextFieldProxyURL.setText( this.preferences.get( PreferencesAS2.PROXY_HOST ));
         this.jTextFieldProxyPort.setText( this.preferences.get( PreferencesAS2.PROXY_PORT ));
         this.jTextFieldProxyUser.setText( this.preferences.get( PreferencesAS2.AUTH_PROXY_USER ));

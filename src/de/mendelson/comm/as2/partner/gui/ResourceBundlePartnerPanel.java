@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/partner/gui/ResourceBundlePartnerPanel.java,v 1.1 2012/04/18 14:10:32 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/gui/ResourceBundlePartnerPanel.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.partner.gui;
 
 import de.mendelson.util.MecResourceBundle;
@@ -42,6 +42,8 @@ public class ResourceBundlePartnerPanel extends MecResourceBundle {
         {"label.usecommandonsenderror", "Command on msg send (error):"},
         {"label.usecommandonsendsuccess", "Command on msg send (success):"},
         {"label.keepfilenameonreceipt", "Keep original file name on receipt (if sender added this information)"},
+        {"label.address", "Address:" },
+        {"label.contact", "Contact:" },        
         {"tab.misc", "Misc"},
         {"tab.security", "Security"},
         {"tab.send", "Send"},
@@ -71,7 +73,7 @@ public class ResourceBundlePartnerPanel extends MecResourceBundle {
         {"hint.filenamereplacement.receipt1", "Replacements: $'{'filename}, $'{'subject},"},
         {"hint.filenamereplacement.receipt2", "$'{'sender}, $'{'receiver}, $'{'messageid}."},
         {"hint.replacement.send1", "Replacements: $'{'filename}, $'{'fullstoragefilename}, $'{'log}, $'{'subject},"},        
-        {"hint.replacement.send2", "$'{'sender}, $'{'receiver}, $'{'messageid}, $'{'mdntext}."},
+        {"hint.replacement.send2", "$'{'sender}, $'{'receiver}, $'{'messageid}, $'{'mdntext}, $'{'userdefinedid}."},
         {"hint.subject.replacement", "The pattern $'{'filename} will be replaced by the send filename."},
         {"hint.keepfilenameonreceipt", "Please ensure your partner sends unique file names before enabling this option!"},
         {"label.url.hint", "Please start this URL with the protocol \"http://\" or \"https://\"."},

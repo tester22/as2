@@ -1,10 +1,10 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/client/manualsend/JDialogManualSend.java,v 1.1 2012/04/18 14:10:24 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/manualsend/JDialogManualSend.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.client.manualsend;
 
 import de.mendelson.comm.as2.client.AS2StatusBar;
-import de.mendelson.util.security.cert.CertificateManager;
 import de.mendelson.comm.as2.partner.Partner;
-import de.mendelson.comm.as2.partner.PartnerAccessDB;
+import de.mendelson.comm.as2.partner.clientserver.PartnerListRequest;
+import de.mendelson.comm.as2.partner.clientserver.PartnerListResponse;
 import de.mendelson.comm.as2.partner.gui.ListCellRendererPartner;
 import de.mendelson.comm.as2.preferences.PreferencesAS2;
 import de.mendelson.util.LockingGlassPane;
@@ -14,12 +14,13 @@ import de.mendelson.util.clientserver.BaseClient;
 import de.mendelson.util.clientserver.clients.datatransfer.TransferClientWithProgress;
 import de.mendelson.util.clientserver.clients.preferences.PreferencesClient;
 import de.mendelson.util.security.BCCryptoHelper;
+import de.mendelson.util.security.cert.CertificateManager;
 import de.mendelson.util.security.cert.KeystoreStorage;
 import de.mendelson.util.security.cert.clientserver.KeystoreStorageImplClientServer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.sql.Connection;
+import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
@@ -38,32 +39,37 @@ import javax.swing.SwingUtilities;
  */
 /**
  * Dialog to send a file to a single partner
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
 public class JDialogManualSend extends JDialog {
 
-    /**ResourceBundle to localize the GUI*/
+    /**
+     * ResourceBundle to localize the GUI
+     */
     private MecResourceBundle rb = null;
     private Logger logger = Logger.getLogger("de.mendelson.as2.client");
-    private Partner[] localStations = null;
+    private List<Partner> localStations = null;
     private CertificateManager certificateManager = null;
     //DB connection for the partner access
-    private Connection configConnection;
-    private Connection runtimeConnection;
     private BaseClient baseClient;
     private AS2StatusBar statusbar;
-    /**String that is displayed while the client uploads data to the server to send*/
+    /**
+     * String that is displayed while the client uploads data to the server to
+     * send
+     */
     private String uploadDisplay;
 
-    /** Creates new form JDialogPartnerConfig
-     * @param uploadDisplay String that is displayed while the client uploads data to the server to send
+    /**
+     * Creates new form JDialogPartnerConfig
+     *
+     * @param uploadDisplay String that is displayed while the client uploads
+     * data to the server to send
      */
-    public JDialogManualSend(JFrame parent, Connection configConnection, Connection runtimeConnection,BaseClient baseClient,
+    public JDialogManualSend(JFrame parent, BaseClient baseClient,
             AS2StatusBar statusbar, String uploadDisplay) {
         super(parent, true);
-        this.configConnection = configConnection;
-        this.runtimeConnection = runtimeConnection;
         this.statusbar = statusbar;
         this.uploadDisplay = uploadDisplay;
         //load resource bundle
@@ -80,14 +86,13 @@ public class JDialogManualSend extends JDialog {
         this.getRootPane().setDefaultButton(this.jButtonOk);
         //fill in data
         try {
-            PartnerAccessDB partnerAccess = new PartnerAccessDB(this.configConnection, this.runtimeConnection);
-            Partner[] partner = partnerAccess.getPartner();
-            for (int i = 0; i < partner.length; i++) {
-                if (!partner[i].isLocalStation()) {
-                    this.jComboBoxPartner.addItem(partner[i]);
-                }
+            PartnerListResponse response = (PartnerListResponse) baseClient.sendSync(new PartnerListRequest(PartnerListRequest.LIST_NON_LOCALSTATIONS));
+            List<Partner> nonlocalStations = response.getList();
+            for (Partner partner : nonlocalStations) {
+                this.jComboBoxPartner.addItem(partner);
             }
-            this.localStations = partnerAccess.getLocalStations();
+            response = (PartnerListResponse) baseClient.sendSync(new PartnerListRequest(PartnerListRequest.LIST_LOCALSTATION));
+            this.localStations = response.getList();
             this.certificateManager = new CertificateManager(this.logger);
             //ask the server for the password
             PreferencesClient client = new PreferencesClient(baseClient);
@@ -99,11 +104,12 @@ public class JDialogManualSend extends JDialog {
         } catch (Exception e) {
             this.logger.severe("JDialogManualSend: " + e.getMessage());
         }
-        //single local stattion? No need to select the sender
-        if (this.localStations.length == 1) {
+        //single local station? No need to select the sender
+        if (this.localStations.size() == 1) {
             this.jLabelSender.setVisible(false);
             this.jComboBoxSender.setVisible(false);
         } else {
+            //add all local stations to the selection box
             this.jComboBoxSender.removeAllItems();
             for (Partner localStation : this.localStations) {
                 this.jComboBoxSender.addItem(localStation);
@@ -115,7 +121,9 @@ public class JDialogManualSend extends JDialog {
         this.setButtonState();
     }
 
-    /**Lock the component: Add a glasspane that prevents any action on the UI*/
+    /**
+     * Lock the component: Add a glasspane that prevents any action on the UI
+     */
     private void lock() {
         //init glasspane for first use
         if (!(this.getGlassPane() instanceof LockingGlassPane)) {
@@ -125,12 +133,17 @@ public class JDialogManualSend extends JDialog {
         this.getGlassPane().requestFocusInWindow();
     }
 
-    /**Unlock the component: remove the glasspane that prevents any action on the UI*/
+    /**
+     * Unlock the component: remove the glasspane that prevents any action on
+     * the UI
+     */
     private void unlock() {
         getGlassPane().setVisible(false);
     }
 
-    /**Fills in some preselections for the file send dialog*/
+    /**
+     * Fills in some preselections for the file send dialog
+     */
     public void initialize(Partner sender, Partner receiver, String filename) {
         this.jComboBoxPartner.setSelectedItem(receiver);
         this.jComboBoxSender.setSelectedItem(sender);
@@ -138,21 +151,23 @@ public class JDialogManualSend extends JDialog {
         this.setButtonState();
     }
 
-    /**Sets the ok and cancel buttons of this GUI*/
+    /**
+     * Sets the ok and cancel buttons of this GUI
+     */
     private void setButtonState() {
         this.jButtonOk.setEnabled(
                 this.jTextFieldFilename.getText().length() > 0);
     }
-
-    /**Will be executed on click to OK*/
-    public void performSend() throws Throwable {
+    
+    public ManualSendResponse performSend( String resendMessageId ) throws Throwable{
         InputStream inStream = null;
+        ManualSendResponse response = null;
         try {
             Partner receiver = (Partner) this.jComboBoxPartner.getSelectedItem();
             File sendFile = new File(this.jTextFieldFilename.getText());
             Partner sender = null;
-            if (this.localStations.length == 1) {
-                sender = this.localStations[0];
+            if (this.localStations.size() == 1) {
+                sender = this.localStations.get(0);
             } else {
                 sender = (Partner) this.jComboBoxSender.getSelectedItem();
             }
@@ -163,11 +178,12 @@ public class JDialogManualSend extends JDialog {
             //perform the upload to the server, chunked
             String uploadHash = transferClient.uploadChunkedWithProgress(inStream, this.uploadDisplay, (int) sendFile.length());
             ManualSendRequest request = new ManualSendRequest();
+            request.setResendMessageId(resendMessageId);
             request.setUploadHash(uploadHash);
             request.setFilename(sendFile.getName());
             request.setReceiver(receiver);
             request.setSender(sender);
-            ManualSendResponse response = (ManualSendResponse) transferClient.upload(request);
+            response = (ManualSendResponse) transferClient.uploadWaitInfinite(request);
             if (response.getException() != null) {
                 throw (response.getException());
             }
@@ -177,19 +193,20 @@ public class JDialogManualSend extends JDialog {
 
             }
         }
+        return( response );
     }
 
     private void okButtonPressed() {
-        this.jButtonOk.setEnabled( false );
-        this.jButtonCancel.setEnabled( false );
+        this.jButtonOk.setEnabled(false);
+        this.jButtonCancel.setEnabled(false);
         Runnable runnable = new Runnable() {
-
             @Override
             public void run() {
                 JDialogManualSend.this.lock();
                 try {
-                    //perform send has an own progress bar, no need to set one here
-                    JDialogManualSend.this.performSend();
+                    //perform send has an own progress bar, no need to set one here. This is never a resend of an existing
+                    //transaction, set the resendMessageId to null
+                    JDialogManualSend.this.performSend(null);
                     //display success dialog
                     JFrame parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, JDialogManualSend.this);
                     JDialogManualSend.this.unlock();
@@ -208,10 +225,10 @@ public class JDialogManualSend extends JDialog {
         Executors.newSingleThreadExecutor().submit(runnable);
     }
 
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {

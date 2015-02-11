@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/notification/NotificationData.java,v 1.1 2012/04/18 14:10:31 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/notification/NotificationData.java,v 1.1 2015/01/06 11:07:42 heller Exp $
 package de.mendelson.comm.as2.notification;
 
 import java.io.Serializable;
@@ -20,6 +20,11 @@ import org.w3c.dom.NodeList;
  */
 public class NotificationData implements Serializable{
 
+    public static final int SECURITY_PLAIN = 0;
+    public static final int SECURITY_START_SSL = 1;
+    public static final int SECURITY_SSL = 2;
+    
+    
     private String notificationMail = null;
     private String mailServer = null;
     private int mailServerPort = 25;
@@ -29,14 +34,13 @@ public class NotificationData implements Serializable{
     private boolean notifyTransactionError = false;
     private boolean notifyCEM = false;
     private boolean notifySystemFailure = false;
-    //TODO CONFIGURABLE!!!
     private boolean notifyResendDetected = true;
     /**Makes no sense but some mail servers require this to be a valid email from the same host to prevent SPAM sending*/
     private String replyTo = null;
-
     private boolean useSMTHAuth = false;
     private String smtpUser = null;
     private char[] smtpPass = null;
+    private int connectionSecurity = SECURITY_PLAIN;
 
     public String getNotificationMail() {
         return notificationMail;
@@ -116,6 +120,7 @@ public class NotificationData implements Serializable{
         builder.append(offset).append("\t<accountpass>").append(this.toCDATA(String.valueOf(this.accountPassword))).append("</accountpass>\n");
         builder.append(offset).append("\t<mailserver>").append(this.toCDATA(this.mailServer)).append("</mailserver>\n");
         builder.append(offset).append("\t<mailserverport>").append(this.mailServerPort).append("</mailserverport>\n");
+        builder.append(offset).append("\t<connectionsecurity>").append(this.connectionSecurity).append("</connectionsecurity>\n");
         builder.append(offset).append("\t<notificationmail>").append(this.toCDATA(this.notificationMail)).append("</notificationmail>\n");
         builder.append(offset).append("\t<notifycertexpire>").append(String.valueOf(this.notifyCertExpire)).append("</notifycertexpire>\n");
         builder.append(offset).append("\t<notifytransactionerror>").append(String.valueOf(this.notifyTransactionError)).append("</notifytransactionerror>\n");
@@ -160,6 +165,8 @@ public class NotificationData implements Serializable{
                     notification.setNotifyCEM(value.equalsIgnoreCase("true"));
                 } else if (key.equals("replyto")) {
                     notification.setReplyTo(value);
+                }else if (key.equals("connectionsecurity")) {
+                    notification.setConnectionSecurity(Integer.valueOf(value).intValue());
                 }
             }
         }
@@ -248,6 +255,20 @@ public class NotificationData implements Serializable{
      */
     public void setNotifyResendDetected(boolean notifyResendDetected) {
         this.notifyResendDetected = notifyResendDetected;
+    }
+
+    /**
+     * @return the security
+     */
+    public int getConnectionSecurity() {
+        return connectionSecurity;
+    }
+
+    /**
+     * @param connectionSecurity the connection security to set
+     */
+    public void setConnectionSecurity(int connectionSecurity) {
+        this.connectionSecurity = connectionSecurity;
     }
 
 }

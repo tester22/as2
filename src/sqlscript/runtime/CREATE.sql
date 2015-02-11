@@ -5,22 +5,22 @@
 #
 # Create table for update and version control
 #
-CREATE TABLE version(id INTEGER IDENTITY PRIMARY KEY,actualVersion INTEGER,updateDate TIMESTAMP,updateComment VARCHAR(255))
+CREATE TABLE version(id INTEGER IDENTITY PRIMARY KEY,actualversion INTEGER,updatedate TIMESTAMP,updatecomment VARCHAR(255))
 #
 # Message details
 #
-CREATE CACHED TABLE messages(messageid VARCHAR(255) PRIMARY KEY,initdate TIMESTAMP,senddate TIMESTAMP,direction INTEGER,rawfilename VARCHAR(512),state INTEGER,signature INTEGER,encryption INTEGER,senderid VARCHAR(255),receiverid VARCHAR(255),syncmdn INTEGER,headerfilename VARCHAR(512),rawdecryptedfilename VARCHAR(512),senderhost VARCHAR(255),useragent VARCHAR(255),contentmic VARCHAR(255),compression INT DEFAULT 0 NOT NULL,messagetype INT DEFAULT 1 NOT NULL,asyncmdnurl VARCHAR(512),subject VARCHAR(255),resendcounter INT DEFAULT 0 NOT NULL)
-CREATE INDEX idx_messages_initdate ON messages(initdate)
+CREATE CACHED TABLE messages(messageid VARCHAR(255) PRIMARY KEY,initdateutc TIMESTAMP,senddateutc TIMESTAMP,direction INTEGER,rawfilename VARCHAR(512),state INTEGER,signature INTEGER,encryption INTEGER,senderid VARCHAR(255),receiverid VARCHAR(255),syncmdn INTEGER,headerfilename VARCHAR(512),rawdecryptedfilename VARCHAR(512),senderhost VARCHAR(255),useragent VARCHAR(255),contentmic VARCHAR(255),compression INT DEFAULT 0 NOT NULL,messagetype INT DEFAULT 1 NOT NULL,asyncmdnurl VARCHAR(512),subject VARCHAR(255),resendcounter INT DEFAULT 0 NOT NULL,userdefinedid VARCHAR(255))
+CREATE INDEX idx_messages_initdate ON messages(initdateutc)
 CREATE INDEX idx_messages_contentmic ON messages(contentmic)
 #
 # MDN details
 #
-CREATE CACHED TABLE mdn(messageid VARCHAR(255) PRIMARY KEY,relatedmessageid VARCHAR(255),initdate TIMESTAMP,direction INTEGER,rawfilename VARCHAR(512), state INTEGER, signature INTEGER, senderid VARCHAR(255),receiverid VARCHAR(255), headerfilename VARCHAR(512),senderhost VARCHAR(255),useragent VARCHAR(255),mdntext OBJECT,FOREIGN KEY(relatedmessageid)REFERENCES messages(messageid))
-CREATE INDEX idx_mdn_initdate ON mdn(initdate)
+CREATE CACHED TABLE mdn(messageid VARCHAR(255) PRIMARY KEY,relatedmessageid VARCHAR(255),initdateutc TIMESTAMP,direction INTEGER,rawfilename VARCHAR(512), state INTEGER, signature INTEGER, senderid VARCHAR(255),receiverid VARCHAR(255), headerfilename VARCHAR(512),senderhost VARCHAR(255),useragent VARCHAR(255),mdntext OBJECT,FOREIGN KEY(relatedmessageid)REFERENCES messages(messageid))
+CREATE INDEX idx_mdn_initdate ON mdn(initdateutc)
 #
 #message log
 #
-CREATE CACHED TABLE messagelog( id INTEGER IDENTITY PRIMARY KEY,messageid VARCHAR(255),timestamp TIMESTAMP,loglevel INTEGER,details OBJECT,FOREIGN KEY(messageid)REFERENCES messages(messageid))
+CREATE CACHED TABLE messagelog( id INTEGER IDENTITY PRIMARY KEY,messageid VARCHAR(255),timestamputc TIMESTAMP,loglevel INTEGER,details OBJECT,FOREIGN KEY(messageid)REFERENCES messages(messageid))
 CREATE INDEX idx_messagelog_messageid ON messagelog(messageid)
 #
 #payload 
@@ -30,7 +30,7 @@ CREATE INDEX idx_payload_messageid ON payload(messageid)
 #
 #statistic overview
 #
-CREATE TABLE statisticoverview(relationshipid VARCHAR(255)PRIMARY KEY,localstationid VARCHAR(255),partnerid VARCHAR(255),sendmessagecount INTEGER,receivedmessagecount INTEGER,sendwithfailurecount INTEGER,receivedwithfailurecount INTEGER,resetdate TIMESTAMP)
+CREATE TABLE statisticoverview(relationshipid VARCHAR(255)PRIMARY KEY,localstationid VARCHAR(255),partnerid VARCHAR(255),sendmessagecount INTEGER,receivedmessagecount INTEGER,sendwithfailurecount INTEGER,receivedwithfailurecount INTEGER,resetdateutc TIMESTAMP)
 CREATE INDEX idx_statisticoverview_localstationid on statisticoverview(localstationid);
 CREATE INDEX idx_statisticoverview_partnerid on statisticoverview(partnerid);
 #
@@ -53,3 +53,8 @@ CREATE TABLE cem(id INTEGER IDENTITY PRIMARY KEY,initiatoras2id VARCHAR(255),rec
 #Send order queue
 #
 CREATE CACHED TABLE sendorder(id INTEGER IDENTITY PRIMARY KEY,scheduletime BIGINT NOT NULL,nextexecutiontime BIGINT NOT NULL,sendorder OBJECT NOT NULL,orderstate INTEGER NOT NULL)
+#
+#Client module locks
+#
+CREATE TABLE modulelock(modulename VARCHAR(255) PRIMARY KEY,startlockmillis BIGINT NOT NULL,refreshlockmillies BIGINT NOT NULL,clientip VARCHAR(255) NOT NULL, clientid VARCHAR(255) NOT NULL,username VARCHAR(255) NOT NULL)
+CREATE INDEX idx_refreshlockmillies ON modulelock(refreshlockmillies)

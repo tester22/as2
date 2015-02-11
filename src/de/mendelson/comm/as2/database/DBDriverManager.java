@@ -1,9 +1,10 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/database/DBDriverManager.java,v 1.1 2012/04/18 14:10:29 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/database/DBDriverManager.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.database;
 
 import de.mendelson.comm.as2.AS2ServerVersion;
 import de.mendelson.comm.as2.preferences.PreferencesAS2;
 import de.mendelson.comm.as2.server.AS2Server;
+import de.mendelson.util.database.DebuggableConnection;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -18,15 +19,14 @@ import org.apache.commons.dbcp.BasicDataSource;
  * Other product and brand names are trademarks of their respective owners.
  */
 
-
 /**
  * Class needed to access the database
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
 public class DBDriverManager {
 
-    
     private static BasicDataSource dataSourceConfig;
     private static BasicDataSource dataSourceRuntime;
     public static int DB_DEPRICATED = 1;
@@ -37,12 +37,13 @@ public class DBDriverManager {
     private final static String DB_USER_NAME = "sa";
     private final static String DB_PASSWORD = "as2dbadmin";
 
-    /**Setup the driver manager, initialize the connection pool
-     * 
+    /**
+     * Setup the driver manager, initialize the connection pool
+     *
      */
     public static synchronized void setupConnectionPool() {
         String driverName = "org.hsqldb.jdbcDriver";
-        String dbHost = "localhost";        
+        String dbHost = "localhost";
         //in client-server environment this may be called from client and server in the same VM
         if (dataSourceConfig == null) {
             dataSourceConfig = new BasicDataSource();
@@ -66,7 +67,7 @@ public class DBDriverManager {
             dataSourceRuntime.setPoolPreparedStatements(false);
         }
     }
- 
+
     /**
      * shutdown the connection pool
      */
@@ -81,13 +82,16 @@ public class DBDriverManager {
         }
     }
 
-    /**Returns the URI to connect to*/
+    /**
+     * Returns the URI to connect to
+     */
     public static String getConnectionURI(String host, final int DB_TYPE) {
         int port = DBDriverManager.preferences.getInt(PreferencesAS2.SERVER_DB_PORT);
         return ("jdbc:hsqldb:hsql://" + host + ":" + port + "/" + DBDriverManager.getDBAlias(DB_TYPE));
     }
-    
-    /**Returns the DB name, depending on the systemwide profile name
+
+    /**
+     * Returns the DB name, depending on the systemwide profile name
      */
     public static String getDBName(final int DB_TYPE) {
         String name = "AS2_DB";
@@ -100,8 +104,9 @@ public class DBDriverManager {
         }
         return (name);
     }
-    
-    /**Returns the DB name for a special profile
+
+    /**
+     * Returns the DB name for a special profile
      */
     public static String getDBAlias(final int DB_TYPE) {
         String alias = "";
@@ -114,10 +119,13 @@ public class DBDriverManager {
         }
         return (alias);
     }
-    
-    /**Creates a new locale database
+
+    /**
+     * Creates a new locale database
+     *
      * @return true if it was created successfully
-     * @param DB_TYPE of the database that should be created, as defined in this class
+     * @param DB_TYPE of the database that should be created, as defined in this
+     * class
      */
     public static boolean createDatabase(final int DB_TYPE) {
         // It will be create automatically if it does not yet exist
@@ -164,13 +172,15 @@ public class DBDriverManager {
         return (true);
     }
 
-    /**Connects to a local database called "MecDriverManager.DB_NAME"
+    /**
+     * Connects to a local database called "MecDriverManager.DB_NAME"
      */
     public static Connection getLocalConnection(final int DB_TYPE) {
         return (getConnection(DB_TYPE, "127.0.0.1"));
     }
 
-    /**Returns a connection to the database     
+    /**
+     * Returns a connection to the database
      */
     public static Connection getConnection(final int DB_TYPE, String hostName) {
         try {
@@ -181,10 +191,13 @@ public class DBDriverManager {
         return (null);
     }
 
-    /**Returns a connection to the database
-     * @param hostName Name of the database server to connect to. Use "localhost"
-     * to connect to your local host
-     * @param DB_TYPE of the database that should be created, as defined in this class
+    /**
+     * Returns a connection to the database
+     *
+     * @param hostName Name of the database server to connect to. Use
+     * "localhost" to connect to your local host
+     * @param DB_TYPE of the database that should be created, as defined in this
+     * class
      */
     public static synchronized Connection getConnectionWithoutErrorHandling(final int DB_TYPE, String host)
             throws SQLException {
@@ -225,7 +238,6 @@ public class DBDriverManager {
         }
         connection.setReadOnly(false);
         connection.setAutoCommit(true);
-        return(connection);
+        return (new DebuggableConnection(connection));
     }
-
 }

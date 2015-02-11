@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/util/security/cert/KeystoreStorageImplFile.java,v 1.1 2012/04/18 14:10:47 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/cert/KeystoreStorageImplFile.java,v 1.1 2015/01/06 11:07:58 heller Exp $
 package de.mendelson.util.security.cert;
 
 import de.mendelson.util.MecResourceBundle;
@@ -22,6 +22,7 @@ import java.util.ResourceBundle;
  */
 /**
  * Keystore storage implementation that relies on a keystore file
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
@@ -46,7 +47,7 @@ public class KeystoreStorageImplFile implements KeystoreStorage {
                     ResourceBundleKeystoreStorage.class.getName());
         } catch (MissingResourceException e) {
             throw new RuntimeException("Oops..resource bundle " + e.getClassName() + " not found.");
-        }        
+        }
         this.keystoreFilename = keystoreFilename;
         this.keystorePass = keystorePass;
         this.keystoreType = keystoreType;
@@ -54,7 +55,6 @@ public class KeystoreStorageImplFile implements KeystoreStorage {
         this.keystore = cryptoHelper.createKeyStoreInstance(keystoreType);
         this.keystoreUtil.loadKeyStore(this.keystore, this.keystoreFilename, this.keystorePass);
     }
-
 
     @Override
     public void save() throws Exception {
@@ -111,14 +111,14 @@ public class KeystoreStorageImplFile implements KeystoreStorage {
     public Map<String, Certificate> loadCertificatesFromKeystore() throws Exception {
         File keystoreFile = new File(this.keystoreFilename);
         if (!keystoreFile.canRead()) {
-            throw new Exception(this.rb.getResourceString(this.rb.getResourceString("error.readaccess", this.keystoreFilename)));
+            throw new Exception(this.rb.getResourceString("error.readaccess", this.keystoreFilename));
         }
         if (!keystoreFile.exists()) {
-            throw new Exception(this.rb.getResourceString(this.rb.getResourceString("error.filexists", this.keystoreFilename)));
+            throw new Exception(this.rb.getResourceString("error.filexists", this.keystoreFilename));
         }
         if (!keystoreFile.isFile()) {
-            throw new Exception(this.rb.getResourceString(this.rb.getResourceString("error.notafile", this.keystoreFilename)));
-        }        
+            throw new Exception(this.rb.getResourceString("error.notafile", this.keystoreFilename));
+        }
         //recreate keystore object
         this.keystoreUtil.loadKeyStore(this.keystore, this.keystoreFilename, this.keystorePass);
         Map<String, Certificate> certificateMap = this.keystoreUtil.getCertificatesFromKeystore(this.keystore);
@@ -126,22 +126,22 @@ public class KeystoreStorageImplFile implements KeystoreStorage {
     }
 
     @Override
-    public boolean isKeyEntry(String alias) throws Exception{
-        return( this.keystore.isKeyEntry(alias));
+    public boolean isKeyEntry(String alias) throws Exception {
+        return (this.keystore.isKeyEntry(alias));
     }
 
     @Override
     public String getOriginalKeystoreFilename() {
-        return( this.keystoreFilename);
+        return (this.keystoreFilename);
     }
 
     @Override
     public boolean canWrite() {
-        return( new File(this.keystoreFilename).canWrite() );
+        return (new File(this.keystoreFilename).canWrite());
     }
 
     @Override
     public String getKeystoreType() {
-        return( this.keystoreType);
+        return (this.keystoreType);
     }
 }

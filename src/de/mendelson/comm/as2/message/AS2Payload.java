@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/message/AS2Payload.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/AS2Payload.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
 import java.io.BufferedInputStream;
@@ -152,5 +152,12 @@ public class AS2Payload implements Serializable {
      */
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+    
+     /**Releases all resources that have been allocated, e.g. temp files*/
+    public void releaseResources(){
+        if( this.data != null ){
+            this.data.release();
+        }
     }
 }

@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/client/HTMLPanel.java,v 1.1 2012/04/18 14:10:23 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/HTMLPanel.java,v 1.1 2015/01/06 11:07:37 heller Exp $
 package de.mendelson.comm.as2.client;
 
 import java.awt.Cursor;
@@ -42,9 +42,9 @@ public class HTMLPanel extends JPanel implements HyperlinkListener {
 
     /**Sets a new page to the viewer
      */
-    public void setPage(File htmlFile) {
+    public void setPage(String url) {
         try {
-            this.jEditorPane.setPage(htmlFile.toURI().toURL());
+            this.jEditorPane.setPage(url);
         } catch (Exception e) {
             //nop
         }
@@ -53,7 +53,7 @@ public class HTMLPanel extends JPanel implements HyperlinkListener {
     /**Sets a new page to the viewer and handles the Stack update
      *@param url URL to move to
      */
-    public Header[] setURL(String urlStr, String userAgent, File fallbackOnError) {
+    public Header[] setURL(String urlStr, String userAgent, String fallbackOnErrorURL) {
         Header[] header = new Header[0];
         try {
             //post for header data
@@ -73,7 +73,7 @@ public class HTMLPanel extends JPanel implements HyperlinkListener {
         } catch (Exception e) {
             e.printStackTrace();
             try {
-                this.setPage(fallbackOnError);
+                this.setPage(fallbackOnErrorURL);
             } catch (Exception ex) {
                 //nop
             }

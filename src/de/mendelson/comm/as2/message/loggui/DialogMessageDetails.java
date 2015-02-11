@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/message/loggui/DialogMessageDetails.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/loggui/DialogMessageDetails.java,v 1.1 2015/01/06 11:07:41 heller Exp $
 package de.mendelson.comm.as2.message.loggui;
 
 import de.mendelson.comm.as2.log.LogAccessDB;
@@ -6,15 +6,18 @@ import de.mendelson.comm.as2.log.LogEntry;
 import de.mendelson.comm.as2.message.AS2Info;
 import de.mendelson.comm.as2.message.AS2MessageInfo;
 import de.mendelson.comm.as2.message.AS2Payload;
-import de.mendelson.comm.as2.message.MessageAccessDB;
-import de.mendelson.util.log.IRCColors;
-import java.text.SimpleDateFormat;
+import de.mendelson.comm.as2.message.clientserver.MessageDetailRequest;
+import de.mendelson.comm.as2.message.clientserver.MessageDetailResponse;
+import de.mendelson.comm.as2.message.clientserver.MessageLogRequest;
+import de.mendelson.comm.as2.message.clientserver.MessageLogResponse;
 import de.mendelson.util.MecResourceBundle;
 import de.mendelson.util.clientserver.BaseClient;
+import de.mendelson.util.log.IRCColors;
 import de.mendelson.util.tables.JTableColumnResizer;
 import java.awt.Color;
 import java.sql.Connection;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -57,17 +60,13 @@ public class DialogMessageDetails extends JDialog implements ListSelectionListen
     private JPanelFileDisplay jPanelFileDisplayRaw;
     private JPanelFileDisplay jPanelFileDisplayHeader;
     private JPanelFileDisplay[] jPanelFileDisplayPayload;
-    private LogAccessDB logAccess;
-    //db connection
-    private Connection runtimeConnection;
-    private Connection configConnection;
+    private BaseClient baseClient;
 
     /** Creates new form AboutDialog */
-    public DialogMessageDetails(JFrame parent, Connection configConnection, Connection runtimeConnection,
+    public DialogMessageDetails(JFrame parent,
             BaseClient baseClient, AS2MessageInfo overviewInfo, List<AS2Payload> payload) {
         super(parent, true);
-        this.runtimeConnection = runtimeConnection;
-        this.configConnection = configConnection;
+        this.baseClient = baseClient;
         //load resource bundle
         try {
             this.rb = (MecResourceBundle) ResourceBundle.getBundle(
@@ -105,12 +104,7 @@ public class DialogMessageDetails extends JDialog implements ListSelectionListen
                         String.valueOf(i + 1)), jPanelFileDisplayPayload[i]);
             }
         }
-        this.jTableMessageDetails.getSelectionModel().addListSelectionListener(this);
-        try {
-            this.logAccess = new LogAccessDB(this.configConnection, this.runtimeConnection);
-        } catch (Exception e) {
-            this.logger.severe(e.getMessage());
-        }
+        this.jTableMessageDetails.getSelectionModel().addListSelectionListener(this);        
         this.displayProcessLog();
         JTableColumnResizer.adjustColumnWidthByContent(this.jTableMessageDetails);
         this.jTableMessageDetails.getSelectionModel().setSelectionInterval(0, 0);
@@ -122,29 +116,29 @@ public class DialogMessageDetails extends JDialog implements ListSelectionListen
         StyleContext context = StyleContext.getDefaultStyleContext();
         Style currentStyle = context.getStyle(StyleContext.DEFAULT_STYLE);
         Color defaultColor = (Color) currentStyle.getAttribute(StyleConstants.Foreground);
-        LogEntry[] entries = this.logAccess.getLog(overviewInfo.getMessageId());
+        List<LogEntry> entries = ((MessageLogResponse)this.baseClient.sendSync(new MessageLogRequest(overviewInfo.getMessageId()))).getList();
         StringBuilder buffer = new StringBuilder();
         DateFormat format = SimpleDateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
-        for (int i = 0; i < entries.length; i++) {
+        for (int i = 0; i < entries.size(); i++) {
             currentStyle.removeAttribute(StyleConstants.Foreground);
             currentStyle.addAttribute(StyleConstants.Foreground, defaultColor);
-            buffer.append("[").append(format.format(entries[i].getMillis())).append("] ");
+            buffer.append("[").append(format.format(entries.get(i).getMillis())).append("] ");
             try {
                 document.insertString(document.getLength(), buffer.toString(), currentStyle);
             } catch (Throwable ignore) {
                 //nop
             }
             buffer.setLength(0);
-            if (entries[i].getLevel().equals(Level.WARNING)) {
+            if (entries.get(i).getLevel().equals(Level.WARNING)) {
                 currentStyle.addAttribute(StyleConstants.Foreground, IRCColors.COLOR_NAVY.brighter());
-            } else if (entries[i].getLevel().equals(Level.SEVERE)) {
+            } else if (entries.get(i).getLevel().equals(Level.SEVERE)) {
                 currentStyle.addAttribute(StyleConstants.Foreground, IRCColors.COLOR_RED);
-            } else if (entries[i].getLevel().equals(Level.FINE)) {
+            } else if (entries.get(i).getLevel().equals(Level.FINE)) {
                 currentStyle.addAttribute(StyleConstants.Foreground, IRCColors.COLOR_GREEN);
             } else {
                 currentStyle.addAttribute(StyleConstants.Foreground, defaultColor);
             }
-            buffer.append(entries[i].getMessage()).append("\n");
+            buffer.append(entries.get(i).getMessage()).append("\n");
             try {
                 document.insertString(document.getLength(), buffer.toString(), currentStyle);
             } catch (Throwable ignore) {
@@ -159,8 +153,7 @@ public class DialogMessageDetails extends JDialog implements ListSelectionListen
     /**Displays all messages that contain to the passed overview object*/
     private void displayData(AS2MessageInfo overviewRow) {
         try {
-            MessageAccessDB messageAccess = new MessageAccessDB(this.configConnection, this.runtimeConnection);
-            List<AS2Info> details = messageAccess.getMessageDetails(overviewRow.getMessageId());
+            List<AS2Info> details = ((MessageDetailResponse)this.baseClient.sendSync(new MessageDetailRequest(overviewRow.getMessageId()))).getList();
             ((TableModelMessageDetails) this.jTableMessageDetails.getModel()).passNewData(details);
         } catch (Exception e) {
             JFrame parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, this);

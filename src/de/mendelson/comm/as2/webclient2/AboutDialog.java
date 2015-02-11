@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/webclient2/AboutDialog.java,v 1.1 2012/04/18 14:10:41 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/webclient2/AboutDialog.java,v 1.1 2015/01/06 11:07:50 heller Exp $
 package de.mendelson.comm.as2.webclient2;
 
 import com.vaadin.terminal.ExternalResource;
@@ -29,7 +29,7 @@ import de.mendelson.comm.as2.AS2ServerVersion;
 public class AboutDialog extends OkDialog {
 
     public AboutDialog() {
-        super(470, 430, "About");
+        super(470, 480, "About");
         this.setResizable(false);
         this.setClosable(false);
     }
@@ -39,7 +39,7 @@ public class AboutDialog extends OkDialog {
     public AbstractComponent getContentPanel() {
         int maxX = 7;
         Panel panel = new Panel();
-        GridLayout gridLayout = new GridLayout(maxX, 13);
+        GridLayout gridLayout = new GridLayout(maxX, 17);
         gridLayout.setSizeFull();
         Embedded logComm = new Embedded("", new ThemeResource("images/logocommprotocols.gif"));
         logComm.setType(Embedded.TYPE_IMAGE);
@@ -58,6 +58,10 @@ public class AboutDialog extends OkDialog {
         gridLayout.addComponent(new Label("<hr/>", Label.CONTENT_XHTML), 0, 10, 6, 10);
         gridLayout.addComponent(new Link("http://www.mendelson.de", new ExternalResource("http://www.mendelson.de")), 0, 11, maxX - 1, 11);
         gridLayout.addComponent(new Link("http://www.mendelson-e-c.com", new ExternalResource("http://www.mendelson-e-c.com")), 0, 12, maxX - 1, 12);
+        gridLayout.addComponent(new Label("<hr/>", Label.CONTENT_XHTML), 0, 13, maxX - 1, 13);
+        gridLayout.addComponent(new Label("<br/>", Label.CONTENT_XHTML), 0, 14, maxX - 1, 14);
+        gridLayout.addComponent(new Label( "[Based on VAADIN " 
+                + com.vaadin.terminal.gwt.server.ApplicationServlet.VERSION + "]"), 0, 16, maxX - 1, 16);        
         panel.addComponent(gridLayout);
         return (panel);
     }

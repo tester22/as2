@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/message/ByteStorage.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/ByteStorage.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
 import java.io.InputStream;
@@ -51,5 +51,12 @@ public class ByteStorage implements Serializable {
     /**Returns an input stream to read directly from the underlaying buffer*/
     public InputStream getInputStream() throws Exception {
         return (this.storage.getInputStream());
+    }
+    
+    /**Releases the allocated resources*/
+    public void release(){
+        if( this.storage != null ){
+            this.storage.release();
+        }
     }
 }

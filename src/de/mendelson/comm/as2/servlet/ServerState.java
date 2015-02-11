@@ -1,4 +1,4 @@
-///$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/servlet/ServerState.java,v 1.1 2012/04/18 14:10:39 heller Exp $
+///$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/servlet/ServerState.java,v 1.1 2015/01/06 11:07:50 heller Exp $
 package de.mendelson.comm.as2.servlet;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
@@ -10,51 +10,58 @@ package de.mendelson.comm.as2.servlet;
 
 /**
  * Servlet to display the server state
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
 import de.mendelson.comm.as2.AS2ServerVersion;
-import de.mendelson.comm.as2.client.rmi.GenericClient;
-import de.mendelson.comm.as2.clientserver.ErrorObject;
-import de.mendelson.comm.as2.clientserver.serialize.CommandObjectServerInfo;
-import java.io.*;
+import de.mendelson.comm.as2.clientserver.message.ServerInfoRequest;
+import de.mendelson.comm.as2.clientserver.message.ServerInfoResponse;
+import de.mendelson.comm.as2.preferences.PreferencesAS2;
+import de.mendelson.util.clientserver.AnonymousTextClient;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Map;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public class ServerState extends HttpServlet {
 
-    /**Format the date display*/
+    /**
+     * Format the date display
+     */
     private DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
-
 
     public ServerState() {
     }
 
-    /**A GET request should be rejected*/
+    /**
+     * A GET request should be rejected
+     */
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         Map map = req.getParameterMap();
         String output = "html";
-        if( map.containsKey("output")){
-            output = ((String[])map.get( "output"))[0];
-            if( output == null ){
+        if (map.containsKey("output")) {
+            output = ((String[]) map.get("output"))[0];
+            if (output == null) {
                 output = "html";
             }
         }
         PrintWriter out = res.getWriter();
-        if( output.equalsIgnoreCase("html")){
+        if (output.equalsIgnoreCase("html")) {
             res.setContentType("text/html");
-            out.println( this.getOutputHTML());
-        }else{
+            out.println(this.getOutputHTML());
+        } else {
             res.setContentType("text/html");
-            out.println( "<html>Unknown output type, please use one of 'html'</html>");
+            out.println("<html>Unknown output type, please use one of 'html'</html>");
         }
     }
 
-    private String getOutputHTML(){
+    private String getOutputHTML() {
         StringBuilder builder = new StringBuilder();
         builder.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">");
         builder.append("<html>");
@@ -62,46 +69,62 @@ public class ServerState extends HttpServlet {
         builder.append("        <META NAME=\"description\" CONTENT=\"mendelson-e-commerce GmbH: Your EAI partner\">");
         builder.append("        <META NAME=\"copyright\" CONTENT=\"mendelson-e-commerce GmbH\">");
         builder.append("        <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
-        builder.append("        <title>" + AS2ServerVersion.getProductName() + "</title>");
+        builder.append("        <title>").append(AS2ServerVersion.getProductName()).append("</title>");
         builder.append("        <link rel=\"shortcut icon\" href=\"images/mendelson_favicon.png\" type=\"image/x-icon\" />");
         builder.append("    </head>");
         builder.append("    <body>");
-        boolean processingUnitUp = false;        
-        GenericClient client = new GenericClient();
-        CommandObjectServerInfo commandObject = new CommandObjectServerInfo();
-        ErrorObject errorObject = client.send(commandObject);
-        if (errorObject.noErrorsAndWarnings()) {
-            commandObject = (CommandObjectServerInfo) client.getCommandObject();
-            long startTime = new Long(commandObject.getProperties().getProperty(CommandObjectServerInfo.SERVER_START_TIME)).longValue();
-            builder.append("The AS2 processing unit " + commandObject.getProperties().getProperty(CommandObjectServerInfo.SERVER_PRODUCT_NAME) + " " + commandObject.getProperties().getProperty(CommandObjectServerInfo.SERVER_VERSION) + " " + commandObject.getProperties().getProperty(CommandObjectServerInfo.SERVER_BUILD) + " is up and running since " + format.format(startTime) + ".");
+        boolean processingUnitUp = false;
+        AnonymousTextClient client = null;
+        try {
+            client = new AnonymousTextClient();
+            PreferencesAS2 preferences = new PreferencesAS2();
+            client.connect("localhost", preferences.getInt(PreferencesAS2.CLIENTSERVER_COMM_PORT), 30000);
+            ServerInfoResponse response = (ServerInfoResponse) client.sendSync(new ServerInfoRequest(), 30000);
+            long startTime = new Long(response.getProperties().getProperty(ServerInfoResponse.SERVER_START_TIME)).longValue();
+            builder.append("The AS2 processing unit "
+                    + response.getProperties().getProperty(ServerInfoResponse.SERVER_PRODUCT_NAME) + " "
+                    + response.getProperties().getProperty(ServerInfoResponse.SERVER_VERSION) + " "
+                    + response.getProperties().getProperty(ServerInfoResponse.SERVER_BUILD) + " is up and running since "
+                    + format.format(startTime) + ".");
             processingUnitUp = true;
-        } else {
+        } catch (Exception e) {
             builder.append("Error connecting to AS2 processing unit: ");
-            ArrayList log = client.getLog();
-            for (int i = 0; i < log.size(); i++) {
-                if (log.get(i) != null) {
-                    builder.append(log.get(i));
-                }
+            builder.append(e.getMessage());
+        } finally {
+            if (client != null && client.isConnected()) {
+                client.disconnect();
             }
         }
         builder.append("<br><br>");
         if (processingUnitUp) {
             builder.append("System status is fine.");
         } else {
-            builder.append("Errors encounted.");
+            builder.append("Errors encountered.");
         }
+        builder.append("</body>");
         builder.append("</html>");
-        return( builder.toString());
+        return (builder.toString());
     }
 
-
-    /**POST by the HTTP client: receive the message and work on it*/
+    /**
+     * POST by the HTTP client: receive the message and work on it
+     */
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        //simulate HTTP state for test purpose
+        //HTTP 400
+        //response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        //HTTP 500
+        //response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        //HTTP 503
+        //response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);   
+        //HTTP 502
+        //response.setStatus(HttpServletResponse.SC_BAD_GATEWAY);   
         this.doGet(request, response);
     }//end of doPost
 
-    /** Returns a short description of the servlet.
+    /**
+     * Returns a short description of the servlet.
      */
     @Override
     public String getServletInfo() {

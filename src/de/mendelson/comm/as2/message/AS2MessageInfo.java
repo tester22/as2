@@ -1,7 +1,8 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/message/AS2MessageInfo.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/AS2MessageInfo.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
 import de.mendelson.comm.as2.AS2ServerVersion;
+import de.mendelson.util.security.BCCryptoHelper;
 import java.util.Date;
 import java.util.Properties;
 
@@ -14,6 +15,7 @@ import java.util.Properties;
  */
 /**
  * Stores all information about a as2 message
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
@@ -24,57 +26,84 @@ public class AS2MessageInfo implements AS2Info {
     public static final int DIRECTION_OUT = 2;
     private String senderId;
     private String receiverId;
-    /**Date of this message*/
+    /**
+     * Date of this message
+     */
     private Date initDate = new Date();
     private String messageId;
     private String senderEMail;
-    /**Stores the sender host for a message
+    /**
+     * Stores the sender host for a message
      */
     private String senderHost = null;
-    /**Raw data file*/
+    /**
+     * Raw data file
+     */
     private String rawFilename = null;
-    /**Raw data header file*/
+    /**
+     * Raw data header file
+     */
     private String headerFilename = null;
-    /**Decrypted file*/
+    /**
+     * Decrypted file
+     */
     private String rawFilenameDecrypted = null;
-    /**indicates if the message is signed. Before it has been analyzed it is not clear
-     *if the message/MDN contains a signature or not
+    /**
+     * indicates if the message is signed. Before it has been analyzed it is not
+     * clear if the message/MDN contains a signature or not
      */
     private int signType = AS2Message.SIGNATURE_UNKNOWN;
-    /**indicates if the message is encrypted*/
+    /**
+     * indicates if the message is encrypted
+     */
     private int encryptionType = AS2Message.ENCRYPTION_UNKNOWN;
-    /**Stores the compression type of this entry*/
+    /**
+     * Stores the compression type of this entry
+     */
     private int compressionType = AS2Message.COMPRESSION_NONE;
-    /**This is the product name submitted in the user agent header*/
+    /**
+     * This is the product name submitted in the user agent header
+     */
     private String useragent = null;
     private int direction = DIRECTION_UNKNOWN;
     private String receivedContentMIC;
-    /**Possible are
-     * AS2Message.STATE_STATE_FINISHED
-     *AS2Message.STATE_STATE_PENDING
-     *AS2Message.STATE_STATE_STOPPED
+    /**
+     * Possible are AS2Message.STATE_STATE_FINISHED
+     * AS2Message.STATE_STATE_PENDING AS2Message.STATE_STATE_STOPPED
      */
     private int state = AS2Message.STATE_PENDING;
-    /**stores if the MDN to this message should be sync or async*/
+    /**
+     * stores if the MDN to this message should be sync or async
+     */
     private boolean requestsSyncMDN = true;
     private String asyncMDNURL = null;
     private String subject;
-    /**There are several message types that are tansported by the AS2 protocol. These are
-     * the AS2 message (EDI data) and the Certificate Exchange Message (CEM, contains certificates).
+    /**
+     * There are several message types that are tansported by the AS2 protocol.
+     * These are the AS2 message (EDI data) and the Certificate Exchange Message
+     * (CEM, contains certificates).
      */
     private int messageType = AS2Message.MESSAGETYPE_AS2;
-    
     private int resendCounter = 0;
-    
-    /**These are the disposition notification options
+    /**
+     * Allows to track this transmission later using the RPC XML interface
      */
-    private DispositionNotificationOptions dispositionNotificationOptions = new DispositionNotificationOptions();
+    private String userdefinedId = null;
+
+    /**
+     * These are the disposition notification options
+     */
+    private DispositionNotificationOptions dispositionNotificationOptions;
 
     public AS2MessageInfo() {
         this.useragent = AS2ServerVersion.getUserAgent();
+        this.dispositionNotificationOptions = new DispositionNotificationOptions(
+                new String[]{BCCryptoHelper.ALGORITHM_SHA1});
     }
 
-    /**Initializes the message info from the passed MDN/AS2 message request headers*/
+    /**
+     * Initializes the message info from the passed MDN/AS2 message request headers
+     */
     public void initializeByRequestHeader(Properties requestHeader) {
         if (requestHeader.containsKey("message-id")) {
             this.setMessageId(requestHeader.getProperty("message-id"));
@@ -95,30 +124,73 @@ public class AS2MessageInfo implements AS2Info {
         if (requestHeader.containsKey("from")) {
             this.setSenderEMail(requestHeader.getProperty("from"));
         }
-        if( requestHeader.containsKey("subject")){
+        if (requestHeader.containsKey("subject")) {
             this.setSubject(requestHeader.getProperty("subject"));
         }
     }
 
-    /**Returns the senderId, unescaped*/
+    /**
+     * Serializes this partner to XML
+     *
+     * @param level level in the XML hierarchie for the xml beautifying
+     */
+    public String toXML(int level) {
+        String offset = "";
+        for (int i = 0; i < level; i++) {
+            offset += "\t";
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append(offset).append("<messageinfo>\n");        
+        builder.append(offset).append("\t<id>").append(this.toCDATA(this.messageId)).append("</id>\n");
+        builder.append(offset).append("\t<userdefinedid>");
+        if (this.userdefinedId != null) {
+            builder.append(this.toCDATA(this.userdefinedId));
+        }
+        builder.append("</userdefinedid>\n");
+        builder.append(offset).append("\t<senderid>").append(this.senderId).append("</senderid>\n");
+        builder.append(offset).append("\t<receiverid>").append(this.receiverId).append("</receiverid>\n");
+        builder.append(offset).append("\t<signtype>").append(this.signType).append("</signtype>\n");
+        builder.append(offset).append("\t<encryptiontype>").append(this.encryptionType).append("</encryptiontype>\n");
+        builder.append(offset).append("\t<compressiontype>").append(this.compressionType).append("</compressiontype>\n");
+        builder.append(offset).append("\t<state>").append(this.state).append("</state>\n");
+        builder.append(offset).append("</messageinfo>\n");
+        return (builder.toString());
+    }
+
+    /**
+     * Adds a cdata indicator to xml data
+     */
+    private String toCDATA(String data) {
+        return ("<![CDATA[" + data + "]]>");
+    }
+
+    /**
+     * Returns the senderId, unescaped
+     */
     @Override
     public String getSenderId() {
         return senderId;
     }
 
-    /**sets the sender id, unescaped*/
+    /**
+     * sets the sender id, unescaped
+     */
     @Override
     public void setSenderId(String senderId) {
         this.senderId = senderId;
     }
 
-    /**sets the receiver id, unescaped*/
+    /**
+     * sets the receiver id, unescaped
+     */
     @Override
     public String getReceiverId() {
         return receiverId;
     }
 
-    /**sets the sender id, unescaped*/
+    /**
+     * sets the sender id, unescaped
+     */
     @Override
     public void setReceiverId(String receiverId) {
         this.receiverId = receiverId;
@@ -139,7 +211,8 @@ public class AS2MessageInfo implements AS2Info {
         return messageId;
     }
 
-    /**Removes braces if they exist
+    /**
+     * Removes braces if they exist
      */
     @Override
     public void setMessageId(String messageId) {
@@ -195,6 +268,17 @@ public class AS2MessageInfo implements AS2Info {
     @Override
     public void setSignType(int signType) {
         this.signType = signType;
+        if (signType == AS2Message.SIGNATURE_MD5) {
+            this.dispositionNotificationOptions.setSignaturHashFunction(BCCryptoHelper.ALGORITHM_MD5);
+        } else if (signType == AS2Message.SIGNATURE_SHA1) {
+            this.dispositionNotificationOptions.setSignaturHashFunction(BCCryptoHelper.ALGORITHM_SHA1);
+        } else if (signType == AS2Message.SIGNATURE_SHA256) {
+            this.dispositionNotificationOptions.setSignaturHashFunction(BCCryptoHelper.ALGORITHM_SHA256);
+        } else if (signType == AS2Message.SIGNATURE_SHA384) {
+            this.dispositionNotificationOptions.setSignaturHashFunction(BCCryptoHelper.ALGORITHM_SHA384);
+        } else if (signType == AS2Message.SIGNATURE_SHA512) {
+            this.dispositionNotificationOptions.setSignaturHashFunction(BCCryptoHelper.ALGORITHM_SHA512);
+        }
     }
 
     @Override
@@ -267,7 +351,8 @@ public class AS2MessageInfo implements AS2Info {
         this.senderHost = senderHost;
     }
 
-    /**Returns the content of this object for debug purpose
+    /**
+     * Returns the content of this object for debug purpose
      */
     @Override
     public String getDebugDisplay() {
@@ -278,7 +363,7 @@ public class AS2MessageInfo implements AS2Info {
         buffer.append("\n");
         buffer.append("encryptionType=\t\t").append(this.encryptionType);
         buffer.append("\n");
-        StringBuilder append = buffer.append("headerFilename=\t\t").append(this.headerFilename);
+        buffer.append("headerFilename=\t\t").append(this.headerFilename);
         buffer.append("\n");
         buffer.append("messageDate=\t\t").append(this.initDate);
         buffer.append("\n");
@@ -340,15 +425,19 @@ public class AS2MessageInfo implements AS2Info {
         this.compressionType = compressionType;
     }
 
-    /**There are several message types that are tansported by the AS2 protocol. These are
-     * the AS2 message (EDI data) and the Certificate Exchange Message (CEM, contains certificates).
+    /**
+     * There are several message types that are tansported by the AS2 protocol.
+     * These are the AS2 message (EDI data) and the Certificate Exchange Message
+     * (CEM, contains certificates).
      */
     public int getMessageType() {
         return messageType;
     }
 
-    /**There are several message types that are tansported by the AS2 protocol. These are
-     * the AS2 message (EDI data) and the Certificate Exchange Message (CEM, contains certificates).
+    /**
+     * There are several message types that are tansported by the AS2 protocol.
+     * These are the AS2 message (EDI data) and the Certificate Exchange Message
+     * (CEM, contains certificates).
      */
     public void setMessageType(int messageType) {
         this.messageType = messageType;
@@ -358,9 +447,11 @@ public class AS2MessageInfo implements AS2Info {
     public boolean isMDN() {
         return (false);
     }
-    
-    /**Overwrite the equal method of object
-     *@param anObject object ot compare
+
+    /**
+     * Overwrite the equal method of object
+     *
+     * @param anObject object ot compare
      */
     @Override
     public boolean equals(Object anObject) {
@@ -369,7 +460,7 @@ public class AS2MessageInfo implements AS2Info {
         }
         if (anObject != null && anObject instanceof AS2MessageInfo) {
             AS2MessageInfo info = (AS2MessageInfo) anObject;
-            return (info != null && this.messageId != null && this.messageId.equals( info.messageId));
+            return (info != null && this.messageId != null && this.messageId.equals(info.messageId));
         }
         return (false);
     }
@@ -394,5 +485,19 @@ public class AS2MessageInfo implements AS2Info {
     public void setResendCounter(int resendCounter) {
         this.resendCounter = resendCounter;
     }
-    
+
+    /**
+     * @return the userdefinedId
+     */
+    public String getUserdefinedId() {
+        return userdefinedId;
+    }
+
+    /**
+     * @param userdefinedId the userdefinedId to set
+     */
+    public void setUserdefinedId(String userdefinedId) {
+        this.userdefinedId = userdefinedId;
+    }
+
 }

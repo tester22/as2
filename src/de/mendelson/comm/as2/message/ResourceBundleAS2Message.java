@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/message/ResourceBundleAS2Message.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/ResourceBundleAS2Message.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
 import de.mendelson.util.MecResourceBundle;
@@ -17,6 +17,7 @@ import de.mendelson.util.MecResourceBundle;
  */
 public class ResourceBundleAS2Message extends MecResourceBundle {
 
+    @Override
     public Object[][] getContents() {
         return contents;
     }
@@ -26,6 +27,10 @@ public class ResourceBundleAS2Message extends MecResourceBundle {
         {"signature." + AS2Message.SIGNATURE_NONE, "No signature"},
         {"signature." + AS2Message.SIGNATURE_MD5, "MD5"},
         {"signature." + AS2Message.SIGNATURE_SHA1, "SHA-1"},
+        {"signature." + AS2Message.SIGNATURE_SHA224, "SHA-224" },
+        {"signature." + AS2Message.SIGNATURE_SHA256, "SHA-256" },
+        {"signature." + AS2Message.SIGNATURE_SHA384, "SHA-384" },
+        {"signature." + AS2Message.SIGNATURE_SHA512, "SHA-512" },
         {"encryption." + AS2Message.ENCRYPTION_UNKNOWN, "Unknown"},
         {"encryption." + AS2Message.ENCRYPTION_NONE, "No encryption"},
         {"encryption." + AS2Message.ENCRYPTION_3DES, "3DES"},

@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/util/security/cert/TableModelCertificates.java,v 1.1 2012/04/18 14:10:47 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/cert/TableModelCertificates.java,v 1.1 2015/01/06 11:07:58 heller Exp $
 package de.mendelson.util.security.cert;
 
 import java.text.DateFormat;
@@ -19,11 +19,13 @@ import de.mendelson.util.MecResourceBundle;
 import de.mendelson.util.security.DNUtil;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
  * table model to display a configuration grid
- * @author  S.Heller
+ *
+ * @author S.Heller
  * @version $Revision: 1.1 $
  */
 public class TableModelCertificates extends AbstractTableModel {
@@ -51,7 +53,8 @@ public class TableModelCertificates extends AbstractTableModel {
     private DateFormat format = SimpleDateFormat.getDateInstance(DateFormat.SHORT);
     private final List<KeystoreCertificate> data = Collections.synchronizedList(new ArrayList<KeystoreCertificate>());
 
-    /** Creates new table model
+    /**
+     * Creates new table model
      */
     public TableModelCertificates() {
         //load resource bundle
@@ -63,8 +66,10 @@ public class TableModelCertificates extends AbstractTableModel {
         }
     }
 
-    /**Passes data to the model and fires a table data update
-     *@param list new data to display
+    /**
+     * Passes data to the model and fires a table data update
+     *
+     * @param list new data to display
      */
     public void setNewData(List<KeystoreCertificate> data) {
         synchronized (this.data) {
@@ -74,7 +79,9 @@ public class TableModelCertificates extends AbstractTableModel {
         ((AbstractTableModel) this).fireTableDataChanged();
     }
 
-    /**returns the number of rows in the table*/
+    /**
+     * returns the number of rows in the table
+     */
     @Override
     public int getRowCount() {
         synchronized (this.data) {
@@ -82,14 +89,18 @@ public class TableModelCertificates extends AbstractTableModel {
         }
     }
 
-    /**returns the number of columns in the table. should be const for a table*/
+    /**
+     * returns the number of columns in the table. should be const for a table
+     */
     @Override
     public int getColumnCount() {
         return (7);
     }
 
-    /**Returns the name of every column
-     *@param col Column to get the header name of
+    /**
+     * Returns the name of every column
+     *
+     * @param col Column to get the header name of
      */
     @Override
     public String getColumnName(int col) {
@@ -118,18 +129,19 @@ public class TableModelCertificates extends AbstractTableModel {
         return ("");
     }
 
-    public ImageIcon getIconForCertificate(KeystoreCertificate certificate){
+    public ImageIcon getIconForCertificate(KeystoreCertificate certificate) {
         if (certificate.getIsKeyPair()) {
-                return (ICON_KEY);
-            }
-            if (certificate.isRootCertificate()) {
-                return (ICON_CERTIFICATE_ROOT);
-            }
-            return (ICON_CERTIFICATE);
+            return (ICON_KEY);
+        }
+        if (certificate.isRootCertificate()) {
+            return (ICON_CERTIFICATE_ROOT);
+        }
+        return (ICON_CERTIFICATE);
     }
 
-
-    /**Returns the grid value*/
+    /**
+     * Returns the grid value
+     */
     @Override
     public Object getValueAt(int row, int col) {
         KeystoreCertificate certificate = null;
@@ -137,7 +149,7 @@ public class TableModelCertificates extends AbstractTableModel {
             certificate = this.data.get(row);
         }
         if (col == 0) {
-            return( this.getIconForCertificate(certificate));
+            return (this.getIconForCertificate(certificate));
         }
         if (col == 1) {
             try {
@@ -151,7 +163,7 @@ public class TableModelCertificates extends AbstractTableModel {
             return (certificate.getAlias());
         }
         if (col == 3) {
-            return (this.format.format(certificate.getNotAfter()));
+            return (certificate.getNotAfter());
         }
         if (col == 4) {
             return (String.valueOf(certificate.getPublicKeyLength()));
@@ -165,14 +177,17 @@ public class TableModelCertificates extends AbstractTableModel {
         return ("");
     }
 
-    /**Swing GUI checks which cols are editable.
+    /**
+     * Swing GUI checks which cols are editable.
      */
     @Override
     public boolean isCellEditable(int row, int col) {
         return (false);
     }
 
-    /**Set how to display the grid elements
+    /**
+     * Set how to display the grid elements
+     *
      * @param col requested column
      */
     @Override
@@ -181,17 +196,26 @@ public class TableModelCertificates extends AbstractTableModel {
                     ImageIcon.class,
                     ImageIcon.class,
                     String.class,
-                    String.class,
+                    Date.class,
                     String.class,
                     String.class,
                     String.class,}[col]);
     }
 
-    /**Returns the certificate at the passed row
+    /**
+     * Returns the certificate at the passed row
      */
     public KeystoreCertificate getParameter(int row) {
         synchronized (this.data) {
             return (this.data.get(row));
+        }
+    }
+
+    public KeystoreCertificate[] getCertificatesAsArray() {
+        synchronized (this.data) {
+            KeystoreCertificate[] certArray = new KeystoreCertificate[this.data.size()];
+            certArray = this.data.toArray(certArray);
+            return (certArray);
         }
     }
 }

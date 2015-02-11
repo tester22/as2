@@ -1,20 +1,17 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/message/MDNAccessDB.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/MDNAccessDB.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
 import de.mendelson.comm.as2.notification.Notification;
 import de.mendelson.comm.as2.server.AS2Server;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
-import java.util.logging.Level;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 
 /*
@@ -26,39 +23,48 @@ import java.util.logging.Logger;
  */
 /**
  * Access MDN
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
 public class MDNAccessDB {
 
-    /**Logger to log inforamtion to*/
+    /**
+     * Logger to log inforamtion to
+     */
     private Logger logger = Logger.getLogger(AS2Server.SERVER_LOGGER_NAME);
-    /**Connection to the database*/
+    /**
+     * Connection to the database
+     */
     private Connection runtimeConnection = null;
     private Connection configConnection = null;
+    private Calendar calendarUTC = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 
-    /** Creates new message I/O log and connects to localhost
-     *@param host host to connect to
+    /**
+     * Creates new message I/O log and connects to localhost
+     *
+     * @param host host to connect to
      */
     public MDNAccessDB(Connection configConnection, Connection runtimeConnection) {
         this.runtimeConnection = runtimeConnection;
         this.configConnection = configConnection;
     }
 
-    /**Returns all overview rows from the datase*/
+    /**
+     * Returns all overview rows from the datase
+     */
     public List<AS2MDNInfo> getMDN(String relatedMessageId) {
         List<AS2MDNInfo> messageList = new ArrayList<AS2MDNInfo>();
         ResultSet result = null;
         PreparedStatement preparedStatement = null;
         try {
-            preparedStatement = this.runtimeConnection.prepareStatement("SELECT * FROM mdn WHERE relatedmessageid=? ORDER BY initdate ASC");
-            preparedStatement.setEscapeProcessing(true);
+            preparedStatement = this.runtimeConnection.prepareStatement("SELECT * FROM mdn WHERE relatedmessageid=? ORDER BY initdateutc ASC");
             preparedStatement.setString(1, relatedMessageId);
             result = preparedStatement.executeQuery();
             while (result.next()) {
                 AS2MDNInfo info = new AS2MDNInfo();
                 info.setMessageId(result.getString("messageid"));
-                info.setInitDate(result.getTimestamp("initdate"));
+                info.setInitDate(result.getTimestamp("initdateutc", this.calendarUTC));
                 info.setDirection(result.getInt("direction"));
                 info.setRelatedMessageId(result.getString("relatedmessageid"));
                 info.setRawFilename(result.getString("rawfilename"));
@@ -71,7 +77,7 @@ public class MDNAccessDB {
                 info.setUserAgent(result.getString("useragent"));
                 Object mdnTextObj = result.getObject("mdntext");
                 if (!result.wasNull() && mdnTextObj instanceof String) {
-                    info.setRemoteMDNText((String)mdnTextObj);
+                    info.setRemoteMDNText((String) mdnTextObj);
                 } else {
                     info.setRemoteMDNText(null);
                 }
@@ -100,7 +106,8 @@ public class MDNAccessDB {
         }
     }
 
-    /**Adds a MDN to the database
+    /**
+     * Adds a MDN to the database
      */
     public void initializeOrUpdateMDN(AS2MDNInfo info) {
         String messageId = info.getRelatedMessageId();
@@ -117,7 +124,8 @@ public class MDNAccessDB {
         }
     }
 
-    /**Adds a MDN to the datasbase
+    /**
+     * Adds a MDN to the datasbase
      */
     private void updateMDN(AS2MDNInfo info) {
         PreparedStatement statement = null;
@@ -125,7 +133,6 @@ public class MDNAccessDB {
             statement = this.runtimeConnection.prepareStatement(
                     "UPDATE mdn SET rawfilename=?,receiverid=?,senderid=?,signature=?,state=?,headerfilename=?,"
                     + "mdntext=? WHERE messageid=?");
-            statement.setEscapeProcessing(true);
             statement.setString(1, info.getRawFilename());
             statement.setString(2, info.getReceiverId());
             statement.setString(3, info.getSenderId());
@@ -154,8 +161,9 @@ public class MDNAccessDB {
         }
     }
 
-    /**Checks if the MDN id does already exist in the database. In this case an error occured -
-     * a MDNs message id has to be unique
+    /**
+     * Checks if the MDN id does already exist in the database. In this case an
+     * error occured - a MDNs message id has to be unique
      */
     private void checkForUniqueMDNMessageId(AS2MDNInfo info) {
         PreparedStatement statement = null;
@@ -198,19 +206,19 @@ public class MDNAccessDB {
         }
     }
 
-    /**Adds a MDN to the datasbase
+    /**
+     * Adds a MDN to the datasbase
      */
     private void initializeMDN(AS2MDNInfo info) {
         this.checkForUniqueMDNMessageId(info);
         PreparedStatement statement = null;
         try {
             statement = this.runtimeConnection.prepareStatement(
-                    "INSERT INTO mdn(messageid,relatedmessageid,initdate,direction,rawfilename,receiverid,senderid,signature,state,headerfilename,senderhost,useragent,mdntext)"
+                    "INSERT INTO mdn(messageid,relatedmessageid,initdateutc,direction,rawfilename,receiverid,senderid,signature,state,headerfilename,senderhost,useragent,mdntext)"
                     + "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
-            statement.setEscapeProcessing(true);
             statement.setString(1, info.getMessageId());
             statement.setString(2, info.getRelatedMessageId());
-            statement.setTimestamp(3, new java.sql.Timestamp(info.getInitDate().getTime()));
+            statement.setTimestamp(3, new java.sql.Timestamp(info.getInitDate().getTime()), this.calendarUTC);
             statement.setInt(4, info.getDirection());
             statement.setString(5, info.getRawFilename());
             statement.setString(6, info.getReceiverId());
@@ -241,8 +249,10 @@ public class MDNAccessDB {
         }
     }
 
-    /**Returns all file names of files that could be deleted for a passed message
-     *info*/
+    /**
+     * Returns all file names of files that could be deleted for a passed
+     * message info
+     */
     public List<String> getRawFilenamesToDelete(String messageId) {
         List<String> list = new ArrayList<String>();
         ResultSet result = null;
@@ -250,7 +260,6 @@ public class MDNAccessDB {
         try {
             String query = "SELECT * FROM mdn WHERE relatedmessageid=?";
             statement = this.runtimeConnection.prepareStatement(query);
-            statement.setEscapeProcessing(true);
             statement.setString(1, messageId);
             result = statement.executeQuery();
             while (result.next()) {

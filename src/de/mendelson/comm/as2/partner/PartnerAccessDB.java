@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/partner/PartnerAccessDB.java,v 1.1 2012/04/18 14:10:32 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/PartnerAccessDB.java,v 1.1 2015/01/06 11:07:43 heller Exp $
 package de.mendelson.comm.as2.partner;
 
 import de.mendelson.comm.as2.cert.CertificateAccessDB;
@@ -11,7 +11,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -57,7 +56,7 @@ public class PartnerAccessDB {
     /**
      * Requires a query to select partners from the DB
      */
-    private Partner[] getPartnerByQuery(String query) {
+    private List<Partner> getPartnerByQuery(String query) {
         List<Partner> partnerList = new ArrayList<Partner>();
         Statement statement = null;
         ResultSet result = null;
@@ -105,6 +104,28 @@ public class PartnerAccessDB {
                 } else {
                     partner.setComment(null);
                 }
+                Object contactObj = result.getObject("partnercontact");
+                if (!result.wasNull()) {
+                    if (contactObj instanceof String) {
+                        partner.setContactAS2((String) contactObj);
+                    } else if (contactObj instanceof byte[]) {
+                        //compatibility issue - db update
+                        partner.setContactAS2(new String((byte[]) contactObj));
+                    }
+                } else {
+                    partner.setComment(null);
+                }
+                Object addressObj = result.getObject("partneraddress");
+                if (!result.wasNull()) {
+                    if (addressObj instanceof String) {
+                        partner.setContactCompany((String) addressObj);
+                    } else if (addressObj instanceof byte[]) {
+                        //compatibility issue - db update
+                        partner.setContactCompany(new String((byte[]) addressObj));
+                    }
+                } else {
+                    partner.setComment(null);
+                }
                 partner.setNotifyReceive(result.getInt("notifyreceive"));
                 partner.setNotifySend(result.getInt("notifysend"));
                 partner.setNotifySendReceive(result.getInt("notifysendreceive"));
@@ -123,9 +144,7 @@ public class PartnerAccessDB {
                 this.loadHttpHeader(partner);
                 partnerList.add(partner);
             }
-            Partner[] partnerArray = new Partner[partnerList.size()];
-            partnerList.toArray(partnerArray);
-            return (partnerArray);
+            return (partnerList);
         } catch (Exception e) {
             e.printStackTrace();
             this.logger.severe("PartnerAccessDB.getPartnerByQuery: " + e.getMessage());
@@ -152,42 +171,41 @@ public class PartnerAccessDB {
     /**
      * Returns all partner stored in the DB, even the local station
      */
-    public Partner[] getPartner() {
+    public List<Partner> getPartner() {
         return (this.getPartnerByQuery("SELECT * FROM partner"));
     }
 
     /**
      * Returns all local stations stored in the DB
      */
-    public Partner[] getLocalStations() {
+    public List<Partner> getLocalStations() {
         return (this.getPartnerByQuery("SELECT * FROM partner WHERE islocal=1"));
     }
 
     /**
      * Returns all partner stored in the DB, even the local station
      */
-    public Partner[] getNonLocalStations() {
+    public List<Partner> getNonLocalStations() {
         return (this.getPartnerByQuery("SELECT * FROM partner WHERE islocal<>1"));
     }
 
     /**
      * receives a partner configuration and updates the database with them
      */
-    public void updatePartner(Partner[] newPartner) {
+    public void modifyPartner(List<Partner> newPartner) {
         //first delete all partners that are in the DB but not in the new list
-        Partner[] existingPartner = this.getPartner();
-        List<Partner> newPartnerList = new ArrayList(Arrays.asList(newPartner));
-        for (int i = 0; i < existingPartner.length; i++) {
-            if (!newPartnerList.contains(existingPartner[i])) {
-                this.deletePartner(existingPartner[i]);
+        List<Partner> existingPartner = this.getPartner();
+        for (int i = 0; i < existingPartner.size(); i++) {
+            if (!newPartner.contains(existingPartner.get(i))) {
+                this.deletePartner(existingPartner.get(i));
             }
         }
         //insert all NEW partners and update the existing
-        for (int i = 0; i < newPartner.length; i++) {
-            if (newPartner[i].getDBId() < 0) {
-                this.insertPartner(newPartner[i]);
+        for (int i = 0; i < newPartner.size(); i++) {
+            if (newPartner.get(i).getDBId() < 0) {
+                this.insertPartner(newPartner.get(i));
             } else {
-                this.updatePartner(newPartner[i]);
+                this.updatePartner(newPartner.get(i));
             }
         }
     }
@@ -202,7 +220,7 @@ public class PartnerAccessDB {
         PreparedStatement statement = null;
         try {
             statement = this.configConnection.prepareStatement(
-                    "UPDATE partner SET as2ident=?,name=?,islocal=?,sign=?,encrypt=?,email=?,url=?,mdnurl=?,subject=?,contenttype=?,syncmdn=?,pollignorelist=?,pollinterval=?,compression=?,signedmdn=?,commandonreceipt=?,usecommandonreceipt=?,usehttpauth=?,httpauthuser=?,httpauthpass=?,usehttpauthasyncmdn=?,httpauthuserasnymdn=?,httpauthpassasnymdn=?,keeporiginalfilenameonreceipt=?,partnercomment=?,notifysend=?,notifyreceive=?,notifysendreceive=?,notifysendenabled=?,notifyreceiveenabled=?,notifysendreceiveenabled=?,commandonsenderror=?,usecommandonsenderror=?,commandonsendsuccess=?,usecommandonsendsuccess=?,contenttransferencoding=?,httpversion=?,maxpollfiles=? WHERE id=?");
+                    "UPDATE partner SET as2ident=?,name=?,islocal=?,sign=?,encrypt=?,email=?,url=?,mdnurl=?,subject=?,contenttype=?,syncmdn=?,pollignorelist=?,pollinterval=?,compression=?,signedmdn=?,commandonreceipt=?,usecommandonreceipt=?,usehttpauth=?,httpauthuser=?,httpauthpass=?,usehttpauthasyncmdn=?,httpauthuserasnymdn=?,httpauthpassasnymdn=?,keeporiginalfilenameonreceipt=?,partnercomment=?,notifysend=?,notifyreceive=?,notifysendreceive=?,notifysendenabled=?,notifyreceiveenabled=?,notifysendreceiveenabled=?,commandonsenderror=?,usecommandonsenderror=?,commandonsendsuccess=?,usecommandonsendsuccess=?,contenttransferencoding=?,httpversion=?,maxpollfiles=?,partnercontact=?,partneraddress=? WHERE id=?");
             statement.setEscapeProcessing(true);
             statement.setString(1, partner.getAS2Identification());
             statement.setString(2, partner.getName());
@@ -246,8 +264,18 @@ public class PartnerAccessDB {
             statement.setInt(36, partner.getContentTransferEncoding());
             statement.setString(37, partner.getHttpProtocolVersion());
             statement.setInt(38, partner.getMaxPollFiles());
+            if (partner.getContactAS2() == null) {
+                statement.setNull(39, Types.JAVA_OBJECT);
+            } else {
+                statement.setObject(39, partner.getContactAS2());
+            }
+            if (partner.getContactCompany() == null) {
+                statement.setNull(40, Types.JAVA_OBJECT);
+            } else {
+                statement.setObject(40, partner.getContactCompany());
+            }
             //where statement
-            statement.setInt(39, partner.getDBId());
+            statement.setInt(41, partner.getDBId());
             statement.execute();
         } catch (SQLException e) {
             this.logger.severe("updatePartner: " + e.getMessage());
@@ -297,11 +325,11 @@ public class PartnerAccessDB {
     /**
      * Inserts a new partner into the database
      */
-    public void insertPartner(Partner partner) {
+    public Partner insertPartner(Partner partner) {
         PreparedStatement statement = null;
         try {
             statement = this.configConnection.prepareStatement(
-                    "INSERT INTO partner(as2ident,name,islocal,sign,encrypt,email,url,mdnurl,subject,contenttype,syncmdn,pollignorelist,pollinterval,compression,signedmdn,commandonreceipt,usecommandonreceipt,usehttpauth,httpauthuser,httpauthpass,usehttpauthasyncmdn,httpauthuserasnymdn,httpauthpassasnymdn,keeporiginalfilenameonreceipt,partnercomment,notifysend,notifyreceive,notifysendreceive,notifysendenabled,notifyreceiveenabled,notifysendreceiveenabled,commandonsenderror,usecommandonsenderror,commandonsendsuccess,usecommandonsendsuccess,contenttransferencoding,httpversion,maxpollfiles)VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                    "INSERT INTO partner(as2ident,name,islocal,sign,encrypt,email,url,mdnurl,subject,contenttype,syncmdn,pollignorelist,pollinterval,compression,signedmdn,commandonreceipt,usecommandonreceipt,usehttpauth,httpauthuser,httpauthpass,usehttpauthasyncmdn,httpauthuserasnymdn,httpauthpassasnymdn,keeporiginalfilenameonreceipt,partnercomment,notifysend,notifyreceive,notifysendreceive,notifysendenabled,notifyreceiveenabled,notifysendreceiveenabled,commandonsenderror,usecommandonsenderror,commandonsendsuccess,usecommandonsendsuccess,contenttransferencoding,httpversion,maxpollfiles,partnercontact,partneraddress)VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             statement.setEscapeProcessing(true);
             statement.setString(1, partner.getAS2Identification());
             statement.setString(2, partner.getName());
@@ -345,6 +373,16 @@ public class PartnerAccessDB {
             statement.setInt(36, partner.getContentTransferEncoding());
             statement.setString(37, partner.getHttpProtocolVersion());
             statement.setInt(38, partner.getMaxPollFiles());
+            if (partner.getContactAS2() == null) {
+                statement.setNull(39, Types.JAVA_OBJECT);
+            } else {
+                statement.setObject(39, partner.getContactAS2());
+            }
+            if (partner.getContactCompany() == null) {
+                statement.setNull(40, Types.JAVA_OBJECT);
+            } else {
+                statement.setObject(40, partner.getContactCompany());
+            }
             statement.execute();
         } catch (SQLException e) {
             this.logger.severe("PartnerAccessDB.insertPartner: " + e.getMessage());
@@ -366,6 +404,7 @@ public class PartnerAccessDB {
             this.storeHttpHeader(partner);
             this.certificateAccess.storePartnerCertificateInformationList(partner);
         }
+        return (storedPartner);
     }
 
     /**
@@ -375,11 +414,11 @@ public class PartnerAccessDB {
      */
     public Partner getPartner(String as2ident) {
         String query = "SELECT * FROM partner WHERE as2ident='" + as2ident + "'";
-        Partner[] partner = this.getPartnerByQuery(query);
-        if (partner == null || partner.length == 0) {
+        List<Partner> partner = this.getPartnerByQuery(query);
+        if (partner == null || partner.isEmpty()) {
             return (null);
         }
-        return (partner[0]);
+        return (partner.get(0));
     }
 
     /**
@@ -389,11 +428,11 @@ public class PartnerAccessDB {
      */
     public Partner getPartner(int dbId) {
         String query = "SELECT * FROM partner WHERE id=" + dbId;
-        Partner[] partner = this.getPartnerByQuery(query);
-        if (partner == null || partner.length == 0) {
+        List<Partner> partner = this.getPartnerByQuery(query);
+        if (partner == null || partner.isEmpty()) {
             return (null);
         }
-        return (partner[0]);
+        return (partner.get(0));
     }
 
     /*

@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/partner/gui/ResourceBundlePartnerPanel_de.java,v 1.1 2012/04/18 14:10:32 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/gui/ResourceBundlePartnerPanel_de.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.partner.gui;
 import de.mendelson.util.MecResourceBundle;
 /*
@@ -35,13 +35,15 @@ public class ResourceBundlePartnerPanel_de extends MecResourceBundle{
         {"label.cryptalias.cert", "Partnerzertifikat (Verschlüsselung):" },
         {"label.signtype", "Digitale Signatur:" },
         {"label.encryptiontype", "Nachrichtenverschlüsselung:" },
-        {"label.email", "EMail Adresse:" },
+        {"label.email", "Mail Adresse:" },
         {"label.localstation", "Lokale Station" },       
         {"label.compression", "Ausgehende Nachrichten komprimieren (benötigt AS2 1.1 Gegenstelle)" }, 
         {"label.usecommandonreceipt", "Kommando nach Empfang:" },
         {"label.usecommandonsenderror", "Kommando nach Versand (fehlerhaft):"},
         {"label.usecommandonsendsuccess", "Kommando nach Versand (erfolgreich):"},
         {"label.keepfilenameonreceipt", "Original Dateiname beibehalten (Wenn der Sender diese Information zur Verfügung stellt)"},
+        {"label.address", "Adresse:" },
+        {"label.contact", "Kontakt:" },        
         {"tab.misc", "Allgemein" },
         {"tab.security", "Sicherheit" },
         {"tab.send", "Versand" },
@@ -71,7 +73,7 @@ public class ResourceBundlePartnerPanel_de extends MecResourceBundle{
         {"hint.filenamereplacement.receipt1", "Ersetzungen: $'{'filename}, $'{'subject}," },
         {"hint.filenamereplacement.receipt2", "$'{'sender}, $'{'receiver}, $'{'messageid}" },
         {"hint.replacement.send1", "Ersetzungen: $'{'filename}, $'{'fullstoragefilename}, $'{'log}, $'{'subject}," },        
-        {"hint.replacement.send2", "$'{'sender}, $'{'receiver}, $'{'messageid}, $'{'mdntext}." },
+        {"hint.replacement.send2", "$'{'sender}, $'{'receiver}, $'{'messageid}, $'{'mdntext}, $'{'userdefinedid}."},
         {"hint.subject.replacement", "$'{'filename} wird durch den Sendedateinamen ersetzt."},
         {"hint.keepfilenameonreceipt", "Empfangene Dateinamen müssen eindeutig sein, wenn diese Option eingeschaltet ist!"},
         {"label.url.hint", "Bitte setzen Sie vor die URL das Protokoll (\"http://\" oder \"https://\")."},

@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/message/ResourceBundleAS2MessageParser.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/ResourceBundleAS2MessageParser.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 import de.mendelson.util.MecResourceBundle;
 /*
@@ -51,6 +51,7 @@ public class ResourceBundleAS2MessageParser extends MecResourceBundle{
         {"contentmic.match", "{0}: The Message Integrity Code (MIC) matches the sent AS2 message." },
         {"contentmic.failure", "{0}: The Message Integrity Code (MIC) does not match the sent AS2 message (required: {1}, returned: {2})." },
         {"found.cem", "{0}: The message is a Certificate Exchange Message (CEM)." },
+        {"data.unable.to.process.content.transfer.encoding", "Data has arrived that could not be processed because it contains errors: The content transfer encoding \"{0}\" is unknown."},
     };
     
 }

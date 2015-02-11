@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/preferences/PreferencesPanelSystemMaintenance.java,v 1.1 2012/04/18 14:10:35 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/preferences/PreferencesPanelSystemMaintenance.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.preferences;
 
 import java.util.*;
@@ -48,7 +48,7 @@ public class PreferencesPanelSystemMaintenance extends PreferencesPanel {
     /**Sets new preferences to this panel to changes/modify
      */
     @Override
-    public void loadPreferences(Connection connection, Connection runtimeConnection){
+    public void loadPreferences(){
         this.jCheckBoxDeleteMsgOlderThan.setSelected(this.preferences.getBoolean(PreferencesAS2.AUTO_MSG_DELETE));
         this.jCheckBoxDeleteMsgOlderThanLog.setSelected(this.preferences.getBoolean(PreferencesAS2.AUTO_MSG_DELETE_LOG));
         this.jTextFieldDeleteMsgOlderThan.setText(String.valueOf(this.preferences.getInt(PreferencesAS2.AUTO_MSG_DELETE_OLDERTHAN)));

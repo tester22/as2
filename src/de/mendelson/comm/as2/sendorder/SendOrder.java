@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/sendorder/SendOrder.java,v 1.1 2012/04/18 14:10:38 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/sendorder/SendOrder.java,v 1.1 2015/01/06 11:07:49 heller Exp $
 package de.mendelson.comm.as2.sendorder;
 
 import de.mendelson.comm.as2.message.AS2Message;
@@ -27,6 +27,7 @@ public class SendOrder implements Serializable {
     private Partner sender;
     private int retryCount = 0;
     private int dbId = -1;
+    private String userdefinedId = null;
 
     public Partner getReceiver() {
         return receiver;
@@ -69,6 +70,20 @@ public class SendOrder implements Serializable {
      */
     public void setDbId(int dbId) {
         this.dbId = dbId;
+    }
+
+    /**
+     * @return the userdefinedId
+     */
+    public String getUserdefinedId() {
+        return userdefinedId;
+    }
+
+    /**
+     * @param userdefinedId the userdefinedId to set
+     */
+    public void setUserdefinedId(String userdefinedId) {
+        this.userdefinedId = userdefinedId;
     }
         
 }

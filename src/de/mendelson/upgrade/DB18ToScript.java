@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/upgrade/DB18ToScript.java,v 1.1 2012/04/18 14:10:41 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/upgrade/DB18ToScript.java,v 1.1 2015/01/06 11:07:51 heller Exp $
 package de.mendelson.upgrade;
 
 import de.mendelson.comm.as2.AS2ServerVersion;
@@ -11,23 +11,27 @@ import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Properties;
 import org.hsqldb.Server;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *
  * This software is subject to the license agreement set forth in the license.
- * Please read and agree to all terms before using this software.
- * Other product and brand names are trademarks of their respective owners.
+ * Please read and agree to all terms before using this software. Other product
+ * and brand names are trademarks of their respective owners.
  */
 
 /**
  * Update as2, must be applied for versions < 2012
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
@@ -89,7 +93,9 @@ public class DB18ToScript {
         server.shutdown();
     }
 
-    /**Stores the found objects in an external file, base 64 encoded*/
+    /**
+     * Stores the found objects in an external file, base 64 encoded
+     */
     private void writeObjects(Connection connection, String dbName) throws Exception {
         BufferedWriter writer = new BufferedWriter(new FileWriter(dbName + ".objects"));
         DatabaseMetaData metaData = connection.getMetaData();
@@ -106,11 +112,14 @@ public class DB18ToScript {
             ConsoleProgressBar.print(percent, 40, 80);
             Thread.sleep(200);
             String tableName = result.getString(3);
+            //delete some table data, old versions of the mendelson AS2 did not delete this properly
+            if( tableName.equalsIgnoreCase("statisticdetails")){                
+                continue;
+            }
             Statement statement = connection.createStatement();
             ResultSet tableResult = statement.executeQuery("SELECT * FROM " + tableName);
             ResultSetMetaData resultMetaData = tableResult.getMetaData();
-            int numOfCol = resultMetaData.getColumnCount();
-            //get first primary key of table
+            int numOfCol = resultMetaData.getColumnCount();            //get first primary key of table
             ResultSet primaryResult = metaData.getPrimaryKeys(null, null, tableName);
             String primaryKeyName = null;
             String columnName = null;
@@ -122,9 +131,9 @@ public class DB18ToScript {
                 int columnType = resultMetaData.getColumnType(i);
                 if (columnType == Types.JAVA_OBJECT || columnType == Types.OTHER) {
                     columnName = resultMetaData.getColumnName(i);
-//                    System.out.println("Table name: " + tableName);
-//                    System.out.println("Col: " + columnName);
-//                    System.out.println("Primary key: " + primaryKeyName);
+//                    System.out.println("DEBUG: Table name: " + tableName);
+//                    System.out.println("DEBUG: Col: " + columnName);
+//                    System.out.println("DEBUG: Primary key: " + primaryKeyName);
                 }
             }
             if (columnName != null) {
@@ -133,9 +142,9 @@ public class DB18ToScript {
                     StringBuilder line = new StringBuilder();
                     line.append(tableName).append(":");
                     line.append(primaryKeyName).append(":");
-                    line.append(tableResult.getString(primaryKeyName)).append(":");
+                    line.append(Base64.encode(tableResult.getString(primaryKeyName).getBytes())).append(":");
                     line.append(columnName).append(":");
-                    byte[] data = tableResult.getBytes(columnName);
+                    byte[] data = tableResult.getBytes(columnName);                    
                     if (data != null && data.length > 0) {
                         line.append(Base64.encode(data));
                         writer.write(line.toString());
@@ -148,14 +157,19 @@ public class DB18ToScript {
         writer.flush();
         writer.close();
     }
-
-    /**checks if any of the databases requires an upgrade*/
+    
+    
+    /**
+     * checks if any of the databases requires an upgrade
+     */
     public boolean upgradeIsRequired() throws Exception {
         return (this.upgradeIsRequired(DBDriverManager.getDBName(DBDriverManager.DB_CONFIG))
                 || this.upgradeIsRequired(DBDriverManager.getDBName(DBDriverManager.DB_RUNTIME)));
     }
 
-    /**checks if the selected database requires an upgrade*/
+    /**
+     * checks if the selected database requires an upgrade
+     */
     private boolean upgradeIsRequired(String dbName) throws Exception {
         File propertiesFile = new File(dbName + ".properties");
         String version = "";
@@ -178,7 +192,6 @@ public class DB18ToScript {
             return (false);
         }
     }
-    
 
     public static final class Base64 {
 
@@ -470,8 +483,8 @@ public class DB18ToScript {
         /**
          * remove WhiteSpace from MIME containing encoded Base64 data.
          *
-         * @param data  the byte array of base64 data (with WS)
-         * @return      the new length
+         * @param data the byte array of base64 data (with WS)
+         * @return the new length
          */
         protected static int removeWhiteSpace(char[] data) {
             if (data == null) {

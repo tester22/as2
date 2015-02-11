@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/message/AS2MDNCreation.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/AS2MDNCreation.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
 import com.sun.mail.util.LineOutputStream;
@@ -40,6 +40,7 @@ import javax.mail.util.ByteArrayDataSource;
  */
 /**
  * Packs a message with all necessary headers and attachments
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
@@ -61,7 +62,8 @@ public class AS2MDNCreation {
         this.certificateManager = certificateManager;
     }
 
-    /**Build the header for the sync response and returns them
+    /**
+     * Build the header for the sync response and returns them
      */
     public Properties buildHeaderForSyncMDN(AS2Message message) {
         String ediintFeatures = "multiple-attachments, CEM";
@@ -86,7 +88,9 @@ public class AS2MDNCreation {
         return (header);
     }
 
-    /**Displays a bundle of byte arrays as hex string, for debug purpose only*/
+    /**
+     * Displays a bundle of byte arrays as hex string, for debug purpose only
+     */
     private String toHexDisplay(byte[] data) {
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < data.length; i++) {
@@ -96,15 +100,17 @@ public class AS2MDNCreation {
         return result.toString();
     }
 
-    /**Creates an mdn that could be returned to the sender and indicates that
-     *everything is ok
+    /**
+     * Creates an mdn that could be returned to the sender and indicates that
+     * everything is ok
      */
     public AS2Message createMDNProcessed(AS2MessageInfo releatedMessageInfo, Partner mdnSender, String mdnReceiverAS2Id) throws Exception {
         return (this.createMDNProcessed(releatedMessageInfo, mdnSender, mdnReceiverAS2Id, MDNText.get(MDNText.RECEIVED, releatedMessageInfo.getMessageType())));
     }
 
-    /**Creates an mdn that could be returned to the sender and indicates that
-     *everything is ok
+    /**
+     * Creates an mdn that could be returned to the sender and indicates that
+     * everything is ok
      */
     public AS2Message createMDNProcessed(AS2MessageInfo releatedMessageInfo, Partner mdnSender, String mdnReceiverAS2Id, String detailText) throws Exception {
         AS2Message mdn = this.createMDN(releatedMessageInfo, mdnSender, mdnSender.getAS2Identification(), mdnReceiverAS2Id, "processed", detailText);
@@ -112,27 +118,32 @@ public class AS2MDNCreation {
         return (mdn);
     }
 
-    /**Creates an mdn that could be returned to the sender and indicates an error
-     *by processing the message
+    /**
+     * Creates an mdn that could be returned to the sender and indicates an
+     * error by processing the message
      */
     public AS2Message createMDNError(AS2Exception exception, String as2MessageSenderId, Partner as2MessageReceiver, String as2MessageReceiverId) throws Exception {
-        AS2MessageInfo info = (AS2MessageInfo) exception.getAS2Message().getAS2Info();
-        AS2Message mdn = this.createMDN(info, as2MessageReceiver, as2MessageReceiverId,
-                as2MessageSenderId, "processed/error: " + exception.getErrorType(), MDNText.get(MDNText.ERROR, info.getMessageType()) + exception.getMessage());
+        AS2MessageInfo messageInfoOfException = (AS2MessageInfo) exception.getAS2Message().getAS2Info();
+        AS2Message mdn = this.createMDN(messageInfoOfException, as2MessageReceiver, as2MessageReceiverId,
+                as2MessageSenderId, "processed/error: " + exception.getErrorType(), MDNText.get(MDNText.ERROR, messageInfoOfException.getMessageType()) + exception.getMessage());
         if (this.logger != null) {
             this.logger.log(Level.SEVERE, this.rb.getResourceString("mdn.details",
                     new Object[]{
-                        info.getMessageId(),
-                        exception.getMessage()
-                    }), info);
+                messageInfoOfException.getMessageId(),
+                exception.getMessage()
+            }), messageInfoOfException);
         }
         mdn.getAS2Info().setState(AS2Message.STATE_STOPPED);
         return (mdn);
     }
 
-    /**Creates a MDN to return. It may be confusing that the sender and the sender id is passed but the sender
-     * is null if the partner with the sender id has not been found in the db
-     *@param dispositionState State that will be written into the disposition header
+    /**
+     * Creates a MDN to return. It may be confusing that the sender and the
+     * sender id is passed but the sender is null if the partner with the sender
+     * id has not been found in the db
+     *
+     * @param dispositionState State that will be written into the disposition
+     * header
      */
     private AS2Message createMDN(AS2MessageInfo relatedMessageInfo, Partner sender,
             String senderAS2Id, String receiverAS2Id, String dispositionState,
@@ -198,21 +209,22 @@ public class AS2MDNCreation {
             if (this.logger != null) {
                 this.logger.log(Level.SEVERE, this.rb.getResourceString("mdn.created",
                         new Object[]{
-                            info.getMessageId(), dispositionState
-                        }), info);
+                    info.getMessageId(), dispositionState
+                }), info);
             }
         } else {
             if (this.logger != null) {
                 this.logger.log(Level.FINE, this.rb.getResourceString("mdn.created",
                         new Object[]{
-                            info.getMessageId(), dispositionState
-                        }), info);
+                    info.getMessageId(), dispositionState
+                }), info);
             }
         }
         return (message);
     }
 
-    /**Its necessary to transmit additional notes
+    /**
+     * Its necessary to transmit additional notes
      */
     private MimeBodyPart createMDNNotesBody(String text, String contentTransferEncoding) throws MessagingException {
         MimeBodyPart body = new MimeBodyPart();
@@ -222,7 +234,8 @@ public class AS2MDNCreation {
         return (body);
     }
 
-    /**Creates the MDN body and returns it
+    /**
+     * Creates the MDN body and returns it
      *
      */
     private MimeBodyPart createMDNDispositionBody(AS2MessageInfo relatedMessageInfo, String dispositionState,
@@ -243,34 +256,31 @@ public class AS2MDNCreation {
         return (body);
     }
 
-    /**Signs the passed mdn and returns it
+    /**
+     * Signs the passed mdn and returns it
      */
     private MimeMessage signMDN(MimeMessage mimeMessage, Partner sender, AS2Message as2Message, AS2MessageInfo relatedMessageInfo) throws Exception {
         if (relatedMessageInfo.getDispositionNotificationOptions().signMDN()) {
-            int[] possibleAlgorithm = relatedMessageInfo.getDispositionNotificationOptions().getSignatureAlgorithm();
-            boolean sha1Possible = false;
-            boolean md5Possible = false;
-            for (int i = 0; i < possibleAlgorithm.length; i++) {
-                if (possibleAlgorithm[i] == AS2Message.SIGNATURE_MD5) {
-                    md5Possible = true;
-                } else if (possibleAlgorithm[i] == AS2Message.SIGNATURE_SHA1) {
-                    sha1Possible = true;
-                }
-            }
-            String digest = null;
-            if (sha1Possible) {
-                digest = "sha1";
-                as2Message.getAS2Info().setSignType(AS2Message.SIGNATURE_SHA1);
-            } else if (md5Possible) {
-                digest = "md5";
-                as2Message.getAS2Info().setSignType(AS2Message.SIGNATURE_MD5);
-            }
-            if (digest == null) {
+            int digest = relatedMessageInfo.getDispositionNotificationOptions().getPreferredSignatureAlgorithm();            
+            as2Message.getAS2Info().setSignType(digest);
+            String digestStr = null;
+            if( digest == AS2Message.SIGNATURE_MD5 ){
+                digestStr = BCCryptoHelper.ALGORITHM_MD5;
+            }else if ( digest == AS2Message.SIGNATURE_SHA1 ){
+                digestStr = BCCryptoHelper.ALGORITHM_SHA1;
+            }else if ( digest == AS2Message.SIGNATURE_SHA256 ){
+                digestStr = BCCryptoHelper.ALGORITHM_SHA256;
+            }else if ( digest == AS2Message.SIGNATURE_SHA384 ){
+                digestStr = BCCryptoHelper.ALGORITHM_SHA384;
+            }else if ( digest == AS2Message.SIGNATURE_SHA512 ){
+                digestStr = BCCryptoHelper.ALGORITHM_SHA512;
+            }            
+            if (digestStr == null) {
                 as2Message.getAS2Info().setSignType(AS2Message.SIGNATURE_NONE);
                 if (this.logger != null) {
                     this.logger.log(Level.INFO, this.rb.getResourceString("mdn.notsigned",
                             new Object[]{
-                                as2Message.getAS2Info().getMessageId(),}), as2Message.getAS2Info());
+                        as2Message.getAS2Info().getMessageId(),}), as2Message.getAS2Info());
                 }
                 return (mimeMessage);
             }
@@ -278,12 +288,12 @@ public class AS2MDNCreation {
             String senderSignAlias = this.certificateManager.getAliasByFingerprint(sender.getSignFingerprintSHA1());
             Certificate[] chain = this.certificateManager.getCertificateChain(senderSignAlias);
             BCCryptoHelper helper = new BCCryptoHelper();
-            MimeMessage signedMimeMessage = helper.signToMessage(mimeMessage, chain, senderKey, digest.toUpperCase());
+            MimeMessage signedMimeMessage = helper.signToMessage(mimeMessage, chain, senderKey, digestStr.toUpperCase());
             if (this.logger != null) {
                 this.logger.log(Level.INFO, this.rb.getResourceString("mdn.signed",
                         new Object[]{
-                            as2Message.getAS2Info().getMessageId(), digest.toUpperCase()
-                        }), as2Message.getAS2Info());
+                    as2Message.getAS2Info().getMessageId(), digestStr.toUpperCase()
+                }), as2Message.getAS2Info());
             }
             return (signedMimeMessage);
         } else {
@@ -291,14 +301,15 @@ public class AS2MDNCreation {
             if (this.logger != null) {
                 this.logger.log(Level.INFO, this.rb.getResourceString("mdn.notsigned",
                         new Object[]{
-                            as2Message.getAS2Info().getMessageId(),}), as2Message.getAS2Info());
+                    as2Message.getAS2Info().getMessageId(),}), as2Message.getAS2Info());
             }
             return (mimeMessage);
         }
     }
 
     /**
-     * @param logger the logger to set. If no logger is passed to this class there will be no logging
+     * @param logger the logger to set. If no logger is passed to this class
+     * there will be no logging
      */
     public void setLogger(Logger logger) {
         this.logger = logger;

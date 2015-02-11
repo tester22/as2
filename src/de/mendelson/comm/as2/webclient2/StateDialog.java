@@ -1,15 +1,14 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/webclient2/StateDialog.java,v 1.1 2012/04/18 14:10:41 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/webclient2/StateDialog.java,v 1.1 2015/01/06 11:07:50 heller Exp $
 package de.mendelson.comm.as2.webclient2;
 
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
-import de.mendelson.comm.as2.AS2ServerVersion;
-import de.mendelson.comm.as2.client.rmi.GenericClient;
-import de.mendelson.comm.as2.clientserver.ErrorObject;
-import de.mendelson.comm.as2.clientserver.serialize.CommandObjectServerInfo;
+import de.mendelson.comm.as2.clientserver.message.ServerInfoRequest;
+import de.mendelson.comm.as2.clientserver.message.ServerInfoResponse;
+import de.mendelson.comm.as2.preferences.PreferencesAS2;
+import de.mendelson.util.clientserver.AnonymousTextClient;
 import java.text.DateFormat;
-import java.util.ArrayList;
 
 
 /*
@@ -21,52 +20,46 @@ import java.util.ArrayList;
  */
 /**
  * Displays the state of the receipt unit
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
 public class StateDialog extends OkDialog {
-        
+
     public StateDialog() {
         super(670, 410, "Server state");
         this.setResizable(false);
         this.setClosable(false);
     }
 
-    /**Could be overwritten, contains the content to display*/
+    /**
+     * Could be overwritten, contains the content to display
+     */
     @Override
     public AbstractComponent getContentPanel() {
         DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
         Panel panel = new Panel();
         StringBuilder sourceBuffer = new StringBuilder();
-        sourceBuffer.append("<p>The AS2 HTTP receipt unit <strong>");
-        sourceBuffer.append(AS2ServerVersion.getProductName());
-        sourceBuffer.append(" ");
-        sourceBuffer.append(AS2ServerVersion.getVersion());
-        sourceBuffer.append(" ");
-        sourceBuffer.append(AS2ServerVersion.getBuild());
-        sourceBuffer.append(" </strong> is up and running.<br></p>");
         boolean processingUnitUp = false;
-        GenericClient client = new GenericClient();
-        CommandObjectServerInfo commandObject = new CommandObjectServerInfo();
-        ErrorObject errorObject = client.send(commandObject);
-        if (errorObject.noErrorsAndWarnings()) {
-            commandObject = (CommandObjectServerInfo) client.getCommandObject();
-            long startTime = new Long(commandObject.getProperties().getProperty(CommandObjectServerInfo.SERVER_START_TIME)).longValue();
-            sourceBuffer.append("The AS2 processing unit <strong>");
-            sourceBuffer.append(commandObject.getProperties().getProperty(CommandObjectServerInfo.SERVER_PRODUCT_NAME));
-            sourceBuffer.append(" ").append(commandObject.getProperties().getProperty(CommandObjectServerInfo.SERVER_VERSION));
-            sourceBuffer.append(" ").append(commandObject.getProperties().getProperty(CommandObjectServerInfo.SERVER_BUILD));
-            sourceBuffer.append("</strong> is up and running since <strong>");
-            sourceBuffer.append(format.format(startTime));
-            sourceBuffer.append("</strong>.");
+        AnonymousTextClient client = null;
+        try {
+            client = new AnonymousTextClient();
+            PreferencesAS2 preferences = new PreferencesAS2();
+            client.connect("localhost", preferences.getInt(PreferencesAS2.CLIENTSERVER_COMM_PORT), 30000);
+            ServerInfoResponse response = (ServerInfoResponse) client.sendSync(new ServerInfoRequest(), 30000);
+            long startTime = new Long(response.getProperties().getProperty(ServerInfoResponse.SERVER_START_TIME)).longValue();
+            sourceBuffer.append("<p>The AS2 processing unit <strong>"
+                    + response.getProperties().getProperty(ServerInfoResponse.SERVER_PRODUCT_NAME) + " "
+                    + response.getProperties().getProperty(ServerInfoResponse.SERVER_VERSION) + " "
+                    + response.getProperties().getProperty(ServerInfoResponse.SERVER_BUILD) + "</strong> is up and running since <strong>"
+                    + format.format(startTime) + "</strong></p>.");
             processingUnitUp = true;
-        } else {
+        } catch (Exception e) {
             sourceBuffer.append("Error connecting to AS2 processing unit: ");
-            ArrayList log = client.getLog();
-            for (int i = 0; i < log.size(); i++) {
-                if (log.get(i) != null) {
-                    sourceBuffer.append(log.get(i));
-                }
+            sourceBuffer.append(e.getMessage());
+        } finally {
+            if (client != null && client.isConnected()) {
+                client.disconnect();
             }
         }
         sourceBuffer.append("<br><br>");

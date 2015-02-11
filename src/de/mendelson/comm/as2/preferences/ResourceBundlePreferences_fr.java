@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/preferences/ResourceBundlePreferences_fr.java,v 1.1 2012/04/18 14:10:35 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/preferences/ResourceBundlePreferences_fr.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.preferences;
 import de.mendelson.util.MecResourceBundle;
 /*
@@ -26,7 +26,6 @@ public class ResourceBundlePreferences_fr extends MecResourceBundle{
     static final Object[][] contents = {
         //preferences localized
         { PreferencesAS2.SERVER_HOST, "Hôte serveur" },
-        { PreferencesAS2.SERVER_RMI_PORT, "Port du serveur RMI" },
         { PreferencesAS2.DIR_MSG, "Archivage message" },
                 
         {"button.ok", "Valider" },
@@ -77,18 +76,20 @@ public class ResourceBundlePreferences_fr extends MecResourceBundle{
         {"checkbox.notifyfailure", "Notifier les problems système"},
         {"checkbox.notifyresend", "Notifier renvoie rejetés"},
         {"button.testmail","Envoyer un e-mail de test"},
-        {"label.mailhost", "Hôte du serveur de mail :" },
+        {"label.mailhost", "Hôte du serveur de mail (SMTP):" },
         {"label.mailport", "Port:" },
         {"label.mailaccount", "Compte sur le serveur de mail:" },
         {"label.mailpass", "Mot de passe sur le serveur de mail:" },
         {"label.notificationmail", "Adresse de notification du destinataire:" },
         {"label.replyto", "Adresse de réponse (Replyto):" },
-        {"label.smtpauthentication", "Authentification d'utilisation SMTP" },
+        {"label.smtpauthentication", "Authentification d''utilisation SMTP" },
         {"label.smtpauthentication.user", "Nom d'utilisateur:" },
         {"label.smtpauthentication.pass", "Mot de passe:" },
+        {"label.security", "Sécurité de connexion:" },
         {"testmail.message.success", "E-mail de test envoyé avec succés." },
         {"testmail.message.error", "Erreur lors de l''envoi de l''e-mail de test:\n{0}" },
         {"testmail.title", "Résultat de l''envoi de l''email de test" },
+        {"testmail", "L''email de test"},
         //interface
         {"label.showhttpheader", "Laissez configurer les en-têtes de HTTP dans la configuration d''associé" },
         {"label.showquota", "Laissez configurer l''avis de quote-part dans la configuration d''associé" },
@@ -96,6 +97,11 @@ public class ResourceBundlePreferences_fr extends MecResourceBundle{
         {"label.outboundstatusfiles", "Écrire des fichiers de statut de transaction sortante"},
         {"info.restart.client", "Un redémarrage du client est requise pour effectuer ces modifications valide!" },
         {"remotedir.select", "Sélectionnez le répertoire sur le serveur" },
+        //retry
+        {"label.retry.max", "Le nombre maximum de tentatives de connexion" },
+        {"label.retry.waittime", "Le temps d''attente entre deux tentatives de connexion" },
+        {"label.sec", "seconds" },
+        {"keystore.hint", "Attention:\nVoulez pas modifier ces paramètres, sauf si vous avez utilisé un outil tiers pour modifier vos mots de passe du fichier de clés (qui n''est pas recommandé). Mise en place des mots de passe ici ne sera pas modifier les mots de passe du fichier de clés sous-jacente - ces options seulement permettre d''accéder à des fichiers de clés externes."},
     };
     
 }

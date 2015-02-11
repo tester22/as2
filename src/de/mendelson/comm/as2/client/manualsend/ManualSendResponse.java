@@ -1,6 +1,8 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/client/manualsend/ManualSendResponse.java,v 1.1 2012/04/18 14:10:24 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/manualsend/ManualSendResponse.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.client.manualsend;
 
+import de.mendelson.comm.as2.message.AS2Info;
+import de.mendelson.comm.as2.message.AS2MessageInfo;
 import de.mendelson.util.clientserver.clients.datatransfer.UploadResponseFile;
 import java.io.Serializable;
 /*
@@ -18,12 +20,32 @@ import java.io.Serializable;
  */
 public class ManualSendResponse extends UploadResponseFile implements Serializable {
 
+    private AS2MessageInfo as2Info = null;
+    
     public ManualSendResponse(ManualSendRequest request) {
         super(request);
     }
 
+    
+    
     @Override
     public String toString() {
         return ("Manual send response");
     }
+
+    /**
+     * @return the as2Info
+     */
+    public AS2MessageInfo getAS2Info() {
+        return as2Info;
+    }
+
+    /**
+     * @param as2Info the as2Info to set
+     */
+    public void setAS2Info(AS2MessageInfo as2Info) {
+        this.as2Info = as2Info;
+    }
+
+    
 }

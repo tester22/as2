@@ -1,9 +1,8 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/log/LogEntry.java,v 1.1 2012/04/18 14:10:30 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/log/LogEntry.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.log;
 
-import de.mendelson.comm.as2.server.AS2Server;
+import java.io.Serializable;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
@@ -14,13 +13,12 @@ import java.util.logging.Logger;
  */
 /**
  * Enwrapps a single db log entry in an object
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
-public class LogEntry {
+public class LogEntry implements Serializable {
 
-    /**Logger to log inforamtion to*/
-    private Logger logger = Logger.getLogger(AS2Server.SERVER_LOGGER_NAME);
     private Level level;
     private String message;
     private long millis;
@@ -56,5 +54,32 @@ public class LogEntry {
 
     public void setMessageId(String messageId) {
         this.messageId = messageId;
+    }
+
+    /**
+     * Serializes this partner to XML
+     *
+     * @param level level in the XML hierarchie for the xml beautifying
+     */
+    public String toXML(int level) {
+        String offset = "";
+        for (int i = 0; i < level; i++) {
+            offset += "\t";
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append(offset).append("<logentry level=\"").append(String.valueOf(this.level.intValue())).append("\"");
+        builder.append(" time=\"").append(this.getMillis()).append("\">");
+        if (this.message != null) {
+            builder.append(this.toCDATA(this.message));
+        }
+        builder.append(offset).append("</logentry>\n");
+        return (builder.toString());
+    }
+
+    /**
+     * Adds a cdata indicator to xml data
+     */
+    private String toCDATA(String data) {
+        return ("<![CDATA[" + data + "]]>");
     }
 }

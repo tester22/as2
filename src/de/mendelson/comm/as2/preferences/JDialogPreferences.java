@@ -1,11 +1,10 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/preferences/JDialogPreferences.java,v 1.1 2012/04/18 14:10:35 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/preferences/JDialogPreferences.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.preferences;
 
 import de.mendelson.util.ImageButtonBar;
 import de.mendelson.util.MecResourceBundle;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.MissingResourceException;
@@ -42,7 +41,7 @@ public class JDialogPreferences extends JDialog {
      *@param parameter Parameter to edit, null for a new one
      *@param parameterList List of available parameter
      */
-    public JDialogPreferences(JFrame parent, Connection configConnection, Connection runtimeConnection, List<PreferencesPanel> panelList) {
+    public JDialogPreferences(JFrame parent, List<PreferencesPanel> panelList, String selectedTab) {
         super(parent, true);
         this.panelList = panelList;
         //load resource bundle
@@ -67,14 +66,17 @@ public class JDialogPreferences extends JDialog {
         gridBagConstraints.weighty = 1.0;
         for (PreferencesPanel preferencePanel : this.panelList) {
             //initialize the panels
-            preferencePanel.loadPreferences(configConnection, runtimeConnection);
+            preferencePanel.loadPreferences();
             //add the panels to the layout
             this.jPanelEdit.add(preferencePanel, gridBagConstraints);
         }
         ImageButtonBar buttonBar = new ImageButtonBar(ImageButtonBar.HORIZONTAL);
         buttonBar.setPreferredButtonSize(85, 80);
-        boolean selected = true;
+        boolean selected = selectedTab == null;
         for (PreferencesPanel preferencePanel : this.panelList) {
+            if( selectedTab != null && preferencePanel.getTabResource().equals( selectedTab)){
+                selected = true;
+            }
             buttonBar.addButton(
                     new ImageIcon(this.getClass().getResource(preferencePanel.getIconResource())),
                     this.rb.getResourceString(preferencePanel.getTabResource()),
@@ -226,7 +228,7 @@ public class JDialogPreferences extends JDialog {
         getContentPane().add(jPanelButtonBar, gridBagConstraints);
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-746)/2, (screenSize.height-499)/2, 746, 499);
+        setBounds((screenSize.width-742)/2, (screenSize.height-526)/2, 742, 526);
     }// </editor-fold>//GEN-END:initComponents
     private void jButtonOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOkActionPerformed
         for (PreferencesPanel panel : this.panelList) {

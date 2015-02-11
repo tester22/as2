@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/sendorder/SendOrderReceiver.java,v 1.1 2012/04/18 14:10:38 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/sendorder/SendOrderReceiver.java,v 1.1 2015/01/06 11:07:49 heller Exp $
 package de.mendelson.comm.as2.sendorder;
 
 import de.mendelson.comm.as2.clientserver.message.RefreshClientMessageOverviewList;
@@ -48,8 +48,6 @@ public class SendOrderReceiver implements Runnable {
     private Connection configConnection;
     private Connection runtimeConnection;
     private SendOrderAccessDB sendOrderAccess;
-    private final int MAX_RETRY_COUNT = 10;
-    private final long RETRY_WAIT_TIME = TimeUnit.SECONDS.toMillis(30);
     /**
      * Thread will stop if this is no longer set
      */
@@ -105,7 +103,6 @@ public class SendOrderReceiver implements Runnable {
             for (SendOrder order : waitingOrders) {
                 final SendOrder finalOrder = order;
                 fixedTheadExecutor.execute(new Runnable() {
-
                     @Override
                     public void run() {
                         processOrder(finalOrder);
@@ -115,7 +112,7 @@ public class SendOrderReceiver implements Runnable {
             }
             //wait some time before looking for new messages
             try {
-                Thread.sleep(TimeUnit.MILLISECONDS.toMillis(250));
+                Thread.sleep(TimeUnit.MILLISECONDS.toMillis(200));
             } catch (InterruptedException e) {
                 //NOP
             }
@@ -140,7 +137,7 @@ public class SendOrderReceiver implements Runnable {
                 AS2MessageInfo messageInfo = (AS2MessageInfo) order.getMessage().getAS2Info();
                 if (messageInfo.getMessageType() == AS2Message.MESSAGETYPE_AS2) {
                     //update the message info from the database
-                    messageInfo = messageAccess.getLastMessageEntry(messageInfo.getMessageId());
+                    messageInfo = this.messageAccess.getLastMessageEntry(messageInfo.getMessageId());
                     if (messageInfo == null || messageInfo.getState() == AS2Message.STATE_STOPPED) {
                         processingAllowed = false;
                     }
@@ -150,6 +147,11 @@ public class SendOrderReceiver implements Runnable {
             }
             if (processingAllowed) {
                 MessageHttpUploader messageUploader = new MessageHttpUploader();
+                if (!this.preferences.getBoolean(PreferencesAS2.CEM)) {
+                    messageUploader.setEDIINTFeatures("multiple-attachments");
+                } else {
+                    messageUploader.setEDIINTFeatures("multiple-attachments, CEM");
+                }
                 messageUploader.setLogger(this.logger);
                 messageUploader.setAbstractServer(this.clientserver);
                 messageUploader.setDBConnection(this.configConnection, this.runtimeConnection);
@@ -178,16 +180,15 @@ public class SendOrderReceiver implements Runnable {
                 } else {
                     //its a AS2 message that has been sent
                     AS2MessageInfo messageInfo = (AS2MessageInfo) order.getMessage().getAS2Info();
-                    messageAccess.updateFilenames(messageInfo);
                     messageAccess.setMessageSendDate(messageInfo);
+                    messageAccess.updateFilenames(messageInfo);
                     if (!messageInfo.requestsSyncMDN()) {
                         long endTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(preferences.getInt(PreferencesAS2.ASYNC_MDN_TIMEOUT));
                         DateFormat format = SimpleDateFormat.getDateTimeInstance(DateFormat.SHORT,
                                 DateFormat.MEDIUM);
                         logger.log(Level.INFO, rb.getResourceString("async.mdn.wait",
                                 new Object[]{
-                                    order.getMessage().getAS2Info().getMessageId(),
-                                    format.format(endTime)
+                                    messageInfo.getMessageId(), format.format(endTime)
                                 }), messageInfo);
                     }
                 }
@@ -197,8 +198,9 @@ public class SendOrderReceiver implements Runnable {
             this.clientserver.broadcastToClients(new RefreshClientMessageOverviewList());
         } catch (NoConnectionException e) {
             int retryCount = order.incRetryCount();
+            int maxRetryCount = this.preferences.getInt(PreferencesAS2.MAX_CONNECTION_RETRY_COUNT);
             //to many retries: cancel the transaction
-            if (retryCount > this.MAX_RETRY_COUNT) {
+            if (retryCount > maxRetryCount) {
                 logger.log(Level.SEVERE, e.getMessage(), order.getMessage().getAS2Info());
                 logger.log(Level.SEVERE, rb.getResourceString("max.retry.reached",
                         new Object[]{
@@ -209,9 +211,9 @@ public class SendOrderReceiver implements Runnable {
                 logger.log(Level.WARNING, rb.getResourceString("retry",
                         new Object[]{
                             order.getMessage().getAS2Info().getMessageId(),
-                            String.valueOf((this.RETRY_WAIT_TIME / 1000)),
+                            String.valueOf(this.preferences.getInt(PreferencesAS2.CONNECTION_RETRY_WAIT_TIME_IN_S)),
                             String.valueOf(retryCount),
-                            String.valueOf(this.MAX_RETRY_COUNT)
+                            String.valueOf(maxRetryCount)
                         }), order.getMessage().getAS2Info());
                 this.sendOrderToRetry(order);
             }
@@ -228,7 +230,7 @@ public class SendOrderReceiver implements Runnable {
     private void sendOrderToRetry(SendOrder order) {
         SendOrderSender sender = null;
         sender = new SendOrderSender(this.configConnection, this.runtimeConnection);
-        sender.resend(order, System.currentTimeMillis() + this.RETRY_WAIT_TIME);
+        sender.resend(order, System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(this.preferences.getInt(PreferencesAS2.CONNECTION_RETRY_WAIT_TIME_IN_S)));
     }
 
     /**

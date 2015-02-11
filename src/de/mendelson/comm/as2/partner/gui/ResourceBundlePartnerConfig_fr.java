@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/partner/gui/ResourceBundlePartnerConfig_fr.java,v 1.1 2012/04/18 14:10:32 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/gui/ResourceBundlePartnerConfig_fr.java,v 1.1 2015/01/06 11:07:44 heller Exp $
 package de.mendelson.comm.as2.partner.gui;
 import de.mendelson.util.MecResourceBundle;
 /*
@@ -44,6 +44,7 @@ public class ResourceBundlePartnerConfig_fr extends MecResourceBundle{
         {"directory.delete.failure", "Incapable de supprimer \"{0}\"." },
         {"directory.delete.success", "L'annuaire \"{0}\" a été supprimé." },
         {"saving", "Enregistrement..." },
+        {"module.locked", "La gestion des partenaires est verrouillé par un autre client, vous n''êtes pas autorisé à valider vos modifications!" },
     };
     
 }

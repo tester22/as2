@@ -1,6 +1,7 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/partner/gui/TableModelHttpHeader.java,v 1.1 2012/04/18 14:10:32 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/gui/TableModelHttpHeader.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.partner.gui;
 
+import de.mendelson.comm.as2.partner.Partner;
 import de.mendelson.comm.as2.partner.PartnerHttpHeader;
 import javax.swing.table.*;
 import java.util.*;
@@ -15,18 +16,22 @@ import de.mendelson.util.MecResourceBundle;
  */
 /**
  * Table model to display the properties to set
+ *
  * @author S.Heller
  * @version $Revision: 1.1 $
  */
 public class TableModelHttpHeader extends AbstractTableModel {
 
     /*Actual data to display, list of directory prefs*/
-    private List<PartnerHttpHeader> array = new ArrayList<PartnerHttpHeader>();
+    private final List<PartnerHttpHeader> array = Collections.synchronizedList(new ArrayList<PartnerHttpHeader>());
     /*ResourceBundle to localize the headers*/
     private MecResourceBundle rb = null;
+    private Partner partner = null;
 
-    /** Creates new preferences table model
-     *@param rb Resourcebundle to localize the header rows
+    /**
+     * Creates new preferences table model
+     *
+     * @param rb Resourcebundle to localize the header rows
      */
     public TableModelHttpHeader() {
         //load resource bundle
@@ -38,38 +43,58 @@ public class TableModelHttpHeader extends AbstractTableModel {
         }
     }
 
-    /**Passes data to the model and fires a table data update
-     *@param newData data array, may be null to delete the actual data contents
+    /**
+     * Passes data to the model and fires a table data update
+     *
+     * @param newData data array, may be null to delete the actual data contents
      */
-    public void passNewData(List<PartnerHttpHeader> newData) {
-        this.array = newData;
+    public void passNewData(Partner partner) {
+        this.partner = partner;
+        synchronized (this.array) {
+            array.clear();
+            array.addAll(partner.getHttpHeader());
+        }
         ((AbstractTableModel) this).fireTableDataChanged();
     }
 
-    /**Passes a new single value to the array
-     *@param header new header to add to the partner
+    /**
+     * Passes a new single value to the array
+     *
+     * @param header new header to add to the partner
      */
     public void addRow(PartnerHttpHeader header) {
-        this.array.add(header);
+        synchronized (this.array) {
+            this.array.add(header);
+            this.partner.setHttpHeader(this.array);
+        }
         ((AbstractTableModel) this).fireTableDataChanged();
     }
 
-    /**Passes a new single value to the array
-     *@param header new header to add to the partner
+    /**
+     * Passes a new single value to the array
+     *
+     * @param header new header to add to the partner
      */
     public void deleteRow(int row) {
-        this.array.remove(row);
+        synchronized (this.array) {
+            this.array.remove(row);
+            this.partner.setHttpHeader(this.array);
+        }
         ((AbstractTableModel) this).fireTableDataChanged();
     }
 
-    /**return one value defined by row and column
-     *@param row row that contains value
-     *@param col column that contains value
+    /**
+     * return one value defined by row and column
+     *
+     * @param row row that contains value
+     * @param col column that contains value
      */
     @Override
     public Object getValueAt(int row, int col) {
-        PartnerHttpHeader header = this.array.get(row);
-
+        PartnerHttpHeader header = null;
+        synchronized (this.array) {
+            header = this.array.get(row);
+        }
         //preferences name
         if (col == 0) {
             return (header.getKey());
@@ -81,20 +106,28 @@ public class TableModelHttpHeader extends AbstractTableModel {
         return (null);
     }
 
-    /**returns the number of rows in the table*/
+    /**
+     * returns the number of rows in the table
+     */
     @Override
     public int getRowCount() {
-        return array.size();
+        synchronized (this.array) {
+            return this.array.size();
+        }
     }
 
-    /**returns the number of columns in the table. should be const for a table*/
+    /**
+     * returns the number of columns in the table. should be const for a table
+     */
     @Override
     public int getColumnCount() {
         return (2);
     }
 
-    /**Returns the name of every column
-     *@param col Column to get the header name of
+    /**
+     * Returns the name of every column
+     *
+     * @param col Column to get the header name of
      */
     @Override
     public String getColumnName(int col) {
@@ -110,19 +143,20 @@ public class TableModelHttpHeader extends AbstractTableModel {
     }
 
     @Override
-    public boolean isCellEditable( int rowIndex, int columnIndex){
-        return( true );
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return (true);
     }
-
 
     @Override
-    public void setValueAt(Object aValue, int rowIndex, int columnIndex){
-        String value = (String)aValue;
-        if( columnIndex == 0 ){
-            this.array.get(rowIndex).setKey(value);
-        }else{
-            this.array.get(rowIndex).setValue(value);
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        String value = (String) aValue;
+        synchronized (this.array) {
+            if (columnIndex == 0) {
+                this.array.get(rowIndex).setKey(value);
+            } else {
+                this.array.get(rowIndex).setValue(value);
+            }
+            this.partner.setHttpHeader(this.array);
         }
     }
-    
 }

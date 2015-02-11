@@ -1,4 +1,4 @@
-//$Header: /cvsroot-fuse/mec-as2/39/mendelson/comm/as2/database/SQLScriptExecutor.java,v 1.1 2012/04/18 14:10:29 heller Exp $
+//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/database/SQLScriptExecutor.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.database;
 
 import de.mendelson.comm.as2.AS2ServerVersion;
@@ -10,8 +10,11 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
@@ -48,11 +51,10 @@ public class SQLScriptExecutor {
             this.executeScript(connection, RESOURCE + "CREATE.sql");
             //request all connections from the database to store them
             statement = connection.prepareStatement(
-                    "INSERT INTO version(actualVersion,updateDate,updateComment)" + "VALUES(?,?,?)");
-            statement.setEscapeProcessing(true);
+                    "INSERT INTO version(actualversion,updatedate,updatecomment)VALUES(?,?,?)");
             //fill in values
             statement.setInt(1, version);
-            statement.setDate(2, new java.sql.Date(System.currentTimeMillis()));
+            statement.setTimestamp(2, new Timestamp(System.currentTimeMillis()), Calendar.getInstance(TimeZone.getTimeZone("UTC")));
             statement.setString(3, AS2ServerVersion.getProductName() 
                     + " " + AS2ServerVersion.getVersion() + " " 
                     + AS2ServerVersion.getBuild() + ": initial installation");
