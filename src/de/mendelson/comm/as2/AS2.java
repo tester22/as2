@@ -40,6 +40,8 @@ public class AS2 {
         System.out.println("-lang <String>: Language to use for the server, nonpersistent. Possible values are \"en\", \"fr\" and \"de\".");
         System.out.println("-nohttpserver: Do not start the integrated HTTP server, only useful if you are integrating the product into an other web container");
         System.out.println("-allowallclients: Allows client connections from every host. Without this setting client connections are allowed from localhost only");
+        System.out.println("-nostartserver: Do not start the integrated AS2 server");
+        System.out.println("-nostartclient: Do not start the integrated client");    
     }
 
     /**Method to start the server on from the command line*/
@@ -47,6 +49,8 @@ public class AS2 {
         String language = null;
         boolean startHTTP = true;
         boolean allowAllClients = false;
+        boolean startServer = true;
+        boolean startClient = true;
         int optind;
         for (optind = 0; optind < args.length; optind++) {
             if (args[optind].toLowerCase().equals("-lang")) {
@@ -55,6 +59,10 @@ public class AS2 {
                 startHTTP = false;
             } else if (args[optind].toLowerCase().equals("-allowallclients")) {
                 allowAllClients = true;
+            } else if (args[optind].toLowerCase().equals("-nostartserver")) {
+                startServer = false;
+            } else if (args[optind].toLowerCase().equals("-nostartclient")) {
+                startClient = false;
             } else if (args[optind].toLowerCase().equals("-?")) {
                 AS2.printUsage();
                 System.exit(1);
@@ -85,6 +93,38 @@ public class AS2 {
                 System.exit(1);
             }
         }
+        if (startServer == true) {
+
+            //start server
+            try {
+                //register the database drivers for the VM
+                Class.forName("org.hsqldb.jdbcDriver");
+                //initialize the security provider
+                BCCryptoHelper helper = new BCCryptoHelper();
+                helper.initialize();
+                AS2Server as2Server = new AS2Server(startHTTP, allowAllClients);
+                AS2Agent agent = new AS2Agent(as2Server);
+            } catch (UpgradeRequiredException e) {
+                //an upgrade to HSQLDB 2.x is required, delete the lock file
+                Logger.getLogger(AS2Server.SERVER_LOGGER_NAME).warning(e.getMessage());
+                Logger.getLogger(AS2Server.SERVER_LOGGER_NAME).warning(e.getClass().getName() + ": " + e.getMessage());
+                AS2Server.deleteLockFile();
+                System.exit(1);
+            } catch (Throwable e) {
+                e.printStackTrace();
+                String message = e.getMessage();
+                if( message == null ){
+                    message = "[" + e.getClass().getName() + "]";
+                }
+                Logger.getLogger(AS2Server.SERVER_LOGGER_NAME).warning(message);
+                AS2Server.deleteLockFile();
+                System.exit(1);
+            }
+        	
+
+        }        
+        if (startClient == true) {
+        
         Splash splash = new Splash("/de/mendelson/comm/as2/client/Splash.jpg");
         AffineTransform transform = new AffineTransform();
         splash.setTextAntiAliasing(false);
@@ -94,38 +134,11 @@ public class AS2 {
                 new Color(0x65, 0xB1, 0x80), transform);
         splash.setVisible(true);
         splash.toFront();
-        //start server
-        try {
-            //register the database drivers for the VM
-            Class.forName("org.hsqldb.jdbcDriver");
-            //initialize the security provider
-            BCCryptoHelper helper = new BCCryptoHelper();
-            helper.initialize();
-            AS2Server as2Server = new AS2Server(startHTTP, allowAllClients);
-            AS2Agent agent = new AS2Agent(as2Server);
-        } catch (UpgradeRequiredException e) {
-            //an upgrade to HSQLDB 2.x is required, delete the lock file
-            Logger.getLogger(AS2Server.SERVER_LOGGER_NAME).warning(e.getMessage());
-            JOptionPane.showMessageDialog(null, e.getClass().getName() + ": " + e.getMessage());
-            AS2Server.deleteLockFile();
-            System.exit(1);
-        } catch (Throwable e) {
-            if (splash != null) {
-                splash.destroy();
-            }
-            e.printStackTrace();
-            String message = e.getMessage();
-            if( message == null ){
-                message = "[" + e.getClass().getName() + "]";
-            }
-            JOptionPane.showMessageDialog(null, message);
-            AS2Server.deleteLockFile();
-            System.exit(1);
-        }
         //start client
-        AS2Gui gui = new AS2Gui(splash, "localhost");
+        AS2Gui gui = new AS2Gui(splash, "");
         gui.setVisible(true);
         splash.destroy();
         splash.dispose();
+        }
     }
 }
