@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="WINDOWS-1252" standalone="no"?>
 <jardesc>
     <jar path="as2/dist/as2.jar"/>
-    <options buildIfNeeded="true" compress="true" descriptionLocation="/as2/AS2.jardesc" exportErrors="false" exportWarnings="true" includeDirectoryEntries="false" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/as2/AS2.jardesc" exportErrors="false" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
     <manifest generateManifest="true" mainClassHandleIdentifier="=as2/src&lt;de.mendelson.comm.as2{AS2.java[AS2" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
@@ -11,69 +11,6 @@
         </sealing>
     </manifest>
     <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.clientserver.connectionprogress"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.configurationcheck"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.clientserver.console"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.cert"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.database"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.clientserver.gui"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.client.about"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.message"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.clientserver"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.upgrade"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.notification.clientserver"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.tree"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.cem.gui"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.statistic"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.clientserver.clients.filesystemview"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.cem.clientserver"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.security.cert.gui.keygeneration"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.security.csr"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.database"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.clientserver.clients.datatransfer"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.importexport"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.security"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.preferences"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.tables"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.cem"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.notification"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.log"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.cem.messages"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.security.cert"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.security.keygeneration"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.partner.gui"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.modulelock"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.message.clientserver"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.clientserver.message"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.webclient2"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.server"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.datasheet"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.security.cert.gui"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.clientserver.clients.fileoperation"/>
-        <javaElement handleIdentifier="=as2/src&lt;sqlscript.runtime"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.clientserver.messages"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.partner.clientserver"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.log.panel"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.log"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.message.store"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.servlet"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.sendorder"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.clientserver.codec"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.clientserver.log"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.client.manualsend"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.security.cert.clientserver"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.clientserver.user"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.message.loggui"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.send"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.timing"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.clientserver.clients.preferences"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.util.clientserver"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.partner"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.client"/>
-        <javaElement handleIdentifier="=as2/src&lt;sqlscript.config"/>
-        <javaElement handleIdentifier="=as2/src&lt;de.mendelson.comm.as2.datasheet.gui"/>
+        <javaElement handleIdentifier="=as2/src"/>
     </selectedElements>
 </jardesc>

@@ -13,8 +13,6 @@ call :appendJarsAndZips lib\httpclient
 call :appendJarsAndZips lib\help
 call :appendJarsAndZips jetty\lib
 
-echo %CLASSPATH%
-
 :RunIt
 java -Xmx1024M -Xms92M -classpath %CLASSPATH% de.mendelson.comm.as2.AS2
 
