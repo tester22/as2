@@ -8,24 +8,24 @@
 CLASSPATH=as2.jar:jetty/start.jar
 export CLASSPATH
 
-if [ -d jlib ]; then
-    JARDIR=jlib
+if [ -d lib ]; then
+    JARDIR=lib
     export JARDIR
     for jar in `ls $JARDIR/*.jar $JARDIR/*.zip 2>/dev/null`
     do
         CLASSPATH=$CLASSPATH:$jar
     done
 fi
-if [ -d jlib/mina ]; then
-    MINADIR=jlib/mina
+if [ -d lib/mina ]; then
+    MINADIR=lib/mina
     export MINADIR
     for jar in `ls $MINADIR/*.jar $MINADIR/*.zip 2>/dev/null`
     do
         CLASSPATH=$CLASSPATH:$jar
     done
 fi
-if [ -d jlib/vaadin ]; then
-    VAADINDIR=jlib/vaadin
+if [ -d lib/vaadin ]; then
+    VAADINDIR=lib/vaadin
     export VAADINDIR
     for jar in `ls $VAADINDIR/*.jar $VAADINDIR/*.zip 2>/dev/null`
     do

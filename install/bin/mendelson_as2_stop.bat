@@ -6,11 +6,11 @@ rem
 rem
 
 set CLASSPATH="as2.jar";"jetty\start.jar"
-call :appendJarsAndZips jlib
-call :appendJarsAndZips jlib\mina
-call :appendJarsAndZips jlib\vaadin
-call :appendJarsAndZips jlib\httpclient
-call :appendJarsAndZips jlib\help
+call :appendJarsAndZips lib
+call :appendJarsAndZips lib\mina
+call :appendJarsAndZips lib\vaadin
+call :appendJarsAndZips lib\httpclient
+call :appendJarsAndZips lib\help
 
 :RunIt
 java -Xmx192M -Xms92M -classpath %CLASSPATH% de.mendelson.comm.as2.AS2Shutdown

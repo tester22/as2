@@ -8,32 +8,32 @@
 CLASSPATH=as2.jar:jetty/start.jar
 export CLASSPATH
 
-if [ -d jlib ]; then
-    JARDIR=jlib
+if [ -d lib ]; then
+    JARDIR=lib
     export JARDIR
     for jar in `ls $JARDIR/*.jar $JARDIR/*.zip 2>/dev/null`
     do
         CLASSPATH=$CLASSPATH:$jar
     done
 fi
-if [ -d jlib/mina ]; then
-    MINADIR=jlib/mina
+if [ -d lib/mina ]; then
+    MINADIR=lib/mina
     export MINADIR
     for jar in `ls $MINADIR/*.jar $MINADIR/*.zip 2>/dev/null`
     do
         CLASSPATH=$CLASSPATH:$jar
     done
 fi
-if [ -d jlib/help ]; then
-    HELPDIR=jlib/help
+if [ -d lib/help ]; then
+    HELPDIR=lib/help
     export HELPDIR
     for jar in `ls $HELPDIR/*.jar $HELPDIR/*.zip 2>/dev/null`
     do
         CLASSPATH=$CLASSPATH:$jar
     done
 fi
-if [ -d jlib/vaadin ]; then
-    VAADINDIR=jlib/vaadin
+if [ -d lib/vaadin ]; then
+    VAADINDIR=lib/vaadin
     export VAADINDIR
     for jar in `ls $VAADINDIR/*.jar $VAADINDIR/*.zip 2>/dev/null`
     do
@@ -48,8 +48,8 @@ if [ -d jetty/lib ]; then
         CLASSPATH=$CLASSPATH:$jar
     done
 fi
-if [ -d jlib/httpclient ]; then
-    HTTPLIBDIR=jlib/httpclient
+if [ -d lib/httpclient ]; then
+    HTTPLIBDIR=lib/httpclient
     export HTTPLIBDIR
     for jar in `ls $HTTPLIBDIR/*.jar $HTTPLIBDIR/*.zip 2>/dev/null`
     do

@@ -1,6 +1,7 @@
 *~
 classes
-dist/classes/
+dist/
+install/as2.jar
 install/temp/
 install/log
 install/messages
@@ -14,4 +15,3 @@ install/AS2_DB_RUNTIME.script
 install/client_server_session*.log
 install/client_server_session*.log.lck
 mendelson_opensource_AS2.lock
-

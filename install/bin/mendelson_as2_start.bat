@@ -6,12 +6,14 @@ rem
 rem
 
 set CLASSPATH="as2.jar";"jetty\start.jar"
-call :appendJarsAndZips jlib
-call :appendJarsAndZips jlib\mina
-call :appendJarsAndZips jlib\vaadin
-call :appendJarsAndZips jlib\httpclient
-call :appendJarsAndZips jlib\help
+call :appendJarsAndZips lib
+call :appendJarsAndZips lib\mina
+call :appendJarsAndZips lib\vaadin
+call :appendJarsAndZips lib\httpclient
+call :appendJarsAndZips lib\help
 call :appendJarsAndZips jetty\lib
+
+echo %CLASSPATH%
 
 :RunIt
 java -Xmx1024M -Xms92M -classpath %CLASSPATH% de.mendelson.comm.as2.AS2
@@ -23,3 +25,4 @@ goto :EOF
 :appendJarsAndZips
 for %%D in (%1\*.jar,%1\*.zip) do call :appendToCP "%%D"
 goto :EOF
+
