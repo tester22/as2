@@ -93,15 +93,18 @@ public class AS2 {
                 System.exit(1);
             }
         }
+
+        //initialize the security provider
+        BCCryptoHelper helper = new BCCryptoHelper();
+        helper.initialize();
+
+        
         if (startServer == true) {
 
             //start server
             try {
                 //register the database drivers for the VM
                 Class.forName("org.hsqldb.jdbcDriver");
-                //initialize the security provider
-                BCCryptoHelper helper = new BCCryptoHelper();
-                helper.initialize();
                 AS2Server as2Server = new AS2Server(startHTTP, allowAllClients);
                 AS2Agent agent = new AS2Agent(as2Server);
             } catch (UpgradeRequiredException e) {
