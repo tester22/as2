@@ -304,7 +304,7 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
                         jButtonNewVersion.setVisible(false);
                         String version = (AS2ServerVersion.getVersion() + " " + AS2ServerVersion.getBuild()).replace(' ', '+');
                         try {
-                            String displayURL = new File("start/client_welcome.html").toURI().toURL().toExternalForm();
+                            String displayURL = new File("resources/start/client_welcome.html").toURI().toURL().toExternalForm();
                             Header[] header = htmlPanel.setURL("http://www.mendelson.de/en/mecas2/client_welcome.php?version=" + version,
                                     AS2ServerVersion.getProductName() + " " + AS2ServerVersion.getVersion(), displayURL);
                             if (header != null) {
@@ -336,7 +336,7 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
                         }
                     } else {
                         try {
-                            String url = new File("start/client_welcome.html").toURI().toURL().toExternalForm();
+                            String url = new File("resources/start/client_welcome.html").toURI().toURL().toExternalForm();
                             htmlPanel.setPage(url);
                         } catch (Exception nop) {
                             //nop
@@ -398,9 +398,9 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
                 this.getLogger().warning("Sorry, there is no specific HELPSET available for your language, ");
                 this.getLogger().warning("the english help will be displayed.");
                 filename
-                        = "as2help/as2_en.hs";
+                        = "resources/doc/as2help/as2_en.hs";
             } else {
-                filename = "as2help/as2_" + Locale.getDefault().getLanguage() + ".hs";
+                filename = "resources/doc/as2help/as2_" + Locale.getDefault().getLanguage() + ".hs";
             }
 
             File helpSetFile = new File(filename);

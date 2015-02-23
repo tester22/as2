@@ -138,7 +138,7 @@ public class AS2 {
         splash.setVisible(true);
         splash.toFront();
         //start client
-        AS2Gui gui = new AS2Gui(splash, "");
+        AS2Gui gui = new AS2Gui(splash, "localhost");
         gui.setVisible(true);
         splash.destroy();
         splash.dispose();

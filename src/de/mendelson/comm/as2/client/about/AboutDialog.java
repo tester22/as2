@@ -64,7 +64,7 @@ public class AboutDialog extends JDialog {
     /**Displays the license text in the GUI*/
     private void displayLicense(){
         try{
-            File file = new File( "license/LICENSE.gpl.txt" );
+            File file = new File( "resources/license/LICENSE.gpl.txt" );
             FileReader reader = new FileReader( file );
             StringWriter writer = new StringWriter();
             int read = 0;

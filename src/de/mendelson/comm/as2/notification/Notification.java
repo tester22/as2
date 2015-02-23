@@ -62,7 +62,7 @@ import de.mendelson.util.security.cert.KeystoreCertificate;
  */
 public class Notification {
 
-    private String templateDir = "notificationtemplates" + File.separator;
+    private String templateDir = "resources/notificationtemplates" + File.separator;
     /**
      * Stores the connection data and notification eMail
      */
