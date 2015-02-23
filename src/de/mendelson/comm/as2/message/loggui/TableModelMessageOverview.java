@@ -1,6 +1,13 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/loggui/TableModelMessageOverview.java,v 1.1 2015/01/06 11:07:41 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/message/loggui/TableModelMessageOverview.java,v 1.1 2015/01/06 11:07:41 heller Exp $
 package de.mendelson.comm.as2.message.loggui;
 
+import de.mendelson.comm.as2.message.AS2Message;
+import de.mendelson.comm.as2.message.AS2MessageInfo;
+import de.mendelson.comm.as2.message.AS2Payload;
+import de.mendelson.comm.as2.message.ResourceBundleAS2Message;
+import de.mendelson.comm.as2.partner.Partner;
+import de.mendelson.util.ImageUtil;
+import de.mendelson.util.MecResourceBundle;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,17 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-
 import javax.swing.ImageIcon;
 import javax.swing.table.AbstractTableModel;
-
-import de.mendelson.comm.as2.message.AS2Message;
-import de.mendelson.comm.as2.message.AS2MessageInfo;
-import de.mendelson.comm.as2.message.AS2Payload;
-import de.mendelson.comm.as2.message.ResourceBundleAS2Message;
-import de.mendelson.comm.as2.partner.Partner;
-import de.mendelson.util.ImageUtil;
-import de.mendelson.util.MecResourceBundle;
 
 
 /*

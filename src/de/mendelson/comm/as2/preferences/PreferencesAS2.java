@@ -1,6 +1,8 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/preferences/PreferencesAS2.java,v 1.1 2015/01/06 11:07:45 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/preferences/PreferencesAS2.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.preferences;
 
+import de.mendelson.comm.as2.AS2ServerVersion;
+import de.mendelson.util.MecResourceBundle;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
@@ -16,9 +18,6 @@ import java.util.prefs.Preferences;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
-
-import de.mendelson.comm.as2.AS2ServerVersion;
-import de.mendelson.util.MecResourceBundle;
 
 /**
  * Class to manage the preferences of the AS2 server

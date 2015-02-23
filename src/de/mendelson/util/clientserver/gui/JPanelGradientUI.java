@@ -1,4 +1,4 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/gui/JPanelGradientUI.java,v 1.1 2015/01/06 11:07:54 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/clientserver/gui/JPanelGradientUI.java,v 1.1 2015/01/06 11:07:54 heller Exp $
 package de.mendelson.util.clientserver.gui;
 
 import java.awt.Color;
@@ -9,7 +9,6 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
-
 import javax.swing.JComponent;
 import javax.swing.plaf.basic.BasicPanelUI;
 /*

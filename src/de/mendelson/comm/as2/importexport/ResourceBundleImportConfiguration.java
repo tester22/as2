@@ -1,4 +1,4 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/importexport/ResourceBundleImportConfiguration.java,v 1.1 2015/01/06 11:07:40 heller Exp $ 
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/importexport/ResourceBundleImportConfiguration.java,v 1.1 2015/01/06 11:07:40 heller Exp $ 
 package de.mendelson.comm.as2.importexport;
 
 import de.mendelson.util.MecResourceBundle;

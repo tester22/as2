@@ -1,9 +1,9 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/cert/KeystoreStorage.java,v 1.1 2015/01/06 11:07:57 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/security/cert/KeystoreStorage.java,v 1.1 2015/01/06 11:07:57 heller Exp $
 package de.mendelson.util.security.cert;
 
 import java.security.Key;
-import java.security.KeyStore;
 import java.security.cert.Certificate;
+import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 

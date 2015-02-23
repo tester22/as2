@@ -1,17 +1,5 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/ClientServerSessionHandler.java,v 1.1 2015/01/06 11:07:53 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/clientserver/ClientServerSessionHandler.java,v 1.1 2015/01/06 11:07:53 heller Exp $
 package de.mendelson.util.clientserver;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.mina.core.service.IoHandlerAdapter;
-import org.apache.mina.core.session.IdleStatus;
-import org.apache.mina.core.session.IoSession;
 
 import de.mendelson.util.clientserver.messages.ClientServerMessage;
 import de.mendelson.util.clientserver.messages.LoginRequest;
@@ -27,6 +15,16 @@ import de.mendelson.util.log.LogFormatter;
 import de.mendelson.util.security.keygeneration.KeyGenerationResult;
 import de.mendelson.util.security.keygeneration.KeyGenerationValues;
 import de.mendelson.util.security.keygeneration.KeyGenerator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.mina.core.service.IoHandlerAdapter;
+import org.apache.mina.core.session.IdleStatus;
+import org.apache.mina.core.session.IoSession;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

@@ -1,14 +1,5 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/ExecuteShellCommand.java,v 1.1 2015/01/06 11:07:40 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/message/ExecuteShellCommand.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
-
-import java.io.File;
-import java.io.PrintStream;
-import java.sql.Connection;
-import java.util.List;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import de.mendelson.comm.as2.log.LogAccessDB;
 import de.mendelson.comm.as2.log.LogEntry;
@@ -17,6 +8,14 @@ import de.mendelson.comm.as2.partner.PartnerAccessDB;
 import de.mendelson.comm.as2.server.AS2Server;
 import de.mendelson.util.Exec;
 import de.mendelson.util.MecResourceBundle;
+import java.io.File;
+import java.io.PrintStream;
+import java.sql.Connection;
+import java.util.List;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

@@ -1,4 +1,4 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/AnonymousTextClient.java,v 1.1 2015/01/06 11:07:53 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/clientserver/AnonymousTextClient.java,v 1.1 2015/01/06 11:07:53 heller Exp $
 package de.mendelson.util.clientserver;
 
 import de.mendelson.util.clientserver.messages.ClientServerMessage;

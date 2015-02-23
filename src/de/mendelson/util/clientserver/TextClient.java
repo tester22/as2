@@ -1,11 +1,5 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/TextClient.java,v 1.1 2015/01/06 11:07:53 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/clientserver/TextClient.java,v 1.1 2015/01/06 11:07:53 heller Exp $
 package de.mendelson.util.clientserver;
-
-import java.net.InetSocketAddress;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 
 import de.mendelson.util.clientserver.messages.ClientServerMessage;
 import de.mendelson.util.clientserver.messages.ClientServerResponse;
@@ -13,6 +7,11 @@ import de.mendelson.util.clientserver.messages.LoginRequest;
 import de.mendelson.util.clientserver.messages.LoginState;
 import de.mendelson.util.clientserver.messages.ServerInfo;
 import de.mendelson.util.clientserver.user.User;
+import java.net.InetSocketAddress;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

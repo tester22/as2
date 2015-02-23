@@ -1,17 +1,15 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/gui/ListCellRendererPartner.java,v 1.1 2015/01/06 11:07:44 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/partner/gui/ListCellRendererPartner.java,v 1.1 2015/01/06 11:07:44 heller Exp $
 package de.mendelson.comm.as2.partner.gui;
 
+import de.mendelson.comm.as2.partner.Partner;
 import java.awt.Component;
 import java.awt.Rectangle;
-
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
-
-import de.mendelson.comm.as2.partner.Partner;
 
 /**
  * Renderer to render the workflows that could be selected

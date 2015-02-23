@@ -1,11 +1,10 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/tables/JTableColumnResizer.java,v 1.1 2015/01/06 11:08:02 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/tables/JTableColumnResizer.java,v 1.1 2015/01/06 11:08:02 heller Exp $
 package de.mendelson.util.tables;
 
 import java.awt.Component;
-
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
-import javax.swing.table.TableCellRenderer;
+import javax.swing.table.*;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *
@@ -13,7 +12,6 @@ import javax.swing.table.TableCellRenderer;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
-import javax.swing.table.TableColumn;
 
 /**
  * Looks at the content of the columns of a JTable and sets the prefered widths

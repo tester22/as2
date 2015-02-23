@@ -1,6 +1,12 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/AS2MessageCreation.java,v 1.1 2015/01/06 11:07:40 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/message/AS2MessageCreation.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
+import com.sun.mail.util.LineOutputStream;
+import de.mendelson.util.security.cert.CertificateManager;
+import de.mendelson.comm.as2.partner.Partner;
+import de.mendelson.util.AS2Tools;
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.security.BCCryptoHelper;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -23,7 +29,6 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.activation.DataHandler;
 import javax.mail.Part;
 import javax.mail.Session;
@@ -32,7 +37,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.util.ByteArrayDataSource;
-
 import org.apache.commons.io.output.DeferredFileOutputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.cms.CMSAlgorithm;
@@ -42,14 +46,6 @@ import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.ZlibCompressor;
 import org.bouncycastle.mail.smime.SMIMECompressedGenerator;
 import org.bouncycastle.mail.smime.SMIMEException;
-
-import com.sun.mail.util.LineOutputStream;
-
-import de.mendelson.comm.as2.partner.Partner;
-import de.mendelson.util.AS2Tools;
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.security.BCCryptoHelper;
-import de.mendelson.util.security.cert.CertificateManager;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
@@ -541,7 +537,7 @@ public class AS2MessageCreation {
                 out = dataGenerator.open(encryptedOutput, new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC)
                         .setProvider("BC").build());
             } else if (encryptionType == AS2Message.ENCRYPTION_DES) {
-                out = dataGenerator.open(encryptedOutput, new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_WRAP, 56)
+                out = dataGenerator.open(encryptedOutput, new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_CBC, 56)
                         .setProvider("BC").build());
             } else if (encryptionType == AS2Message.ENCRYPTION_RC2_40) {
                 out = dataGenerator.open(encryptedOutput, new JceCMSContentEncryptorBuilder(CMSAlgorithm.RC2_CBC, 40)

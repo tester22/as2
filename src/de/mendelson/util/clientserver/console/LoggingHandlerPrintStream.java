@@ -1,8 +1,7 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/console/LoggingHandlerPrintStream.java,v 1.1 2015/01/06 11:07:54 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/clientserver/console/LoggingHandlerPrintStream.java,v 1.1 2015/01/06 11:07:54 heller Exp $
 package de.mendelson.util.clientserver.console;
 
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.util.logging.ErrorManager;
 import java.util.logging.Handler;
 import java.util.logging.Level;

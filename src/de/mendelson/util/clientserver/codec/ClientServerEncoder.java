@@ -1,18 +1,19 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/codec/ClientServerEncoder.java,v 1.1 2015/01/06 11:07:54 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/clientserver/codec/ClientServerEncoder.java,v 1.1 2015/01/06 11:07:54 heller Exp $
 package de.mendelson.util.clientserver.codec;
 
+import de.mendelson.util.clientserver.ClientServerSessionHandler;
+import de.mendelson.util.clientserver.messages.LoginState;
+import de.mendelson.util.security.BCCryptoHelper;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
-
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolEncoder;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
-
-import de.mendelson.util.security.BCCryptoHelper;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

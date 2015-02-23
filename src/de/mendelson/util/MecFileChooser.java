@@ -1,4 +1,4 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/MecFileChooser.java,v 1.1 2015/01/06 11:07:51 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/MecFileChooser.java,v 1.1 2015/01/06 11:07:51 heller Exp $
 package de.mendelson.util;
 
 import java.awt.Frame;
@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.zip.Adler32;
-
 import javax.swing.AbstractAction;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;

@@ -1,6 +1,8 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/MDNParser.java,v 1.1 2015/01/06 11:07:40 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/message/MDNParser.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
+import de.mendelson.comm.as2.server.AS2Server;
+import de.mendelson.util.MecResourceBundle;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -14,7 +16,6 @@ import java.util.MissingResourceException;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
-
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -24,9 +25,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.util.ByteArrayDataSource;
-
-import de.mendelson.comm.as2.server.AS2Server;
-import de.mendelson.util.MecResourceBundle;
 
 
 /*

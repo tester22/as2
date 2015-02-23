@@ -1,7 +1,6 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/server/AS2Agent.java,v 1.1 2015/01/06 11:07:49 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/server/AS2Agent.java,v 1.1 2015/01/06 11:07:49 heller Exp $
 package de.mendelson.comm.as2.server;
 import java.lang.management.ManagementFactory;
-
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 

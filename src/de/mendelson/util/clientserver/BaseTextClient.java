@@ -1,6 +1,10 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/BaseTextClient.java,v 1.1 2015/01/06 11:07:53 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/clientserver/BaseTextClient.java,v 1.1 2015/01/06 11:07:53 heller Exp $
 package de.mendelson.util.clientserver;
 
+import de.mendelson.util.clientserver.console.LoggingHandlerPrintStream;
+import de.mendelson.util.clientserver.messages.ClientServerMessage;
+import de.mendelson.util.clientserver.messages.ClientServerResponse;
+import de.mendelson.util.clientserver.messages.LoginRequired;
 import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -9,11 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import de.mendelson.util.clientserver.console.LoggingHandlerPrintStream;
-import de.mendelson.util.clientserver.messages.ClientServerMessage;
-import de.mendelson.util.clientserver.messages.ClientServerResponse;
-import de.mendelson.util.clientserver.messages.LoginRequired;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

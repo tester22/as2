@@ -1,13 +1,11 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/log/ClientServerLoggingHandler.java,v 1.1 2015/01/06 11:07:55 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/clientserver/log/ClientServerLoggingHandler.java,v 1.1 2015/01/06 11:07:55 heller Exp $
 package de.mendelson.util.clientserver.log;
 
-import java.io.UnsupportedEncodingException;
+import de.mendelson.util.clientserver.ClientServerSessionHandler;
 import java.util.logging.ErrorManager;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-
-import de.mendelson.util.clientserver.ClientServerSessionHandler;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

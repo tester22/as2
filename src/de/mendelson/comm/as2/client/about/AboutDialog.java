@@ -1,17 +1,13 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/about/AboutDialog.java,v 1.1 2015/01/06 11:07:39 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/client/about/AboutDialog.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.client.about;
-import java.io.File;
-import java.io.FileReader;
-import java.io.StringWriter;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-
+import javax.swing.*;
 import de.mendelson.Copyright;
 import de.mendelson.comm.as2.AS2ServerVersion;
 import de.mendelson.util.MecResourceBundle;
+import java.io.File;
+import java.io.FileReader;
+import java.io.StringWriter;
+import java.util.*;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

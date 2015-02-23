@@ -1,20 +1,18 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/clients/filesystemview/RemoteFileBrowser.java,v 1.1 2015/01/06 11:07:54 heller Exp $Revision: 1.1 $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/clientserver/clients/filesystemview/RemoteFileBrowser.java,v 1.1 2015/01/06 11:07:54 heller Exp $Revision: 1 $
 package de.mendelson.util.clientserver.clients.filesystemview;
 
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.clientserver.BaseClient;
 import java.io.File;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
-
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.clientserver.BaseClient;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

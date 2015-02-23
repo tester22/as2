@@ -1,7 +1,12 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/log/panel/LogConsolePanel.java,v 1.1 2015/01/06 11:07:55 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/log/panel/LogConsolePanel.java,v 1.1 2015/01/06 11:07:55 heller Exp $
 package de.mendelson.util.log.panel;
 
 
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.log.IRCColors;
+import de.mendelson.util.log.JTextPaneLoggingHandler;
+import de.mendelson.util.log.JTextPaneOutputStream;
+import de.mendelson.util.log.LogFormatter;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
@@ -14,14 +19,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.swing.JPanel;
-
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.log.IRCColors;
-import de.mendelson.util.log.JTextPaneLoggingHandler;
-import de.mendelson.util.log.JTextPaneOutputStream;
-import de.mendelson.util.log.LogFormatter;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

@@ -1,10 +1,9 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/statistic/StatisticExportRequest.java,v 1.1 2015/01/06 11:07:50 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/statistic/StatisticExportRequest.java,v 1.1 2015/01/06 11:07:50 heller Exp $
 package de.mendelson.comm.as2.statistic;
-
-import java.io.Serializable;
 
 import de.mendelson.comm.as2.partner.Partner;
 import de.mendelson.util.clientserver.clients.datatransfer.DownloadRequest;
+import java.io.Serializable;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *

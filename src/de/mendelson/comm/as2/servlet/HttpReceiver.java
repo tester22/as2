@@ -1,6 +1,14 @@
-///$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/servlet/HttpReceiver.java,v 1.1 2015/01/06 11:07:50 heller Exp $
+///$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/servlet/HttpReceiver.java,v 1.1 2015/01/06 11:07:50 heller Exp $
 package de.mendelson.comm.as2.servlet;
 
+import de.mendelson.Copyright;
+import de.mendelson.comm.as2.AS2ServerVersion;
+import de.mendelson.comm.as2.clientserver.message.IncomingMessageRequest;
+import de.mendelson.comm.as2.clientserver.message.IncomingMessageResponse;
+import de.mendelson.comm.as2.preferences.PreferencesAS2;
+import de.mendelson.comm.as2.server.AS2Server;
+import de.mendelson.util.AS2Tools;
+import de.mendelson.util.clientserver.AnonymousTextClient;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -17,21 +25,11 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 import java.util.logging.Logger;
-
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import de.mendelson.Copyright;
-import de.mendelson.comm.as2.AS2ServerVersion;
-import de.mendelson.comm.as2.clientserver.message.IncomingMessageRequest;
-import de.mendelson.comm.as2.clientserver.message.IncomingMessageResponse;
-import de.mendelson.comm.as2.preferences.PreferencesAS2;
-import de.mendelson.comm.as2.server.AS2Server;
-import de.mendelson.util.AS2Tools;
-import de.mendelson.util.clientserver.AnonymousTextClient;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

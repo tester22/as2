@@ -1,13 +1,12 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/PartnerSystemAccessDB.java,v 1.1 2015/01/06 11:07:43 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/partner/PartnerSystemAccessDB.java,v 1.1 2015/01/06 11:07:43 heller Exp $
 package de.mendelson.comm.as2.partner;
 
+import de.mendelson.comm.as2.notification.Notification;
+import de.mendelson.comm.as2.server.AS2Server;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Logger;
-
-import de.mendelson.comm.as2.notification.Notification;
-import de.mendelson.comm.as2.server.AS2Server;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

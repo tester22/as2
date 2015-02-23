@@ -1,18 +1,17 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/preferences/PreferencesPanelDirectories.java,v 1.1 2015/01/06 11:07:45 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/preferences/PreferencesPanelDirectories.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.preferences;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 
 import de.mendelson.util.MecResourceBundle;
 import de.mendelson.util.clientserver.BaseClient;
 import de.mendelson.util.clientserver.clients.filesystemview.RemoteFileBrowser;
 import de.mendelson.util.clientserver.clients.preferences.PreferencesClient;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

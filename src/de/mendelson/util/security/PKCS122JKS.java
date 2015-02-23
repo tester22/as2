@@ -1,4 +1,4 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/PKCS122JKS.java,v 1.1 2015/01/06 11:07:56 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/security/PKCS122JKS.java,v 1.1 2015/01/06 11:07:56 heller Exp $
 package de.mendelson.util.security;
 
 import java.io.File;
@@ -10,7 +10,6 @@ import java.security.KeyStore;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.util.logging.Logger;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PasswordFinder;
 /*

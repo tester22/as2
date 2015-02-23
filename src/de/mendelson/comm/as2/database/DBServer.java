@@ -1,6 +1,11 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/database/DBServer.java,v 1.1 2015/01/06 11:07:39 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/database/DBServer.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.database;
 
+import de.mendelson.comm.as2.AS2ServerVersion;
+import de.mendelson.comm.as2.preferences.PreferencesAS2;
+import de.mendelson.comm.as2.server.AS2Server;
+import de.mendelson.comm.as2.server.UpgradeRequiredException;
+import de.mendelson.util.MecResourceBundle;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,7 +25,6 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
 import java.util.logging.Logger;
-
 import org.hsqldb.Server;
 import org.hsqldb.persist.HsqlProperties;
 import org.hsqldb.server.ServerConstants;
@@ -31,12 +35,6 @@ import org.hsqldb.server.ServerConstants;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
-
-import de.mendelson.comm.as2.AS2ServerVersion;
-import de.mendelson.comm.as2.preferences.PreferencesAS2;
-import de.mendelson.comm.as2.server.AS2Server;
-import de.mendelson.comm.as2.server.UpgradeRequiredException;
-import de.mendelson.util.MecResourceBundle;
 
 /**
  * Class to start a dedicated SQL database server

@@ -1,4 +1,4 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/cert/gui/ResourceBundleExportCertificate_de.java,v 1.1 2015/01/06 11:07:59 heller Exp $ 
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/security/cert/gui/ResourceBundleExportCertificate_de.java,v 1.1 2015/01/06 11:07:59 heller Exp $ 
 package de.mendelson.util.security.cert.gui;
 import de.mendelson.util.MecResourceBundle;
 /*

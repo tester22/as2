@@ -1,6 +1,9 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/PartnerCertificateInformationList.java,v 1.1 2015/01/06 11:07:43 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/partner/PartnerCertificateInformationList.java,v 1.1 2015/01/06 11:07:43 heller Exp $
 package de.mendelson.comm.as2.partner;
 
+import de.mendelson.comm.as2.cem.CEMEntry;
+import de.mendelson.util.security.cert.CertificateManager;
+import de.mendelson.util.MecResourceBundle;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.MissingResourceException;
@@ -13,10 +16,6 @@ import java.util.Vector;
  * Please read and agree to all terms before using this software.
  * Other product and brand names are trademarks of their respective owners.
  */
-
-import de.mendelson.comm.as2.cem.CEMEntry;
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.security.cert.CertificateManager;
 
 /**
  * Stores a certificate or key used by a partner. Every partner of a communication may use

@@ -1,9 +1,8 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/send/HttpConnectionParameter.java,v 1.1 2015/01/06 11:07:45 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/send/HttpConnectionParameter.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.send;
 
-import java.net.InetAddress;
-
 import de.mendelson.comm.as2.AS2ServerVersion;
+import java.net.InetAddress;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

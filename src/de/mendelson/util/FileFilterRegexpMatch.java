@@ -1,7 +1,8 @@
- //$Header: /cvsroot/mec-as2/b47/de/mendelson/util/FileFilterRegexpMatch.java,v 1.1 2015/01/06 11:07:51 heller Exp $
+ //$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/FileFilterRegexpMatch.java,v 1.1 2015/01/06 11:07:51 heller Exp $
 package de.mendelson.util;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;

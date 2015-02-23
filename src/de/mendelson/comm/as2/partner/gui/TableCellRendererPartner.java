@@ -1,20 +1,18 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/partner/gui/TableCellRendererPartner.java,v 1.1 2015/01/06 11:07:45 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/partner/gui/TableCellRendererPartner.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.partner.gui;
-
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Rectangle;
-import java.util.List;
-
-import javax.swing.ImageIcon;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 
 import de.mendelson.comm.as2.partner.Partner;
 import de.mendelson.comm.as2.partner.clientserver.PartnerListRequest;
 import de.mendelson.comm.as2.partner.clientserver.PartnerListResponse;
 import de.mendelson.util.clientserver.BaseClient;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Rectangle;
+import java.util.List;
+import javax.swing.ImageIcon;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 
 /** 
  * Renders a partner in a JTable column

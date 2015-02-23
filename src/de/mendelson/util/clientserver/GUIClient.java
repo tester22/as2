@@ -1,6 +1,15 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/GUIClient.java,v 1.1 2015/01/06 11:07:53 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/clientserver/GUIClient.java,v 1.1 2015/01/06 11:07:53 heller Exp $
 package de.mendelson.util.clientserver;
 
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.clientserver.connectionprogress.JDialogConnectionProgress;
+import de.mendelson.util.clientserver.gui.JDialogLogin;
+import de.mendelson.util.clientserver.messages.ClientServerMessage;
+import de.mendelson.util.clientserver.messages.ClientServerResponse;
+import de.mendelson.util.clientserver.messages.LoginRequired;
+import de.mendelson.util.clientserver.messages.LoginState;
+import de.mendelson.util.clientserver.messages.ServerInfo;
+import de.mendelson.util.clientserver.user.User;
 import java.awt.Color;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -12,19 +21,8 @@ import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.clientserver.connectionprogress.JDialogConnectionProgress;
-import de.mendelson.util.clientserver.gui.JDialogLogin;
-import de.mendelson.util.clientserver.messages.ClientServerMessage;
-import de.mendelson.util.clientserver.messages.ClientServerResponse;
-import de.mendelson.util.clientserver.messages.LoginRequired;
-import de.mendelson.util.clientserver.messages.LoginState;
-import de.mendelson.util.clientserver.messages.ServerInfo;
-import de.mendelson.util.clientserver.user.User;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

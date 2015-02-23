@@ -1,4 +1,4 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/cert/CertificateInUseInfo.java,v 1.1 2015/01/06 11:07:57 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/security/cert/CertificateInUseInfo.java,v 1.1 2015/01/06 11:07:57 heller Exp $
 package de.mendelson.util.security.cert;
 
 /*

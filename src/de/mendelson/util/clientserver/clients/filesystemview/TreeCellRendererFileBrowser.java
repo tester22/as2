@@ -1,12 +1,12 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/clients/filesystemview/TreeCellRendererFileBrowser.java,v 1.1 2015/01/06 11:07:54 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/clientserver/clients/filesystemview/TreeCellRendererFileBrowser.java,v 1.1 2015/01/06 11:07:54 heller Exp $
 package de.mendelson.util.clientserver.clients.filesystemview;
 
 import java.awt.Component;
-
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.filechooser.FileSystemView;
+import javax.swing.filechooser.FileView;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 

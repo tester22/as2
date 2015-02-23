@@ -1,27 +1,5 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/BaseClient.java,v 1.1 2015/01/06 11:07:53 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/clientserver/BaseClient.java,v 1.1 2015/01/06 11:07:53 heller Exp $
 package de.mendelson.util.clientserver;
-
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import org.apache.mina.core.future.ConnectFuture;
-import org.apache.mina.core.future.WriteFuture;
-import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.ProtocolCodecFilter;
-import org.apache.mina.filter.executor.ExecutorFilter;
-import org.apache.mina.filter.executor.UnorderedThreadPoolExecutor;
-import org.apache.mina.filter.ssl.SslFilter;
-import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 import de.mendelson.util.clientserver.codec.ClientServerCodecFactory;
 import de.mendelson.util.clientserver.messages.ClientServerMessage;
@@ -30,6 +8,25 @@ import de.mendelson.util.clientserver.messages.LoginRequest;
 import de.mendelson.util.clientserver.messages.LoginState;
 import de.mendelson.util.clientserver.messages.QuitRequest;
 import de.mendelson.util.clientserver.user.User;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import org.apache.mina.core.future.ConnectFuture;
+import org.apache.mina.core.future.WriteFuture;
+import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.filter.executor.ExecutorFilter;
+import org.apache.mina.filter.executor.UnorderedThreadPoolExecutor;
+import org.apache.mina.filter.ssl.SslFilter;
+import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

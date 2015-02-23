@@ -1,4 +1,4 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/keygeneration/KeyGenerator.java,v 1.1 2015/01/06 11:08:02 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/security/keygeneration/KeyGenerator.java,v 1.1 2015/01/06 11:08:02 heller Exp $
 package de.mendelson.util.security.keygeneration;
 
 import java.math.BigInteger;
@@ -12,7 +12,6 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
-
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.X509Extensions;

@@ -1,8 +1,7 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/notification/NotificationData.java,v 1.1 2015/01/06 11:07:42 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/notification/NotificationData.java,v 1.1 2015/01/06 11:07:42 heller Exp $
 package de.mendelson.comm.as2.notification;
 
 import java.io.Serializable;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

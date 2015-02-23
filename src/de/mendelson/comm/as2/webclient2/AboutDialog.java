@@ -1,4 +1,4 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/webclient2/AboutDialog.java,v 1.1 2015/01/06 11:07:50 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/webclient2/AboutDialog.java,v 1.1 2015/01/06 11:07:50 heller Exp $
 package de.mendelson.comm.as2.webclient2;
 
 import com.vaadin.terminal.ExternalResource;
@@ -10,7 +10,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
-
 import de.mendelson.Copyright;
 import de.mendelson.comm.as2.AS2ServerVersion;
 

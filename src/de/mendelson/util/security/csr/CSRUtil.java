@@ -1,6 +1,9 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/security/csr/CSRUtil.java,v 1.1 2015/01/06 11:08:02 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/security/csr/CSRUtil.java,v 1.1 2015/01/06 11:08:02 heller Exp $
 package de.mendelson.util.security.csr;
 
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.security.KeyStoreUtil;
+import de.mendelson.util.security.cert.CertificateManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -18,16 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-
 import javax.security.auth.x500.X500Principal;
-
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.openssl.PEMWriter;
-
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.security.KeyStoreUtil;
-import de.mendelson.util.security.cert.CertificateManager;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

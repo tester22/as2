@@ -1,6 +1,13 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/message/AS2MDNCreation.java,v 1.1 2015/01/06 11:07:40 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/message/AS2MDNCreation.java,v 1.1 2015/01/06 11:07:40 heller Exp $
 package de.mendelson.comm.as2.message;
 
+import com.sun.mail.util.LineOutputStream;
+import de.mendelson.comm.as2.AS2Exception;
+import de.mendelson.comm.as2.AS2ServerVersion;
+import de.mendelson.util.security.cert.CertificateManager;
+import de.mendelson.comm.as2.partner.Partner;
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.security.BCCryptoHelper;
 import java.io.ByteArrayOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -15,7 +22,6 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -24,15 +30,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.util.ByteArrayDataSource;
-
-import com.sun.mail.util.LineOutputStream;
-
-import de.mendelson.comm.as2.AS2Exception;
-import de.mendelson.comm.as2.AS2ServerVersion;
-import de.mendelson.comm.as2.partner.Partner;
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.security.BCCryptoHelper;
-import de.mendelson.util.security.cert.CertificateManager;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

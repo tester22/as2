@@ -1,15 +1,5 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/webclient2/TransactionDetailsDialog.java,v 1.1 2015/01/06 11:07:50 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/webclient2/TransactionDetailsDialog.java,v 1.1 2015/01/06 11:07:50 heller Exp $
 package de.mendelson.comm.as2.webclient2;
-
-import java.io.File;
-import java.sql.Connection;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -22,7 +12,6 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-
 import de.mendelson.comm.as2.log.LogAccessDB;
 import de.mendelson.comm.as2.log.LogEntry;
 import de.mendelson.comm.as2.message.AS2Info;
@@ -33,6 +22,15 @@ import de.mendelson.comm.as2.message.AS2Payload;
 import de.mendelson.comm.as2.message.MessageAccessDB;
 import de.mendelson.comm.as2.message.ResourceBundleAS2Message;
 import de.mendelson.util.MecResourceBundle;
+import java.io.File;
+import java.sql.Connection;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 
 /*

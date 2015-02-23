@@ -1,10 +1,9 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/log/DailySubdirFileLoggingHandler.java,v 1.1 2015/01/06 11:07:55 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/log/DailySubdirFileLoggingHandler.java,v 1.1 2015/01/06 11:07:55 heller Exp $
 package de.mendelson.util.log;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;

@@ -1,4 +1,4 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/AS2Tools.java,v 1.1 2015/01/06 11:07:51 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/AS2Tools.java,v 1.1 2015/01/06 11:07:51 heller Exp $
 package de.mendelson.util;
 
 import java.io.File;
@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.Formatter;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.io.FileUtils;
 
 /*

@@ -1,4 +1,4 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/XPathHelper.java,v 1.1 2015/01/06 11:07:51 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/XPathHelper.java,v 1.1 2015/01/06 11:07:51 heller Exp $
 package de.mendelson.util;
 
 import java.io.FileInputStream;
@@ -6,10 +6,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.jaxen.SimpleNamespaceContext;
 import org.jaxen.XPath;
 import org.jaxen.XPathSyntaxException;

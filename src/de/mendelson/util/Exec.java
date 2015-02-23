@@ -1,10 +1,7 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/Exec.java,v 1.1 2015/01/06 11:07:51 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/Exec.java,v 1.1 2015/01/06 11:07:51 heller Exp $
 package de.mendelson.util;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *

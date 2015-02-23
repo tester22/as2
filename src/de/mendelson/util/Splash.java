@@ -1,4 +1,4 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/Splash.java,v 1.1 2015/01/06 11:07:51 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/Splash.java,v 1.1 2015/01/06 11:07:51 heller Exp $
 package de.mendelson.util;
 
 import java.awt.BorderLayout;
@@ -26,7 +26,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import javax.imageio.ImageIO;
 import javax.swing.JWindow;
 import javax.swing.SwingConstants;

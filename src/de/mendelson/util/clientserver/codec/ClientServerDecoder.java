@@ -1,6 +1,7 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/codec/ClientServerDecoder.java,v 1.1 2015/01/06 11:07:54 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/clientserver/codec/ClientServerDecoder.java,v 1.1 2015/01/06 11:07:54 heller Exp $
 package de.mendelson.util.clientserver.codec;
 
+import de.mendelson.util.MecResourceBundle;
 import java.io.ByteArrayInputStream;
 import java.io.InvalidClassException;
 import java.io.ObjectInput;
@@ -9,13 +10,10 @@ import java.math.BigInteger;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
-
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
-
-import de.mendelson.util.MecResourceBundle;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

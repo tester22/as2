@@ -1,17 +1,5 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/datasheet/gui/JDialogCreateDataSheet.java,v 1.1 2015/01/06 11:07:39 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/datasheet/gui/JDialogCreateDataSheet.java,v 1.1 2015/01/06 11:07:39 heller Exp $
 package de.mendelson.comm.as2.datasheet.gui;
-
-import java.awt.Desktop;
-import java.io.File;
-import java.util.List;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.logging.Logger;
-
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-
-import org.apache.commons.io.FileUtils;
 
 import de.mendelson.comm.as2.client.AS2StatusBar;
 import de.mendelson.comm.as2.client.ListCellRendererEncryption;
@@ -19,6 +7,7 @@ import de.mendelson.comm.as2.client.ListCellRendererSignature;
 import de.mendelson.comm.as2.datasheet.DatasheetBuilder;
 import de.mendelson.comm.as2.datasheet.DatasheetInformation;
 import de.mendelson.comm.as2.message.AS2Message;
+import de.mendelson.comm.as2.message.ResourceBundleAS2Message;
 import de.mendelson.comm.as2.partner.Partner;
 import de.mendelson.comm.as2.partner.PartnerCertificateInformation;
 import de.mendelson.comm.as2.partner.clientserver.PartnerListRequest;
@@ -32,6 +21,16 @@ import de.mendelson.util.clientserver.BaseClient;
 import de.mendelson.util.clientserver.clients.preferences.PreferencesClient;
 import de.mendelson.util.security.KeyStoreUtil;
 import de.mendelson.util.security.cert.CertificateManager;
+import java.awt.Desktop;
+import java.io.File;
+import java.util.List;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
+import java.util.logging.Logger;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import org.apache.commons.io.FileUtils;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

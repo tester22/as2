@@ -1,17 +1,16 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/gui/JDialogLogin.java,v 1.1 2015/01/06 11:07:54 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/clientserver/gui/JDialogLogin.java,v 1.1 2015/01/06 11:07:54 heller Exp $
 package de.mendelson.util.clientserver.gui;
 
+import de.mendelson.util.MecResourceBundle;
 import java.awt.Color;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-
-import de.mendelson.util.MecResourceBundle;
+import javax.swing.JRootPane;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *

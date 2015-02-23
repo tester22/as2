@@ -1,4 +1,4 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/ResourceBundleAS2StatusBar_fr.java,v 1.1 2015/01/06 11:07:37 heller Exp $ 
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/client/ResourceBundleAS2StatusBar_fr.java,v 1.1 2015/01/06 11:07:37 heller Exp $ 
 package de.mendelson.comm.as2.client;
 import de.mendelson.util.MecResourceBundle;
 /*

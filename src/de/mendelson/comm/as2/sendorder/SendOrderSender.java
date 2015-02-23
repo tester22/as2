@@ -1,12 +1,5 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/sendorder/SendOrderSender.java,v 1.1 2015/01/06 11:07:49 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/sendorder/SendOrderSender.java,v 1.1 2015/01/06 11:07:49 heller Exp $
 package de.mendelson.comm.as2.sendorder;
-
-import java.io.File;
-import java.sql.Connection;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import de.mendelson.comm.as2.message.AS2Message;
 import de.mendelson.comm.as2.message.AS2MessageCreation;
@@ -17,6 +10,12 @@ import de.mendelson.comm.as2.server.AS2Server;
 import de.mendelson.util.AS2Tools;
 import de.mendelson.util.MecResourceBundle;
 import de.mendelson.util.security.cert.CertificateManager;
+import java.io.File;
+import java.sql.Connection;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

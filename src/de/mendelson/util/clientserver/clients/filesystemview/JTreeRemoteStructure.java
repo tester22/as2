@@ -1,19 +1,17 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/clients/filesystemview/JTreeRemoteStructure.java,v 1.1 2015/01/06 11:07:54 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/clientserver/clients/filesystemview/JTreeRemoteStructure.java,v 1.1 2015/01/06 11:07:54 heller Exp $
 package de.mendelson.util.clientserver.clients.filesystemview;
 
+import de.mendelson.util.MecResourceBundle;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-
-import de.mendelson.util.MecResourceBundle;
 
 
 /*

@@ -1,17 +1,5 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/AS2StatusBar.java,v 1.1 2015/01/06 11:07:37 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/client/AS2StatusBar.java,v 1.1 2015/01/06 11:07:37 heller Exp $
 package de.mendelson.comm.as2.client;
-
-import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.concurrent.TimeUnit;
-
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import de.mendelson.comm.as2.AS2ServerVersion;
 import de.mendelson.comm.as2.clientserver.message.ConfigurationCheckRequest;
@@ -19,6 +7,16 @@ import de.mendelson.comm.as2.clientserver.message.ConfigurationCheckResponse;
 import de.mendelson.util.MecResourceBundle;
 import de.mendelson.util.ProgressPanel;
 import de.mendelson.util.clientserver.BaseClient;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

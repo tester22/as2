@@ -1,29 +1,5 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/cem/CEMReceiptController.java,v 1.1 2015/01/06 11:07:31 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/cem/CEMReceiptController.java,v 1.1 2015/01/06 11:07:31 heller Exp $
 package de.mendelson.comm.as2.cem;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.security.Provider;
-import java.security.Security;
-import java.security.cert.Certificate;
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
 
 import de.mendelson.comm.as2.AS2Exception;
 import de.mendelson.comm.as2.cem.messages.CertificateReference;
@@ -34,6 +10,7 @@ import de.mendelson.comm.as2.cem.messages.TrustRequest;
 import de.mendelson.comm.as2.cem.messages.TrustResponse;
 import de.mendelson.comm.as2.cert.CertificateAccessDB;
 import de.mendelson.comm.as2.clientserver.message.RefreshClientCEMDisplay;
+import de.mendelson.util.security.cert.CertificateManager;
 import de.mendelson.comm.as2.message.AS2Message;
 import de.mendelson.comm.as2.message.AS2MessageCreation;
 import de.mendelson.comm.as2.message.AS2MessageInfo;
@@ -52,9 +29,31 @@ import de.mendelson.util.XPathHelper;
 import de.mendelson.util.clientserver.ClientServer;
 import de.mendelson.util.security.BCCryptoHelper;
 import de.mendelson.util.security.KeyStoreUtil;
-import de.mendelson.util.security.cert.CertificateManager;
 import de.mendelson.util.security.cert.KeystoreCertificate;
 import de.mendelson.util.security.cert.KeystoreStorageImplFile;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.security.Provider;
+import java.security.Security;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.logging.Logger;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

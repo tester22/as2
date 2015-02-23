@@ -1,11 +1,11 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/BrowserLinkedPanel.java,v 1.1 2015/01/06 11:07:37 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/client/BrowserLinkedPanel.java,v 1.1 2015/01/06 11:07:37 heller Exp $
 package de.mendelson.comm.as2.client;
 
 import java.awt.Cursor;
 import java.awt.Desktop;
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
 
+import java.util.concurrent.TimeUnit;
 import javax.swing.JPanel;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;

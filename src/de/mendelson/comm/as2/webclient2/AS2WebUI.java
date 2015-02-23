@@ -1,15 +1,5 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/webclient2/AS2WebUI.java,v 1.1 2015/01/06 11:07:50 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/webclient2/AS2WebUI.java,v 1.1 2015/01/06 11:07:50 heller Exp $
 package de.mendelson.comm.as2.webclient2;
-
-import java.net.URI;
-import java.sql.Connection;
-import java.text.DateFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.logging.Logger;
 
 import com.vaadin.Application;
 import com.vaadin.data.Property;
@@ -33,7 +23,6 @@ import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Window;
-
 import de.mendelson.comm.as2.AS2ServerVersion;
 import de.mendelson.comm.as2.database.DBDriverManager;
 import de.mendelson.comm.as2.message.AS2Message;
@@ -47,6 +36,15 @@ import de.mendelson.comm.as2.partner.PartnerAccessDB;
 import de.mendelson.util.MecResourceBundle;
 import de.mendelson.util.clientserver.user.User;
 import de.mendelson.util.clientserver.user.UserAccess;
+import java.net.URI;
+import java.sql.Connection;
+import java.text.DateFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

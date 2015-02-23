@@ -1,6 +1,7 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/clientserver/clients/datatransfer/DownloadRequestFile.java,v 1.1 2015/01/06 11:07:53 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/clientserver/clients/datatransfer/DownloadRequestFile.java,v 1.1 2015/01/06 11:07:53 heller Exp $
 package de.mendelson.util.clientserver.clients.datatransfer;
 
+import de.mendelson.util.clientserver.messages.ClientServerMessage;
 import java.io.Serializable;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

@@ -1,11 +1,10 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/modulelock/LockRefreshThread.java,v 1.1 2015/01/06 11:07:41 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/modulelock/LockRefreshThread.java,v 1.1 2015/01/06 11:07:41 heller Exp $
 package de.mendelson.comm.as2.modulelock;
-
-import java.util.concurrent.TimeUnit;
 
 import de.mendelson.comm.as2.clientserver.message.ModuleLockRequest;
 import de.mendelson.comm.as2.clientserver.message.ModuleLockResponse;
 import de.mendelson.util.clientserver.BaseClient;
+import java.util.concurrent.TimeUnit;
 
 
 /*

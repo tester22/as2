@@ -1,4 +1,4 @@
-///$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/client/JDialogIssuesList.java,v 1.1 2015/01/06 11:07:37 heller Exp $
+///$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/client/JDialogIssuesList.java,v 1.1 2015/01/06 11:07:37 heller Exp $
 package de.mendelson.comm.as2.client;
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
@@ -8,6 +8,12 @@ package de.mendelson.comm.as2.client;
  * Other product and brand names are trademarks of their respective owners.
  */
 
+import de.mendelson.comm.as2.clientserver.message.ConfigurationCheckRequest;
+import de.mendelson.comm.as2.clientserver.message.ConfigurationCheckResponse;
+import de.mendelson.comm.as2.configurationcheck.ConfigurationIssue;
+import de.mendelson.comm.as2.configurationcheck.ResourceBundleConfigurationIssue;
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.clientserver.BaseClient;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.KeyEventDispatcher;
@@ -24,16 +30,8 @@ import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Vector;
-
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-
-import de.mendelson.comm.as2.clientserver.message.ConfigurationCheckRequest;
-import de.mendelson.comm.as2.clientserver.message.ConfigurationCheckResponse;
-import de.mendelson.comm.as2.configurationcheck.ConfigurationIssue;
-import de.mendelson.comm.as2.configurationcheck.ResourceBundleConfigurationIssue;
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.clientserver.BaseClient;
 
 /**
  * List of functions, useful for auto complete

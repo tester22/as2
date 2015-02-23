@@ -1,9 +1,8 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/server/ServerStartupSequence.java,v 1.1 2015/01/06 11:07:49 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/server/ServerStartupSequence.java,v 1.1 2015/01/06 11:07:49 heller Exp $
 package de.mendelson.comm.as2.server;
 
-import java.util.logging.Logger;
-
 import de.mendelson.comm.as2.preferences.PreferencesAS2;
+import java.util.logging.Logger;
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany

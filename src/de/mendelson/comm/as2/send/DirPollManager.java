@@ -1,6 +1,19 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/comm/as2/send/DirPollManager.java,v 1.1 2015/01/06 11:07:45 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/comm/as2/send/DirPollManager.java,v 1.1 2015/01/06 11:07:45 heller Exp $
 package de.mendelson.comm.as2.send;
 
+import de.mendelson.comm.as2.clientserver.message.RefreshClientMessageOverviewList;
+import de.mendelson.comm.as2.message.AS2Message;
+import de.mendelson.comm.as2.message.store.MessageStoreHandler;
+import de.mendelson.comm.as2.notification.Notification;
+import de.mendelson.comm.as2.partner.Partner;
+import de.mendelson.comm.as2.partner.PartnerAccessDB;
+import de.mendelson.comm.as2.preferences.PreferencesAS2;
+import de.mendelson.comm.as2.sendorder.SendOrderSender;
+import de.mendelson.comm.as2.server.AS2Server;
+import de.mendelson.util.FileFilterRegexpMatch;
+import de.mendelson.util.MecResourceBundle;
+import de.mendelson.util.clientserver.ClientServer;
+import de.mendelson.util.security.cert.CertificateManager;
 import java.io.File;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -24,20 +37,6 @@ import java.util.logging.Logger;
  * Please read and agree to all terms before using this software. Other product
  * and brand names are trademarks of their respective owners.
  */
-
-import de.mendelson.comm.as2.clientserver.message.RefreshClientMessageOverviewList;
-import de.mendelson.comm.as2.message.AS2Message;
-import de.mendelson.comm.as2.message.store.MessageStoreHandler;
-import de.mendelson.comm.as2.notification.Notification;
-import de.mendelson.comm.as2.partner.Partner;
-import de.mendelson.comm.as2.partner.PartnerAccessDB;
-import de.mendelson.comm.as2.preferences.PreferencesAS2;
-import de.mendelson.comm.as2.sendorder.SendOrderSender;
-import de.mendelson.comm.as2.server.AS2Server;
-import de.mendelson.util.FileFilterRegexpMatch;
-import de.mendelson.util.MecResourceBundle;
-import de.mendelson.util.clientserver.ClientServer;
-import de.mendelson.util.security.cert.CertificateManager;
 
 /**
  * Manager that polls the outbox directories of the partners, creates messages

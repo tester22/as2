@@ -1,10 +1,9 @@
-//$Header: /cvsroot/mec-as2/b47/de/mendelson/util/log/JTextPaneOutputStream.java,v 1.1 2015/01/06 11:07:55 heller Exp $
+//$Header: /cvsroot-fuse/mec-as2/b47/de/mendelson/util/log/JTextPaneOutputStream.java,v 1.1 2015/01/06 11:07:55 heller Exp $
 package de.mendelson.util.log;
 
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-
+import java.text.SimpleDateFormat;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 /*
