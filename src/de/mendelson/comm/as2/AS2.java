@@ -2,6 +2,7 @@
 package de.mendelson.comm.as2;
 
 import de.mendelson.comm.as2.client.AS2Gui;
+import de.mendelson.util.clientserver.clients.preferences.PreferencesClient;
 import de.mendelson.util.clientserver.gui.JDialogSelectServer;
 import de.mendelson.comm.as2.server.AS2Agent;
 import de.mendelson.comm.as2.preferences.PreferencesAS2;
@@ -9,12 +10,15 @@ import de.mendelson.comm.as2.server.AS2Server;
 import de.mendelson.comm.as2.server.UpgradeRequiredException;
 import de.mendelson.util.Splash;
 import de.mendelson.util.security.BCCryptoHelper;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.AffineTransform;
 import java.util.Locale;
 import java.util.logging.Logger;
+
 import javax.swing.JOptionPane;
+
 
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
@@ -137,16 +141,8 @@ public class AS2 {
         splash.setVisible(true);
         splash.toFront();
         //start client
-        JDialogSelectServer select = new JDialogSelectServer(null, "localhost", 1235);
-        select.setVisible(true);
-
-        if (select.isCanceled() == true) {
-        	AS2Server.deleteLockFile();
-            System.exit(1);
-        } else {
-            AS2Gui gui = new AS2Gui(splash, select.getHost());
-            gui.setVisible(true);
-        }
+        AS2Gui gui = new AS2Gui(splash, "");
+        gui.setVisible(true);
         splash.destroy();
         splash.dispose();
         }

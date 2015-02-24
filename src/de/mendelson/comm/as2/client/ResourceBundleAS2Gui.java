@@ -25,6 +25,7 @@ public class ResourceBundleAS2Gui extends MecResourceBundle {
     static final Object[][] contents = {
         {"menu.file", "File"},
         {"menu.file.exit", "Exit"},
+        {"menu.file.shutdown", "Shutdown server"},
         {"menu.file.partner", "Partner"},
         {"menu.file.datasheet", "Create communication datasheet"},
         {"menu.file.certificates", "Certificates"},

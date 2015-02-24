@@ -2,6 +2,7 @@
 package de.mendelson.comm.as2.client;
 
 import de.mendelson.comm.as2.AS2ServerVersion;
+import de.mendelson.comm.as2.AS2ShutdownThread;
 import de.mendelson.comm.as2.client.about.AboutDialog;
 import de.mendelson.comm.as2.client.manualsend.JDialogManualSend;
 import de.mendelson.comm.as2.clientserver.message.DeleteMessageRequest;
@@ -9,6 +10,7 @@ import de.mendelson.comm.as2.clientserver.message.ModuleLockRequest;
 import de.mendelson.comm.as2.clientserver.message.ModuleLockResponse;
 import de.mendelson.comm.as2.clientserver.message.RefreshClientCEMDisplay;
 import de.mendelson.comm.as2.clientserver.message.RefreshClientMessageOverviewList;
+import de.mendelson.comm.as2.clientserver.message.ServerShutdown;
 import de.mendelson.util.security.cert.clientserver.RefreshKeystoreCertificates;
 import de.mendelson.comm.as2.clientserver.message.RefreshTablePartnerData;
 import de.mendelson.comm.as2.datasheet.gui.JDialogCreateDataSheet;
@@ -50,12 +52,14 @@ import de.mendelson.util.MecResourceBundle;
 import de.mendelson.util.Splash;
 import de.mendelson.util.clientserver.ClientsideMessageProcessor;
 import de.mendelson.util.clientserver.GUIClient;
+import de.mendelson.util.clientserver.TextClient;
 import de.mendelson.util.clientserver.clients.datatransfer.DownloadRequestFile;
 import de.mendelson.util.clientserver.clients.datatransfer.DownloadResponseFile;
 import de.mendelson.util.clientserver.clients.datatransfer.TransferClient;
 import de.mendelson.util.clientserver.clients.datatransfer.TransferClientWithProgress;
 import de.mendelson.util.clientserver.clients.preferences.PreferencesClient;
 import de.mendelson.util.clientserver.gui.JDialogLogin;
+import de.mendelson.util.clientserver.gui.JDialogSelectServer;
 import de.mendelson.util.clientserver.messages.ClientServerMessage;
 import de.mendelson.util.clientserver.messages.ClientServerResponse;
 import de.mendelson.util.clientserver.messages.ServerInfo;
@@ -119,6 +123,11 @@ import javax.swing.table.TableRowSorter;
 
 import oracle.help.Help;
 import oracle.help.library.helpset.HelpSet;
+
+
+
+
+
 
 
 /*
@@ -198,6 +207,14 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
 //        catch( Exception nop){
 //            //nop
 //        }
+        JDialogSelectServer select = new JDialogSelectServer(null, this.clientPreferences.get(PreferencesAS2.SERVER_HOST), this.clientPreferences.getInt(PreferencesAS2.CLIENTSERVER_COMM_PORT));
+        select.setVisible(true);
+        if (select.isCanceled() == true) {
+        	AS2Server.deleteLockFile();
+            System.exit(1);
+        }
+
+        host = select.getHost();
         this.host = host;
         //Set System default look and feel
         try {
@@ -275,7 +292,8 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
         super.addMessageProcessor(this);
         //perform the connection to the server
         //warning! this works for localhost only so far
-        int clientServerCommPort = this.clientPreferences.getInt(PreferencesAS2.CLIENTSERVER_COMM_PORT);
+        //int clientServerCommPort = this.clientPreferences.getInt(PreferencesAS2.CLIENTSERVER_COMM_PORT);
+        int clientServerCommPort = select.getPort();
         if (splash != null) {
             splash.destroy();
         }
@@ -1127,6 +1145,8 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
         jMenuItemExportConfig = new javax.swing.JMenuItem();
         jMenuItemExportImport = new javax.swing.JMenuItem();
         jSeparator6 = new javax.swing.JSeparator();
+        jSeparator10 = new javax.swing.JSeparator();
+        jMenuItemFileShutdown = new javax.swing.JMenuItem();
         jMenuItemFileExit = new javax.swing.JMenuItem();
         jMenuHelp = new javax.swing.JMenu();
         jMenuItemHelpAbout = new javax.swing.JMenuItem();
@@ -1558,6 +1578,16 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
         jMenuFile.add(jMenuItemExportImport);
         jMenuFile.add(jSeparator6);
 
+        jMenuItemFileShutdown.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/mendelson/comm/as2/client/stop_16x16.gif"))); // NOI18N
+        jMenuItemFileShutdown.setText(this.rb.getResourceString( "menu.file.shutdown" ));
+        jMenuItemFileShutdown.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemFileShutdownActionPerformed(evt);
+            }
+        });
+        jMenuFile.add(jMenuItemFileShutdown);
+        jMenuFile.add(jSeparator10);
+        
         jMenuItemFileExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/mendelson/comm/as2/client/close16x16.gif"))); // NOI18N
         jMenuItemFileExit.setText(this.rb.getResourceString( "menu.file.exit" ));
         jMenuItemFileExit.addActionListener(new java.awt.event.ActionListener() {
@@ -1695,6 +1725,13 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
         dialog.setVisible(true);
     }//GEN-LAST:event_jMenuItemHelpAboutActionPerformed
 
+    private void jMenuItemFileShutdownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemFileExitActionPerformed
+    	
+    	//Runtime.getRuntime().addShutdownHook(null);
+    	// TODO: Shutdown cthe server connected to.
+        this.logout();
+    }//GEN-LAST:event_jMenuItemFileExitActionPerformed
+    
     private void jMenuItemFileExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemFileExitActionPerformed
         this.savePreferences();
         this.setVisible(false);
@@ -1797,6 +1834,7 @@ private void jMenuItemHelpShopActionPerformed(java.awt.event.ActionEvent evt) {/
     private javax.swing.JMenuItem jMenuItemDatasheet;
     private javax.swing.JMenuItem jMenuItemExportConfig;
     private javax.swing.JMenuItem jMenuItemExportImport;
+    private javax.swing.JMenuItem jMenuItemFileShutdown;
     private javax.swing.JMenuItem jMenuItemFileExit;
     private javax.swing.JMenuItem jMenuItemFilePreferences;
     private javax.swing.JMenuItem jMenuItemHelpAbout;
@@ -1825,6 +1863,7 @@ private void jMenuItemHelpShopActionPerformed(java.awt.event.ActionEvent evt) {/
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JSeparator jSeparator5;
     private javax.swing.JSeparator jSeparator6;
+    private javax.swing.JSeparator jSeparator10;
     private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JSplitPane jSplitPane;
