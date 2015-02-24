@@ -52,7 +52,6 @@ import de.mendelson.util.MecResourceBundle;
 import de.mendelson.util.Splash;
 import de.mendelson.util.clientserver.ClientsideMessageProcessor;
 import de.mendelson.util.clientserver.GUIClient;
-import de.mendelson.util.clientserver.TextClient;
 import de.mendelson.util.clientserver.clients.datatransfer.DownloadRequestFile;
 import de.mendelson.util.clientserver.clients.datatransfer.DownloadResponseFile;
 import de.mendelson.util.clientserver.clients.datatransfer.TransferClient;
@@ -1728,7 +1727,7 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
     private void jMenuItemFileShutdownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemFileExitActionPerformed
     	
     	//Runtime.getRuntime().addShutdownHook(null);
-    	// TODO: Shutdown cthe server connected to.
+    	// TODO: Shutdown the server connected to.
         this.logout();
     }//GEN-LAST:event_jMenuItemFileExitActionPerformed
     
