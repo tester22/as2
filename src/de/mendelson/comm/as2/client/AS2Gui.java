@@ -55,6 +55,7 @@ import de.mendelson.util.clientserver.clients.datatransfer.DownloadResponseFile;
 import de.mendelson.util.clientserver.clients.datatransfer.TransferClient;
 import de.mendelson.util.clientserver.clients.datatransfer.TransferClientWithProgress;
 import de.mendelson.util.clientserver.clients.preferences.PreferencesClient;
+import de.mendelson.util.clientserver.gui.JDialogLogin;
 import de.mendelson.util.clientserver.messages.ClientServerMessage;
 import de.mendelson.util.clientserver.messages.ClientServerResponse;
 import de.mendelson.util.clientserver.messages.ServerInfo;
@@ -67,6 +68,7 @@ import de.mendelson.util.security.cert.gui.JDialogCertificates;
 import de.mendelson.util.security.cert.gui.ResourceBundleCertificates;
 import de.mendelson.util.tables.JTableColumnResizer;
 import de.mendelson.util.tables.TableCellRendererDate;
+
 import java.awt.Desktop;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
@@ -97,6 +99,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -113,8 +116,11 @@ import javax.swing.event.RowSorterListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+
 import oracle.help.Help;
 import oracle.help.library.helpset.HelpSet;
+
+
 /*
  * Copyright (C) mendelson-e-commerce GmbH Berlin Germany
  *
@@ -354,7 +360,15 @@ public class AS2Gui extends GUIClient implements ListSelectionListener, RowSorte
 
     @Override
     public void loginRequestedFromServer() {
-        this.performLogin("admin", "admin".toCharArray(), AS2ServerVersion.getFullProductName());
+        JDialogLogin login = new JDialogLogin(null, AS2ServerVersion.getFullProductName());
+        login.setColor(this.getLoginDialogColorBackground(), this.getLoginDialogColorForeground());
+        //login.setDefaultUser(user);
+        //clientPreferences.get(PreferencesAS2.LAST_UPDATE_CHECK)
+        login.setVisible(true);
+        if (login.isCanceled()) {
+        	System.exit(1);
+        }
+        this.performLogin(login.getUser(), login.getPass(), AS2ServerVersion.getFullProductName());
         this.as2StatusBar.setConnectedHost(this.host);
         //start the table update thread
         new Thread(this.refreshThread).start();

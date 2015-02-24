@@ -2,6 +2,7 @@
 package de.mendelson.comm.as2;
 
 import de.mendelson.comm.as2.client.AS2Gui;
+import de.mendelson.util.clientserver.gui.JDialogSelectServer;
 import de.mendelson.comm.as2.server.AS2Agent;
 import de.mendelson.comm.as2.preferences.PreferencesAS2;
 import de.mendelson.comm.as2.server.AS2Server;
@@ -136,8 +137,16 @@ public class AS2 {
         splash.setVisible(true);
         splash.toFront();
         //start client
-        AS2Gui gui = new AS2Gui(splash, "localhost");
-        gui.setVisible(true);
+        JDialogSelectServer select = new JDialogSelectServer(null, "localhost", 1235);
+        select.setVisible(true);
+
+        if (select.isCanceled() == true) {
+        	AS2Server.deleteLockFile();
+            System.exit(1);
+        } else {
+            AS2Gui gui = new AS2Gui(splash, select.getHost());
+            gui.setVisible(true);
+        }
         splash.destroy();
         splash.dispose();
         }
